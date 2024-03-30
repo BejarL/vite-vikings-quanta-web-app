@@ -74,6 +74,20 @@ app.put('/signup', async (req, res) => {
 }) // end user post
 
 
+// get all users from Users table
+app.get('/users', async (req, res, next) => {
+    try {
+        const [rows] = await req.db.query('SELECT * FROM Users')
+        res.json({success: true, data: rows})
+    } catch (error) {
+        console.error('error fetching users: ', error)
+        res.status(500).json({success: false, message: 'internal server error'})
+    }
+})
+
+
 app.listen(port, () => {
     console.log(`server started at http://localhost:${port}`);
   });
+
+  
