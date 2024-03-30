@@ -1,39 +1,41 @@
-// CREATE SCHEMA Quanta;
+const mysql = require('mysql2/promise');
 
-// USE Quanta; 
+//Allows us to access the ENV file
+require('dotenv').config();
 
-// CREATE TABLE Users ( user_id INTEGER PRIMARY KEY AUTO_INCREMENT NOT NULL, 
-// 					 username VARCHAR(20) NOT NULL,
-//                      email VARCHAR(50) NOT NULL,
-//                      password BLOB NOT NULL,
-//                      profile_pic BLOB);
-                     
-// CREATE TABLE Workspace ( workspace_id INTEGER PRIMARY KEY AUTO_INCREMENT NOT NULL,
-// 						 workspace_name VARCHAR(50) NOT NULL);
-                         
-// CREATE TABLE Projects ( project_id INTEGER PRIMARY KEY AUTO_INCREMENT NOT NULL,
-// 						project_name VARCHAR(50) NOT NULL,
-//                         workspace_id INTEGER,
-//                         FOREIGN KEY (workspace_id) REFERENCES Workspace (workspace_id)
-// 					);
+const pool = mysql.createPool({
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    port: process.env.PORT
+});
 
-// CREATE TABLE Entries (entry_id INTEGER PRIMARY KEY AUTO_INCREMENT NOT NULL,
-// 					  start_time DATETIME NOT NULL,
-//                       end_time DATETIME NOT NULL,
-//                       total_time INTEGER NOT NULL,
-//                       entry_desc VARCHAR(255) NOT NULL,
-//                       tag VARCHAR(50), 
-//                       project_id INTEGER NOT NULL, 
-//                       user_id INTEGER NOT NULL,
-//                       FOREIGN KEY (project_id) REFERENCES Projects (project_id),
-//                       FOREIGN KEY (user_id) REFERENCES Users (user_id)
-//                       );
-                      
-// CREATE TABLE Workspace_Users (workspace_user_id INTEGER PRIMARY KEY AUTO_INCREMENT NOT NULL,
-// 							  user_id INTEGER NOT NULL,
-//                               workspace_id INTEGER NOT NULL,
-//                               workspace_role VARCHAR(20),
-//                               FOREIGN KEY (user_id) REFERENCES Users (user_id),
-//                               FOREIGN KEY (workspace_id) REFERENCES Workspace (workspace_id)
-//                               );
-                      
+const dbConnect = async (req, res, next) => {
+
+    console.log("in dbConnect");
+    
+    try {
+      // Connecting to our SQL db. req gets modified and is available down the line in other middleware and endpoint functions
+      req.db = await pool.getConnection();
+      req.db.connection.config.namedPlaceholders = true;
+  
+      // Traditional mode ensures not null is respected for unsupplied fields, ensures valid JavaScript dates, etc.
+      await req.db.query('SET SESSION sql_mode = "TRADITIONAL"');
+      await req.db.query(`SET time_zone = '-8:00'`);
+  
+      // Moves the request on down the line to the next middleware functions and/or the endpoint it's headed for
+      await next();
+  
+      // After the endpoint has been reached and resolved, disconnects from the database
+      req.db.release();
+    } catch (err) {
+      // If anything downstream throw an error, we must release the connection allocated for the request
+      console.log(err)
+      // If an error occurs, disconnects from the database
+      if (req.db) req.db.release();
+      throw err;
+    }
+  }
+
+  module.exports = dbConnect;
