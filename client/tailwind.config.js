@@ -1,4 +1,6 @@
 /** @type {import('tailwindcss').Config} */
+const colors = require('tailwindcss/colors')
+
 export default {
   content: [
     "./index.html", 
@@ -10,9 +12,13 @@ export default {
     // For example, to customize the color palette:
     extend: {
       colors: {
-        'primary': '#3490dc', // Define a primary color
-        'secondary': '#ffed4a', // Define a secondary color
-        // Add more custom colors as needed
+        ...colors,
+        'lightpurple': {
+          DEFAULT: '#f8f0fe',
+          login: '#DCB6FA',
+        },
+        darkpurple: "#63276A",
+        resetpurple: "#B08DCC",
       },
       // You can also customize other theme values like fonts, spacing, etc.
       fontFamily: {
