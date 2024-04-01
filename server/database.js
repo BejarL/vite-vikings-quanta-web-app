@@ -12,9 +12,6 @@ const pool = mysql.createPool({
 });
 
 const dbConnect = async (req, res, next) => {
-
-    console.log("in dbConnect");
-    
     try {
       // Connecting to our SQL db. req gets modified and is available down the line in other middleware and endpoint functions
       req.db = await pool.getConnection();
