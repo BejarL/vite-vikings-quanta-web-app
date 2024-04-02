@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 const LoginPage = () => {
   // Toggle between login and sign-up forms
@@ -7,138 +8,161 @@ const LoginPage = () => {
   
 
   return (
-    <div className="bg-lightpurple-login">
-      <div className="login min-h-screen flex">
-        <div className="w-1/2 flex justify-center items-center relative">
-        <div className="absolute top-12 text-gray-800" >
-        <p className="text-5xl font-bold mb-3">QUANTA</p>
-        <p className="text-4xl">Time Tracker App for desktop and mobile</p>
-        </div>
-          <img
-            src="/images/Quanta-Login.png"
-            alt="Login image"
-            className="max-w-s "
-          />
-        </div>
-
-        {/* Login Page */}
-        <div className="w-1/2 flex justify-center items-center">
-          <div className="bg-white p-9 rounded-lg shadow-md w-full max-w-sm">
-            {/* Toggle Button */}
-            <div className="self-center mt-4 bg-lightpurple-login rounded-3xl flex justify-center mb-4">
-              <button
-                className={`py-2 px-4 my-1 mx-5 rounded-3xl font-bold ${
-                  isLogin ? "text-white bg-darkpurple " : "text-gray-700"
-                }`}
-                onClick={() => setIsLogin(true)}
-              >
-                Sign In
-              </button>
-              <button
-                className={`py-2 px-4 my-1 mx-5 rounded-3xl font-bold ${
-                  !isLogin ? "text-white bg-darkpurple" : "text-gray-700"
-                }`}
-                onClick={() => setIsLogin(false)}
-              >
-                Sign Up
-              </button>
-            </div>
-
-            {/* Login Form */}
-            {isLogin ? (
-              <form action="" className="w-full max-w-xs">
-                <div className="mb-4">
-                  <label
-                    htmlFor="username"
-                    className="block text-gray-700 text-sm font-bold mb-2"
-                  >
-                    Username
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Username"
-                    className="appearance-none w-full bg-transparent border-0 border-b border-gray-700 focus:outline-none py-1"
-                    id="username"
-                  />
-                </div>
-                <div className="mb-6">
-                  <label
-                    htmlFor="username"
-                    className="block text-gray-700 text-sm font-bold mb-2"
-                  >
-                    Password
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Password"
-                    className="appearance-none w-full bg-transparent border-0 border-b border-gray-700 focus:outline-none py-1"
-                  />
-                </div>
-                <div>
-                  <button
-                    className="text-gray-700 w-full hover:bg-lightpurple bg-lightpurple-login rounded-3xl font-bold py-2 px-4 focus:outline-none focus:shadow-outline"
-                    type="button"
-                  >
+    <div className="bg-lightpurple-login w-[100vw] h-[100vh] md:p-[50px]">
+      <div className="flex flex-col items-center md:flex-row md:h-[100%] md:justify-between">
+         
+         {/* img */}
+         <div className="h-[100%] flex flex-col items-center w-[65%] md:w-[100%]">
+            <p className="z-[1] text-5xl font-bold p-3 flex justify-center text-gray-800 mt-[30px] md:mt-[100px]">QUANTA</p>
+            <p className="z-[1] px-2 text-2xl text-center text-gray-800 md:mb-[100px]">Time Tracker App for desktop and mobile</p>
+            <img
+                  src="/images/Quanta-Login.png"
+                  alt="Login image"
+                  className="main-img w-[85%] md:w-[80%]"
+                />
+          </div>
+        
+          {/* Login Page */}
+          <div className="z-[1] h-[100%] flex items-center justify-center md:w-[100%]">
+            <div className="relative bg-white p-9 rounded-lg shadow-md w-[400px]  min-w-md min-w-[350px] pt-1 h-max h-[100%] md:flex md:flex-col md:items-center md:h-[90%] md:w-[70%]">
+              {/* Toggle Button */}
+              <div className="self-center mt-4 bg-lightpurple-login rounded-3xl flex justify-evenly mb-4 md:flex md:w-[80%] md:mb-[100px]">
+                <button
+                  className={`py-2 px-4 my-1  rounded-3xl font-bold mb:min-w-[110px] ${
+                    isLogin ? "text-white bg-darkpurple " : "text-gray-700"
+                  }`}
+                  onClick={() => setIsLogin(true)}
+                >
+                  <p className="mb:w-[110px]">
                     Sign In
-                  </button>
-                </div>
-              </form>
-            ) : (
-              <form action="" className="w-full max-w-xs">
-                <div className="mb-4">
-                  <label
-                    htmlFor="username"
-                    className="block text-gray-700 text-sm font-bold mb-2"
-                  >
-                    Username
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Username"
-                    className="appearance-none w-full bg-transparent border-0 border-b border-gray-700 focus:outline-none py-1"
-                    id="username"
-                  />
-                </div>
-                <div className="mb-4">
-                  <label
-                    htmlFor="email"
-                    className="block text-gray-700 text-sm font-bold mb-2"
-                  >
-                    Email
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Email"
-                    className="appearance-none w-full bg-transparent border-0 border-b border-gray-700 focus:outline-none py-1"
-                    id="username"
-                  />
-                </div>
-                <div className="mb-6">
-                  <label
-                    htmlFor="username"
-                    className="block text-gray-700 text-sm font-bold mb-2"
-                  >
-                    Password
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Password"
-                    className="appearance-none w-full bg-transparent border-0 border-b border-gray-700 focus:outline-none py-1"
-                  />
-                </div>
-                <div>
-                  <button
-                    className="text-gray-700 w-full hover:bg-lightpurple bg-lightpurple-login rounded-3xl font-bold py-2 px-4 focus:outline-none focus:shadow-outline"
-                    type="button"
-                  >
-                    Sign Up
-                  </button>
-                </div>
-              </form>
-            )}
+                  </p>
+                </button>
+                <button
+                  className={`py-2 px-4 my-1 rounded-3xl font-bold ${
+                    !isLogin ? "text-white bg-darkpurple" : "text-gray-700"
+                  }`}
+                  onClick={() => setIsLogin(false)}
+                >
+                  Sign Up
+                </button>
+              </div>
+
+              {/* Login Form */}
+              {isLogin ? (
+                <form action="" className="w-full md:w-[90%]">
+                  <div className="mb-4 md:w-[100%] ">
+                    <label
+                      htmlFor="username"
+                      className="block text-gray-700 text-sm font-bold mb-2 "
+                    >
+                      Username
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Username"
+                      className="appearance-none w-full bg-transparent border-0 border-b border-gray-700 focus:outline-none py-1 md:mb-[20px]"
+                      id="username"
+                    />
+                  </div>
+                  <div className="mb-6">
+                    <label
+                      htmlFor="username"
+                      className="block text-gray-700 text-sm font-bold mb-2"
+                    >
+                      Password
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Password"
+                      className="appearance-none w-full bg-transparent border-0 border-b border-gray-700 focus:outline-none py-1 md:mb-[20px]"
+                    />
+                  </div>
+                  <div>
+                    <button
+                      className="text-gray-700 w-full hover:bg-lightpurple bg-lightpurple-login rounded-3xl font-bold py-2 px-4 focus:outline-none focus:shadow-outline"
+                      type="button"
+                    >
+                      Sign In
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                <form action="" className="w-full md:w-[90%] md:flex md:flex-col">
+                  <div className="mb-4">
+                    <label
+                      htmlFor="username"
+                      className="block text-gray-700 text-sm font-bold mb-2"
+                    >
+                      Username
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Username"
+                      className="appearance-none w-full bg-transparent border-0 border-b border-gray-700 focus:outline-none py-1 md:mb-[20px]"
+                      id="username"
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <label
+                      htmlFor="email"
+                      className="block text-gray-700 text-sm font-bold mb-2"
+                    >
+                      Email
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Email"
+                      className="appearance-none w-full bg-transparent border-0 border-b border-gray-700 focus:outline-none py-1 md:mb-[20px]"
+                      id="username"
+                    />
+                  </div>
+                  <div className="mb-6">
+                    <label
+                      htmlFor="username"
+                      className="block text-gray-700 text-sm font-bold mb-2"
+                    >
+                      Password
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Password"
+                      className="appearance-none w-full bg-transparent border-0 border-b border-gray-700 focus:outline-none py-1 md:mb-[20px]"
+                    />
+                  </div>
+                  <div className="mb-6">
+                    <label
+                      htmlFor="username"
+                      className="block text-gray-700 text-sm font-bold mb-2"
+                    >
+                      Confirm Password
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Confirm Password"
+                      className="appearance-none w-full bg-transparent border-0 border-b border-gray-700 focus:outline-none py-1 md:mb-[20px]"
+                    />
+                  </div>
+                  <div className="md:flex md:justify-center">
+                    <button
+                      className="text-gray-700 w-full hover:bg-lightpurple bg-lightpurple-login rounded-3xl font-bold py-2 px-4 focus:outline-none focus:shadow-outline md:w-[90%] md:mb-[20px]"
+                      type="button"
+                    >
+                      Sign Up
+                    </button>
+                  </div>
+                </form>
+              )}
+              <div>
+                {isLogin ? 
+                  <p className="absolute bottom-[0px] left-0 w-[100%] text-center md:bottom-[10px]">
+                    Forgot your password? 
+                    <Link to="" className="text-darkpurple"> Reset</Link>
+                  </p>
+                  : null}
+              </div>
+            </div>
           </div>
         </div>
-      </div>
     </div>
   );
 };
