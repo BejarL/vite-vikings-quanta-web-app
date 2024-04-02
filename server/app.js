@@ -20,7 +20,8 @@ app.use(cors(corsOptions));
 // Makes Express parse the JSON body of any requests and adds the body to the req object
 app.use(bodyParser.json());
 
-//adds database connection to req.db 
+//adds database connection to req.db
+
 app.use((req, res, next) => dbConnect(req, res, next));
  
 app.put('/signup', async (req, res) => {
@@ -33,8 +34,8 @@ app.put('/signup', async (req, res) => {
         } = req.body;
 
         //check if the email or username is being used
-        const [[validateEmail]] = await req.db.query(`SELECT email FROM Users WHERE email = :email`, { email });
-        const [[validateUser]] = await req.db.query(`SELECT username FROM Users WHERE username = :username`, { username });
+        const [[validateEmail]] = await req.db.query(`SELECT email FROM Users WHERE email = :email AND deleted_flag=0`, { email });
+        const [[validateUser]] = await req.db.query(`SELECT username FROM Users WHERE username = :username AND deleted_flag=0`, { username });
 
         if (validateEmail) {
             res.json({success: false, err: "Email already in use"});
@@ -78,7 +79,7 @@ app.post('/signin', async (req, res) => {
         const { email, password: userEnteredPassword } = req.body;
 
         //get the users data
-        const [[userData]] = await req.db.query(`SELECT email, username, password FROM Users WHERE email = :email`, { email });
+        const [[userData]] = await req.db.query(`SELECT email, username, password FROM Users WHERE email = :email AND deleted_flag=0`, { email });
 
         //if no user data, return false
         if (!userData) {
@@ -124,11 +125,17 @@ app.get('/users', async(req,res) => {
 app.use(async function verifyJwt(req, res, next) {
     const { authorization: authHeader } = req.headers;
     
-    if (!authHeader) res.json('Invalid authorization, no authorization headers');
+    if (!authHeader) {
+        res.json('Invalid authorization, no authorization headers');
+        return;
+    }
   
     const [scheme, jwtToken] = authHeader.split(' ');
   
-    if (scheme !== 'Bearer') res.json('Invalid authorization, invalid authorization scheme');
+    if (scheme !== 'Bearer') {
+        res.json('Invalid authorization, invalid authorization scheme');
+        return;
+    }
   
     try {
       const decodedJwtObject = jwt.verify(jwtToken, process.env.JWT_KEY);
