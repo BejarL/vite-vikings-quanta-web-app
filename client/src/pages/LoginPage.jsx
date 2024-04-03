@@ -72,7 +72,7 @@ const LoginPage = () => {
                       Password
                     </label>
                     <input
-                      type="text"
+                      type="password"
                       placeholder="Password"
                       className="appearance-none w-full bg-transparent border-0 border-b border-gray-700 focus:outline-none py-1 md:mb-[20px]"
                     />
@@ -124,7 +124,7 @@ const LoginPage = () => {
                       Password
                     </label>
                     <input
-                      type="text"
+                      type="password"
                       placeholder="Password"
                       className="appearance-none w-full bg-transparent border-0 border-b border-gray-700 focus:outline-none py-1 md:mb-[20px]"
                     />
@@ -137,7 +137,7 @@ const LoginPage = () => {
                       Confirm Password
                     </label>
                     <input
-                      type="text"
+                      type="password"
                       placeholder="Confirm Password"
                       className="appearance-none w-full bg-transparent border-0 border-b border-gray-700 focus:outline-none py-1 md:mb-[20px]"
                     />
@@ -156,7 +156,7 @@ const LoginPage = () => {
                 {isLogin ? 
                   <p className="absolute bottom-[0px] left-0 w-[100%] text-center md:bottom-[10px]">
                     Forgot your password? 
-                    <Link to="" className="text-darkpurple"> Reset</Link>
+                    <Link to="/forgot-password" className="text-darkpurple"> Reset</Link>
                   </p>
                   : null}
               </div>
