@@ -1,11 +1,91 @@
+
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { setJwt } from "../Auth/jwt";
+import { useNavigate } from "react-router-dom";
 
 const LoginPage = () => {
   // Toggle between login and sign-up forms
   const [isLogin, setIsLogin] = useState(true);
- 
   
+  // state for the input fields
+  const [username, setUsername] = useState("")
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [email, setEmail] = useState("");
+
+  const navigate = useNavigate();
+
+  const toggleForm = () => {
+    setIsLogin(prev => !prev);
+    setUsername("");
+    setPassword("");
+    setConfirm("");
+    setEmail("");
+  }
+
+const handleSignUp = async () => {
+
+  //check the passwords
+  if (password !== confirm) {
+    window.alert('passwords do not match');
+    return;
+  }
+  
+  //try and hit the endpoint on the server for signing up to create a user
+  try {
+    const res = await fetch('http://localhost:3000/signup', {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        username,
+        password,
+        email,
+      }),
+    });
+
+    const data = await res.json();
+
+    //if successfull and the jwt token exist, save the jwt token
+    if (data.success && data.jwt) {
+      setJwt(data.jwt);
+      navigate("/Dashboard");
+    } else {
+      windows.alert(`error creating user: ${data.err}`);
+    }
+  } catch (error) {
+    console.log('Error:', error);
+  }
+}
+const handleSignIn = async () => {
+  //try and hit the endpoint the endpoint to sign in
+  try {
+    const res = await fetch('http://localhost:3000/signin', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        username,
+        password
+      }),
+    });
+
+    const data = await res.json();
+
+    //if successfull and a jwt token, save the token and navigate to the dashboard
+    if (data.success && data.jwt) {
+      setJwt(data.jwt);
+      navigate("/Dashboard");
+    } else {
+      window.alert(`error signing in: ${data.err}`);
+    }
+  } catch (error) {
+    console.log('Error:', error);
+  }
+}
 
   return (
     <div className="bg-lightpurple-login w-[100vw] h-[100vh] md:p-[50px]">
@@ -31,7 +111,7 @@ const LoginPage = () => {
                   className={`py-2 px-4 my-1  rounded-3xl font-bold mb:min-w-[110px] ${
                     isLogin ? "text-white bg-darkpurple " : "text-gray-700"
                   }`}
-                  onClick={() => setIsLogin(true)}
+                  onClick={toggleForm}
                 >
                   <p className="mb:w-[110px]">
                     Sign In
@@ -41,7 +121,7 @@ const LoginPage = () => {
                   className={`py-2 px-4 my-1 rounded-3xl font-bold ${
                     !isLogin ? "text-white bg-darkpurple" : "text-gray-700"
                   }`}
-                  onClick={() => setIsLogin(false)}
+                  onClick={toggleForm}
                 >
                   Sign Up
                 </button>
@@ -55,18 +135,20 @@ const LoginPage = () => {
                       htmlFor="username"
                       className="block text-gray-700 text-sm font-bold mb-2 "
                     >
-                      Username
+                      Sign in with Username or Email
                     </label>
                     <input
                       type="text"
-                      placeholder="Username"
+                      placeholder="Username/Email"
                       className="appearance-none w-full bg-transparent border-0 border-b border-gray-700 focus:outline-none py-1 md:mb-[20px]"
                       id="username"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
                     />
                   </div>
                   <div className="mb-6">
                     <label
-                      htmlFor="username"
+                      htmlFor="password"
                       className="block text-gray-700 text-sm font-bold mb-2"
                     >
                       Password
@@ -74,20 +156,28 @@ const LoginPage = () => {
                     <input
                       type="text"
                       placeholder="Password"
+                      value={password}
+                      id="password"
                       className="appearance-none w-full bg-transparent border-0 border-b border-gray-700 focus:outline-none py-1 md:mb-[20px]"
+                      onChange={(e) => setPassword(e.target.value)}
                     />
                   </div>
                   <div>
                     <button
                       className="text-gray-700 w-full hover:bg-lightpurple bg-lightpurple-login rounded-3xl font-bold py-2 px-4 focus:outline-none focus:shadow-outline"
                       type="button"
+                      onClick={handleSignIn}
                     >
                       Sign In
                     </button>
                   </div>
                 </form>
               ) : (
-                <form action="" className="w-full md:w-[90%] md:flex md:flex-col">
+                // Sign up form
+                <form 
+                  action="" 
+                  className="w-full md:w-[90%] md:flex md:flex-col" 
+                  onSubmit={handleSignUp}>
                   <div className="mb-4">
                     <label
                       htmlFor="username"
@@ -100,11 +190,13 @@ const LoginPage = () => {
                       placeholder="Username"
                       className="appearance-none w-full bg-transparent border-0 border-b border-gray-700 focus:outline-none py-1 md:mb-[20px]"
                       id="username"
+                      value={username}
+                      onChange={(e) => {setUsername(e.target.value)}}
                     />
                   </div>
                   <div className="mb-4">
                     <label
-                      htmlFor="email"
+                      htmlFor="Email"
                       className="block text-gray-700 text-sm font-bold mb-2"
                     >
                       Email
@@ -113,12 +205,14 @@ const LoginPage = () => {
                       type="text"
                       placeholder="Email"
                       className="appearance-none w-full bg-transparent border-0 border-b border-gray-700 focus:outline-none py-1 md:mb-[20px]"
-                      id="username"
+                      id="email"
+                      value={email}
+                      onChange={(e) => {setEmail(e.target.value)}}
                     />
                   </div>
                   <div className="mb-6">
                     <label
-                      htmlFor="username"
+                      htmlFor="password"
                       className="block text-gray-700 text-sm font-bold mb-2"
                     >
                       Password
@@ -127,25 +221,33 @@ const LoginPage = () => {
                       type="text"
                       placeholder="Password"
                       className="appearance-none w-full bg-transparent border-0 border-b border-gray-700 focus:outline-none py-1 md:mb-[20px]"
+                      id="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
                     />
                   </div>
-                  <div className="mb-6">
+                  <div className="mb-6 relative">
                     <label
-                      htmlFor="username"
+                      htmlFor="confirm"
                       className="block text-gray-700 text-sm font-bold mb-2"
                     >
                       Confirm Password
                     </label>
                     <input
                       type="text"
+                      id="confirm"
                       placeholder="Confirm Password"
                       className="appearance-none w-full bg-transparent border-0 border-b border-gray-700 focus:outline-none py-1 md:mb-[20px]"
+                      value={confirm}
+                      onChange={(e) => setConfirm(e.target.value)}
                     />
+                  {password !== confirm ? <p className="text-red-700 text-center w-[100%] absolute md:bottom-[-10px]">Password does not match!</p> : null}
                   </div>
                   <div className="md:flex md:justify-center">
                     <button
                       className="text-gray-700 w-full hover:bg-lightpurple bg-lightpurple-login rounded-3xl font-bold py-2 px-4 focus:outline-none focus:shadow-outline md:w-[90%] md:mb-[20px]"
                       type="button"
+                      onClick={handleSignUp}
                     >
                       Sign Up
                     </button>

@@ -21,7 +21,6 @@ app.use(cors(corsOptions));
 app.use(bodyParser.json());
 
 //adds database connection to req.db
-
 app.use((req, res, next) => dbConnect(req, res, next));
  
 app.put('/signup', async (req, res) => {
@@ -32,6 +31,18 @@ app.put('/signup', async (req, res) => {
             email,
             password
         } = req.body;
+
+        //Check to make sure the data isnt empty
+        if (username === "") {
+            res.json({success: false, err: "Missing username"});
+            return;
+        } else if (email === "") {
+            res.json({success: false, err: "Missing email"});
+            return;
+        }  else if (password === "") {
+            res.json({success: false, err: "Missing password"});
+            return;
+        }
 
         //check if the email or username is being used
         const [[validateEmail]] = await req.db.query(`SELECT email FROM Users WHERE email = :email AND deleted_flag=0`, { email });
@@ -56,15 +67,18 @@ app.put('/signup', async (req, res) => {
                 username
             });
 
+            //create a payload for the jwt
             const payload = {
                 user_id: userData.user_id,
                 username: userData.username,
                 email: userData.email
             }
  
+            //creates the jwt
             const jwtEncodedUser = jwt.sign(payload, process.env.JWT_KEY);
                 
-            res.json({ jwt: jwtEncodedUser, success: true });
+            //respond with the jwt and userData
+            res.json({ jwt: jwtEncodedUser, success: true, userData: payload });
         }
     } catch(error) {
         res.json({success: false, err: "Internal server error"});
@@ -76,19 +90,29 @@ app.put('/signup', async (req, res) => {
 app.post('/signin', async (req, res) => {
     try {
         //get credentials from req
-        const { email, password: userEnteredPassword } = req.body;
+        const { username: login, password: userEnteredPassword } = req.body;
 
-        //get the users data
-        const [[userData]] = await req.db.query(`SELECT email, username, password FROM Users WHERE email = :email AND deleted_flag=0`, { email });
+        //check if the login is an email or username, then do the corresponding query for it
+        let data = {};
+        const emailCheck = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
 
+        if (emailCheck.test(login)) {
+            const [[userData]] = await req.db.query(`SELECT email, username, password FROM Users WHERE email = :login AND deleted_flag=0`, { login });
+            data = userData;
+        } else {
+            const [[userData]] = await req.db.query(`SELECT email, username, password FROM Users WHERE username = :login AND deleted_flag=0`, { login });
+            data = userData;
+        }
+
+        //get the users data 
         //if no user data, return false
-        if (!userData) {
+        if (!data) {
             res.json({success: false, err: "no user found"});
             return;
         }
-        
+
         //hash the entered password and then compare them
-        const hashedPassword = `${userData.password}`
+        const hashedPassword = `${data.password}`
         const passwordMatches = await bcrypt.compare(userEnteredPassword, hashedPassword);
         
         //check if the password is correct, if not then res with success of false
@@ -97,13 +121,13 @@ app.post('/signin', async (req, res) => {
         } else {
             //create a payload for the jwt with user info
             const payload = {
-                user_id: userData.user_id,
-                username: userData.username,
-                email: userData.email
+                user_id: data.user_id,
+                username: data.username,
+                email: data.email
             }; 
 
             const jwtToken = jwt.sign(payload, process.env.JWT_KEY);
-            res.json({success: true, jwt: jwtToken});
+            res.json({success: true, jwt: jwtToken, data: payload});
         }
     } catch(err) {
         console.log(err);
