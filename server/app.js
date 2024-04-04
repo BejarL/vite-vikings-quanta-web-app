@@ -32,18 +32,6 @@ app.put('/signup', async (req, res) => {
             password
         } = req.body;
 
-        //Check to make sure the data isnt empty
-        if (username === "") {
-            res.json({success: false, err: "Missing username"});
-            return;
-        } else if (email === "") {
-            res.json({success: false, err: "Missing email"});
-            return;
-        }  else if (password === "") {
-            res.json({success: false, err: "Missing password"});
-            return;
-        }
-
         //check if the email or username is being used
         const [[validateEmail]] = await req.db.query(`SELECT email FROM Users WHERE email = :email AND deleted_flag=0`, { email });
         const [[validateUser]] = await req.db.query(`SELECT username FROM Users WHERE username = :username AND deleted_flag=0`, { username });
@@ -202,7 +190,7 @@ app.put('/changepassword', async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
 
         //query the database and update the users password
-        const [query] = await req.db.query(`UPDATE Users SET password = :password WHERE user_id = :user_id`, {
+        const [query] = await req.db.query(`UPDATE Users SET password = :hashedPassword WHERE user_id = :user_id`, {
             user_id, hashedPassword
         })
         

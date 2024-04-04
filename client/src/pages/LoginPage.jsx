@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { setJwt } from "../Auth/jwt";
 import { useNavigate } from "react-router-dom";
+import '../index.css'
 
 const LoginPage = () => {
   // Toggle between login and sign-up forms
@@ -25,6 +26,18 @@ const LoginPage = () => {
   }
 
 const handleSignUp = async () => {
+
+  //Check to make sure the data isnt empty
+  if (username === "") {
+    window.alert("Missing username");
+    return;
+  } else if (email === "") {
+    window.alert("missing email");
+    return;
+  }  else if (password === "") {
+    window.alert("Missing password")
+    return;
+  }
 
   //check the passwords
   if (password !== confirm) {
@@ -53,13 +66,23 @@ const handleSignUp = async () => {
       setJwt(data.jwt);
       navigate("/Dashboard");
     } else {
-      windows.alert(`error creating user: ${data.err}`);
+      window.alert(`error creating user: ${data.err}`);
     }
   } catch (error) {
     console.log('Error:', error);
   }
 }
+
 const handleSignIn = async () => {
+
+  if (!username) {
+    window.alert("Missing username/email");
+    return;
+  } else if (!password) {
+    window.alert("Missing password");
+    return;
+  }
+
   //try and hit the endpoint the endpoint to sign in
   try {
     const res = await fetch('http://localhost:3000/signin', {
@@ -93,8 +116,8 @@ const handleSignIn = async () => {
          
          {/* img */}
          <div className="h-[100%] flex flex-col items-center w-[65%] md:w-[100%]">
-            <p className="z-[1] text-5xl font-bold p-3 flex justify-center text-gray-800 mt-[30px] md:mt-[100px]">QUANTA</p>
-            <p className="z-[1] px-2 text-2xl text-center text-gray-800 md:mb-[100px]">Time Tracker App for desktop and mobile</p>
+            <p className="text-shadow z-[1] text-5xl font-bold p-3 flex justify-center text-slate-100 mt-[30px] md:mt-[100px]">QUANTA</p>
+            <p className="text-shadow z-[1] px-2 text-2xl text-center text-slate-100 md:mb-[100px]">Time Tracker App for desktop and mobile</p>
             <img
                   src="/images/Quanta-Login.png"
                   alt="Login image"
@@ -234,7 +257,6 @@ const handleSignIn = async () => {
                       Confirm Password
                     </label>
                     <input
-                      type="text"
                       id="confirm"
                       type="password"
                       placeholder="Confirm Password"
@@ -258,8 +280,7 @@ const handleSignIn = async () => {
               <div>
                 {isLogin ? 
                   <p className="absolute bottom-[0px] left-0 w-[100%] text-center md:bottom-[10px]">
-                    Forgot your password? 
-                    <Link to="/forgot-password" className="text-darkpurple"> Reset</Link>
+                    <Link to="/forgot-password" className="text-sky-600">Forgot your password?</Link>
                   </p>
                   : null}
               </div>

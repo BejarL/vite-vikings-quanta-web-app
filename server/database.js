@@ -1,4 +1,3 @@
-
 const mysql = require('mysql2/promise');
 
 //Allows us to access the ENV file
