@@ -64,7 +64,7 @@ const handleSignUp = async () => {
     //if successfull and the jwt token exist, save the jwt token
     if (data.success && data.jwt) {
       setJwt(data.jwt);
-      navigate("/Dashboard");
+      navigate("/Quanta");
     } else {
       window.alert(`error creating user: ${data.err}`);
     }
@@ -101,7 +101,7 @@ const handleSignIn = async () => {
     //if successfull and a jwt token, save the token and navigate to the dashboard
     if (data.success && data.jwt) {
       setJwt(data.jwt);
-      navigate("/Dashboard");
+      navigate("/Quanta");
     } else {
       window.alert(`error signing in: ${data.err}`);
     }

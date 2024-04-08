@@ -3,10 +3,11 @@ import LoginPage from "./pages/LoginPage"
 import ResetPasswordPage from "./pages/ResetPasswordPage"
 import ConfirmResetPasswordPage from "./pages/ConfirmResetPasswordPage"
 import Layout from "./pages/Layout"
-import TimeTracker from "./pages/TimeTrackerPage"
+import TimeTrackerPage from "./pages/TimeTrackerPage"
 import UsersPage from "./pages/UsersPage"
 import ProjectsPage from "./pages/ProjectsPage"
 import ProfilePage from "./pages/ProfilePage"
+import HomePage from "./pages/HomePage"
 
 const App = () => {
   return (
@@ -16,8 +17,8 @@ const App = () => {
            <Route path="/forgot-password" element={<ResetPasswordPage/>}/>
            <Route path="/reset-password" element={<ConfirmResetPasswordPage/>}/>
            <Route path="/quanta" element={<Layout />}>
-            {/* <Route path="/" elements={<Home />}/> */}
-              <Route path="timetracker" element={<TimeTracker />}/>
+              <Route path="" element={<HomePage />}/>
+              <Route path="timetracker" element={<TimeTrackerPage />}/>
               <Route path="users" element={<UsersPage />}/>
               <Route path="projects" element={<ProjectsPage />}/>
               <Route path="profile" element={<ProfilePage/>}/>

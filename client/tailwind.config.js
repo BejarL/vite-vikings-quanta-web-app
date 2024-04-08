@@ -16,6 +16,8 @@ export default {
         'lightpurple': {
           DEFAULT: '#f8f0fe',
           login: '#DCB6FA',
+          body: '#f3eff6',
+          selected: '#f3e6fd',
         },
         darkpurple: "#63276A",
         resetpurple: "#B08DCC",
