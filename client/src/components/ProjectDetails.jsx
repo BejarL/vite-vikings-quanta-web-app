@@ -1,7 +1,8 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 
 const ProjectDetails = ({ Project }) => {
   const { projectId } = useParams();
+  const navigate = useNavigate()
 
   // Fetch project details using projectId
   // Using mock data for now
@@ -22,6 +23,23 @@ const ProjectDetails = ({ Project }) => {
 
   return (
     <div className="container mx-auto p-4 ">
+      <div>
+        <button
+        onClick={() => navigate(-1)}>
+          <svg
+            className="w-10 h-10"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke="currentColor"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M5 12h14M5 12l4-4m-4 4 4 4"
+            /> 
+          </svg>
+        </button>
+      </div>
       <div className="overflow-hidden overflow-x-auto rounded-lg shadow-md">
         <table className="w-full text-sm text-left">
           <thead className=" text-black uppercase bg-lightpurple-login rounded-lg">
