@@ -3,6 +3,7 @@ const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const bodyParser = require('body-parser');
+const fs = require('fs').promises;
 const dbConnect = require('./database');
 
 const app = express();
@@ -44,11 +45,14 @@ app.put('/signup', async (req, res) => {
 
             //hash their password
             const hashedPassword = await bcrypt.hash(password, 10);
+
+            //get default profile picture
+            const defaultProfilePic = await fs.readFile('./imgs/DefaultProfilePic.jpg');
             
             //attempt to insert the data into the database
-            await req.db.query(`INSERT INTO Users (username, email, password) 
-                                                          VALUES (:username, :email, :hashedPassword);`, 
-            { username, email, hashedPassword });
+            await req.db.query(`INSERT INTO Users (username, email, password, profile_pic) 
+                                                          VALUES (:username, :email, :hashedPassword, :defaultProfilePic);`, 
+            { username, email, hashedPassword, defaultProfilePic });
 
             //need to query into the db to get the newly created users id, username, and profilepic
             const [[userData]] = await req.db.query(`SELECT user_id, username, email FROM Users WHERE username = :username`, {
@@ -59,7 +63,7 @@ app.put('/signup', async (req, res) => {
             const payload = {
                 user_id: userData.user_id,
                 username: userData.username,
-                email: userData.email
+                email: userData.email,
             }
  
             //creates the jwt
@@ -171,7 +175,35 @@ app.use(async function verifyJwt(req, res, next) {
     }
   
     await next();
-  });
+});
+
+//endpoint for geting a specific users information after signing in
+app.get("/user", async (req, res) => {
+    try {
+
+        //get the users id from their jwt token
+        const { user_id } = req.user
+
+        //get the users info, then query again for workspace id and name
+        const [[userData]] = await req.db.query(`SELECT username, email, profile_pic, last_workspace_id FROM Users WHERE user_id = :user_id`, { 
+                                            user_id 
+                                         })
+
+        const [workspaceData] = await req.db.query(`SELECT Workspace_Users.workspace_id, workspace_name
+                                                    FROM Workspace_Users
+                                                    INNER JOIN Workspace ON Workspace_Users.workspace_id = Workspace.workspace_id
+                                                    WHERE user_id = :user_id`, {
+                                             user_id
+                                         })
+
+        //respond with success of true and the data that was just queried
+        res.json({success: true, data: {user: userData, workspaces: workspaceData}})
+
+    } catch (err) {
+        console.log(err);
+        res.json({success: false, err: "Internal server error"});
+    }
+})
 
 //endpoint for changing a users password
 app.put('/changepassword', async (req, res) => {
