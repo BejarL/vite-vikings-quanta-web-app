@@ -201,8 +201,6 @@ app.get("/user", async (req, res) => {
         //get the users id from their jwt token
         const { user_id } = req.user
 
-        console.log(req.user)
-
         //get the users info, then query again for workspace id and name
         const [[userData]] = await req.db.query(`SELECT username, email, profile_pic, last_workspace_id FROM Users WHERE user_id = :user_id`, { 
                                             user_id 
