@@ -1,6 +1,6 @@
-import { useState, createContext } from "react";
+import { useState, useEffect, createContext } from "react";
 import { Outlet, Link, useNavigate } from "react-router-dom";
-import { clearJwt } from "../Auth/jwt";
+import { clearJwt, getJwt } from "../Auth/jwt";
 
 const workspaceContext = createContext(null);
 
@@ -8,12 +8,56 @@ const Layout = () => {
   const [showOffCanvas, setShowOffCanvas] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [workspace, setWorkspace] = useState({ id: 1, name: "Quanta" });
+  const [profilePic, setProfilePic] = useState("")
 
   const navigate = useNavigate();
 
   // get which page is on to decide which nav link to select
   const location = window.location.href;
   const page = location.split("/")[4];
+
+  //is used to get a usersData from the server
+  useEffect(() => {
+    getUserData();
+  }, [])
+
+  const getUserData = async () => {
+    //get the users jwt token
+    const jwt = getJwt();
+
+    //if there is no jwt token saved, navigate back to the sign in page
+    if (!jwt) {
+      navigate("/");
+      return;
+    }
+
+    //try to hit the endpoint to get the users data
+    try {
+
+      const res = await fetch("http://localhost:3000/user", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "authorization": jwt
+        }
+      })
+
+      //get the data from the response
+      const { success, data } = await res.json();
+
+
+      //check if the request was successful, if not do an early return
+      if (!success) {
+        window.alert("error getting user info");
+        return;
+      }
+
+      console.log(data);
+
+    } catch(err) {
+      console.log(err);
+    }
+  }
 
   //toggles the offcanvas on mobile
   const toggleOffCanvas = () => {
