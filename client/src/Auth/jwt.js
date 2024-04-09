@@ -1,17 +1,15 @@
 export const setJwt = (jwt) => {
+  if (!jwt) {
+    return "Missing jwt token";
+  }
 
-    if (!jwt) {
-        return "Missing jwt token";
-    }
-
-    localStorage.setItem("jwt", `Bearer ${jwt}`)
-}
+  localStorage.setItem("jwt", `Bearer ${jwt}`);
+};
 
 export const clearJwt = () => {
-    localStorage.clear();
-}
+  localStorage.clear();
+};
 
 export const getJwt = () => {
-    return localStorage.getItem("jwt");
-}
-
+  return localStorage.getItem("jwt");
+};
