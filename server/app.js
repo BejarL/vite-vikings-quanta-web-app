@@ -255,6 +255,33 @@ app.put("/changepassword", async (req, res) => {
   }
 });
 
+//gets the recent project data to display on home page
+app.post('/projects/recent', async (req, res) => {
+    try {
+
+        const { workspace_id } = req.body;
+
+        if (!workspace_id) {
+            res.json({ success: false, err: "missing workspace id" });
+            return;
+        }
+
+        const [recent] = await req.db.query(`SELECT Projects.project_id, project_name 
+                                       FROM Projects 
+                                       INNER JOIN Entries ON Projects.project_id = Entries.project_id
+                                       WHERE workspace_id = :workspace_id AND Projects.deleted_flag = 0
+                                       ORDER BY Entries.end_time LIMIT 5`, {
+            workspace_id
+        })
+
+        res.json(recent);
+
+    } catch (err) {
+        res.json({success: false, err: "Internal Server Error"});
+        console.log(err);
+    }
+})
+
 app.listen(port, () => {
   console.log(`server started at http://localhost:${port}`);
 });

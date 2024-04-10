@@ -2,12 +2,12 @@ import { useState, useEffect, createContext } from "react";
 import { Outlet, Link, useNavigate } from "react-router-dom";
 import { clearJwt, getJwt } from "../Auth/jwt";
 
-const workspaceContext = createContext(null);
+export const workspaceContext = createContext(null);
 
 const Layout = () => {
   const [showOffCanvas, setShowOffCanvas] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
-  const [workspace, setWorkspace] = useState({ id: 1, name: "Quanta" });
+  const [workspace, setWorkspace] = useState({ workspace_id: 1, name: "Quanta" });
   const [profilePic, setProfilePic] = useState("")
 
   const navigate = useNavigate();
@@ -52,7 +52,7 @@ const Layout = () => {
         return;
       }
 
-      console.log(data);
+      // console.log(data);
 
     } catch(err) {
       console.log(err);
@@ -129,7 +129,7 @@ const Layout = () => {
         ></img>
       </div>
       {/* body wrapper */}
-      <div className="h-[calc(100vh-60px)] relative">
+      <div className="h-[calc(100vh-60px)] relative overflow-x-auto">
         {/* offcanvas - mobile view*/}
         <div
           className={`${
@@ -253,7 +253,7 @@ const Layout = () => {
             <p className="pl-[10px]">Logout</p>
           </button>
         </div>
-        <div className="flex h-[100%]">
+        <div className="flex min-h-[100%]">
           {/* sidebar - desktop view*/}
           <div className="hidden min-w-[180px] h-[100%] py-[20px] flex flex-col justify-between md:flex">
             <div id="link-menu">
