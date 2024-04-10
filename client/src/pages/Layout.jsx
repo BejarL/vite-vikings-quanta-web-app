@@ -255,7 +255,7 @@ const Layout = () => {
         </div>
         <div className="flex min-h-[100%]">
           {/* sidebar - desktop view*/}
-          <div className="hidden min-w-[180px] h-[100%] py-[20px] flex flex-col justify-between md:flex">
+          <div className="hidden min-w-[180px] min-h-[100%] py-[20px] flex flex-col justify-between md:flex">
             <div id="link-menu">
               <Link
                 className={` ${page === "" ? "bg-lightpurple-selected" : null}
