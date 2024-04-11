@@ -1,7 +1,7 @@
 import {useState , useEffect, useContext} from  'react';
 import { workspaceContext } from './Layout';
 import { useNavigate } from 'react-router-dom'
-import { getJwt } from '../Auth/jwt';
+import { getJwt, verifyData } from '../Auth/jwt';
 
 const HomePage = () => {
     const [recentProjects, setRecentProjects] = useState([]);
@@ -19,12 +19,6 @@ const HomePage = () => {
     const handleGetRecent = async () => {
         const jwt = getJwt();
 
-        //check if they have a jwt token, if not navigate to the sign in page
-        if (!jwt) {
-            navigate("/");
-            return;
-        }
-
         try {
             const res = await fetch("http://localhost:3000/projects/recent", {
                 method: "POST",
@@ -37,9 +31,13 @@ const HomePage = () => {
                 })
             })
 
-            const data = await res.json();
-
-            setRecentProjects(data);
+            // checks only for jwt errors. if there are errors, navigate to sign in
+            // if no error, gets data
+            const { success, data } = await verifyData(res, navigate);
+    
+            if (success) {
+                setRecentProjects(data);
+            }
 
         } catch (err) {
             console.log(err);
@@ -81,7 +79,7 @@ const HomePage = () => {
             </div>
         </div>
     <h1 className="font-bold text-3xl md:text-4xl m-[20px]"> Recent Projects</h1>
-    <div className="flex flex-wrap justify-center m-[50px] border md:justify-start">
+    <div className="flex flex-wrap justify-center m-[50px] md:justify-start">
         {recentElems}
     </div>
     

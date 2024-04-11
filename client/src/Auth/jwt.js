@@ -11,5 +11,20 @@ export const clearJwt = () => {
 };
 
 export const getJwt = () => {
-  return localStorage.getItem("jwt");
+  const jwt = localStorage.getItem("jwt");
+
+  return jwt;
 };
+
+// checks for jwt error,
+// if no error, get data
+export const verifyData = async (res, navigate) => {
+  const data = await res.json();
+
+  if (res.err === "Invalid authorization, no authorization headers" || 
+      res.err === "Invalid authorization, invalid authorization scheme") {
+    navigate("/");
+  } else {
+    return data;
+  }
+} 

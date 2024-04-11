@@ -1,6 +1,6 @@
 import { useState, useEffect, createContext } from "react";
 import { Outlet, Link, useNavigate } from "react-router-dom";
-import { clearJwt, getJwt } from "../Auth/jwt";
+import { clearJwt, getJwt, verifyData } from "../Auth/jwt";
 
 export const workspaceContext = createContext(null);
 
@@ -43,16 +43,14 @@ const Layout = () => {
       })
 
       //get the data from the response
-      const { success, data } = await res.json();
-
-
+      const { success, data } = await verifyData(res, navigate);
+      console.log(data);
       //check if the request was successful, if not do an early return
       if (!success) {
         window.alert("error getting user info");
         return;
       }
 
-      // console.log(data);
 
     } catch(err) {
       console.log(err);
@@ -255,7 +253,7 @@ const Layout = () => {
         </div>
         <div className="flex min-h-[100%]">
           {/* sidebar - desktop view*/}
-          <div className="hidden min-w-[180px] min-h-[100%] py-[20px] flex flex-col justify-between md:flex">
+          <div className="hidden min-w-[180px] min-h-[100%] py-[20px] flex-col justify-between md:flex">
             <div id="link-menu">
               <Link
                 className={` ${page === "" ? "bg-lightpurple-selected" : null}
