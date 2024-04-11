@@ -127,7 +127,7 @@ const LoginPage = () => {
 
         {/* Login Page */}
         <div className="z-[1] h-[100%] flex items-center justify-center md:w-[100%]">
-          <div className="relative bg-white p-9 rounded-lg shadow-md w-[400px]  min-w-md min-w-[350px] pt-1 h-max h-[100%] md:flex md:flex-col md:items-center md:h-[90%] md:w-[70%]">
+          <div className="relative bg-white p-9 rounded-lg shadow-md w-[400px]  min-w-md min-w-[350px] pt-1 h-[100%] md:flex md:flex-col md:items-center md:h-[90%] md:w-[70%]">
             {/* Toggle Button */}
             <div className="self-center mt-4 bg-lightpurple-login rounded-3xl flex justify-evenly mb-4 md:flex md:w-[80%] md:mb-[100px]">
               <button

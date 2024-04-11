@@ -7,7 +7,7 @@ export const workspaceContext = createContext(null);
 const Layout = () => {
   const [showOffCanvas, setShowOffCanvas] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
-  const [workspace, setWorkspace] = useState({ workspace_id: 1, name: "Quanta" });
+  const [workspace, setWorkspace] = useState(1);
   const [profilePic, setProfilePic] = useState("")
 
   const navigate = useNavigate();
@@ -44,7 +44,7 @@ const Layout = () => {
 
       //get the data from the response
       const { success, data } = await verifyData(res, navigate);
-      console.log(data);
+
       //check if the request was successful, if not do an early return
       if (!success) {
         window.alert("error getting user info");
