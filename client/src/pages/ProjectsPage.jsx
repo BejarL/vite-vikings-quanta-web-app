@@ -1,16 +1,46 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
-
-const initialProjects = [
-  { id: 1, name: "Vite Vikings", trackedTime: "30h" },
-  { id: 2, name: "Project 2", trackedTime: "300h" },
-  { id: 3, name: "Project 3", trackedTime: "30h" },
-];
+import { useState, useContext, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { workspaceContext } from "./Layout";
+import { getJwt, verifyData} from '../Auth/jwt.js'
 
 const ProjectsPage = () => {
-  const [projects, setProjects] = useState(initialProjects);
+  const [projects, setProjects] = useState([]);
   const [newProjectName, setNewProjectName] = useState("");
   const [searchProject, setSearchProject] = useState("");
+
+  const navigate = useNavigate();
+
+  const workspace_id  = useContext(workspaceContext);
+
+  useEffect(() => {
+    getProjects()
+  }, [])
+
+  const getProjects = async () => {
+    const jwt = getJwt();
+
+    try {
+      const response = await fetch('http://localhost:3000/projects/all', {
+        method: 'POST',
+        headers: {
+          "Content-Type": "application/json",
+          "authorization": jwt
+        }, 
+        body: JSON.stringify({
+          workspace_id
+        })
+      })
+
+      const {success, data} = await verifyData(response, navigate);
+
+      if (success) {
+        setProjects(data);
+      }
+      // setProjects(data);
+    } catch(err) {
+      console.log(err);
+    }
+  }
 
   const handleSearchChange = (event) => {
     setSearchProject(event.target.value);
@@ -21,16 +51,16 @@ const ProjectsPage = () => {
   };
 
   const filteredProjects = projects.filter((project) =>
-    project.name.toLowerCase().includes(searchProject.toLowerCase())
+    project.project_name.toLowerCase().includes(searchProject.toLowerCase())
   );
 
   const addNewProject = () => {
     // Add a new project with a default tracked time of '0h'
     if (newProjectName.trim() !== "") {
       const newProject = {
-        id: projects.length + 1,
-        name: newProjectName || `New Project ${projects.length + 1}`,
-        trackedTime: "0h",
+        project_id: projects.length + 1,
+        project_name: newProjectName || `New Project ${projects.length + 1}`,
+        total_time: "0",
       };
 
       setProjects([...projects, newProject]);
@@ -39,7 +69,7 @@ const ProjectsPage = () => {
   };
 
   const deleteProject = (projectId) => {
-    setProjects(projects.filter((project) => project.id !== projectId));
+    setProjects(projects.filter((project) => project.project_id !== projectId));
   };
 
   return (
@@ -47,7 +77,7 @@ const ProjectsPage = () => {
       {/* Search and Add Section */}
       <div className="w-[100%] pb-4 flex justify-between items-center">
         <input
-          className="shadow appearance-none border rounded w-full py-2 pl-10 pr-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          className="shadow appearance-none border rounded w-full py-2 pl-4 pr-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
           id="search"
           type="text"
           placeholder="Find by name"
@@ -61,7 +91,7 @@ const ProjectsPage = () => {
       </div>
       <div>
         <input
-          className="shadow appearance-none border rounded w-[20%] py-2 pl-10 pr-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          className="shadow appearance-none border rounded w-[20%] py-2 pl-4 pr-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
           id="add"
           type="text"
           placeholder="New Project"
@@ -89,18 +119,18 @@ const ProjectsPage = () => {
           </thead>
           <tbody>
             {filteredProjects.map((project) => (
-              <tr key={project.id} className="hover:bg-gray-100">
+              <tr key={project.project_id} className="hover:bg-gray-100">
                 <td className="py-4 px-6 border-b border-gray-200">
-                  <Link to={`/quanta/projects/${project.id}`}>
-                    {project.name}
+                  <Link to={`/quanta/projects/${project.project_id}`}>
+                    {project.project_name}
                   </Link>
                 </td>
                 <td className="py-4 px-6 border-b border-gray-200">
-                  {project.trackedTime}
+                  {project.total_time} mn
                 </td>
                 <td className="py-4 px-6 border-b border-gray-200 text-end">
                   <button
-                    onClick={() => deleteProject(project.id)}
+                    onClick={() => deleteProject(project.project_id)}
                     className="text-white p-1 rounded-full inline-flex items-center justify-center"
                     aria-label="Delete project"
                   >

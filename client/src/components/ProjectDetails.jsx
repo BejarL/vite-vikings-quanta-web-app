@@ -1,25 +1,67 @@
+import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { getJwt, verifyData } from "../Auth/jwt";
 
 const ProjectDetails = ({ Project }) => {
+  const [project, setProject] = useState([])
   const { projectId } = useParams();
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   // Fetch project details using projectId
   // Using mock data for now
-  const project = {
-    name: "Project Name",
-    tasks: [
-      {
-        id: 1,
-        description: "Worked on wireframes",
-        user: "Lisset",
-        time: "30h",
-      },
-      { id: 2, description: "Worked on wireframes", user: "Ben", time: "30h" },
-      { id: 3, description: "Worked on wireframes", user: "RJ", time: "30h" },
-    ],
-    totalTrackedTime: "90h",
-  };
+  useEffect(() => {
+    getProjectData();
+  }, [])
+
+  const getProjectData = async () => {
+    try {
+      const jwt = getJwt();
+
+      const res = await fetch(`http://localhost:3000/project/${projectId}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "authorization": jwt
+                }
+            })
+      
+      const { success, data } = await verifyData(res, navigate);
+      
+      console.log(data);
+
+      setProject(data);
+      
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
+  // const project = {
+  //   name: "Project Name",
+  //   tasks: [
+  //     {
+  //       id: 1,
+  //       description: "Worked on wireframes",
+  //       user: "Lisset",
+  //       time: "30h",
+  //     },
+  //     { id: 2, description: "Worked on wireframes", user: "Ben", time: "30h" },
+  //     { id: 3, description: "Worked on wireframes", user: "RJ", time: "30h" },
+  //   ],
+  //   totalTrackedTime: "90h",
+  // };
+
+  let totalTime = 0;
+
+  const taskElems = project.map((task) => {
+    totalTime += task.total_time;
+    return (
+    <tr className="bg-white border-b" key={task.entry_id}>
+      <td className="px-6 py-4">{task.entry_desc}</td>
+      <td className="px-6 py-4">{task.username}</td>
+      <td className="px-6 py-4 text-end">{task.total_time}</td>
+    </tr>
+  )})
 
   return (
     <div className="container mx-auto p-4 ">
@@ -56,18 +98,12 @@ const ProjectDetails = ({ Project }) => {
             </tr>
           </thead>
           <tbody>
-            {project.tasks.map((task) => (
-              <tr className="bg-white border-b" key={task.id}>
-                <td className="px-6 py-4">{task.description}</td>
-                <td className="px-6 py-4">{task.user}</td>
-                <td className="px-6 py-4 text-end">{task.time}</td>
-              </tr>
-            ))}
+            {taskElems}
           </tbody>
         </table>
         <div className="text-lg flex justify-end px-6 py-3 bg-lightpurple-login">
           <span>Total Time: </span>
-          <strong>{project.totalTrackedTime}</strong>
+          <strong>{totalTime}</strong>
         </div>
       </div>
     </div>

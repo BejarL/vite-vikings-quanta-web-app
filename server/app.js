@@ -153,17 +153,6 @@ app.post("/signin", async (req, res) => {
   }
 });
 
-app.get("/users", async (req, res) => {
-  try {
-    // get all rows from Users table
-    const [rows] = await req.db.query(`SELECT * FROM Users`);
-    res.json({ success: true, data: rows });
-  } catch (error) {
-    console.error("error getting users", error);
-    res.json({ success: false, message: "internal server error" });
-  }
-});
-
 app.use(async function verifyJwt(req, res, next) {
    
     //get the jwt token from req header
@@ -171,7 +160,7 @@ app.use(async function verifyJwt(req, res, next) {
 
   //check if there is a jwt token
   if (!authHeader) {
-    res.json("Invalid authorization, no authorization headers");
+    res.json({success: false, err: "Invalid authorization, no authorization headers"});
     return;
   }
 
@@ -179,7 +168,7 @@ app.use(async function verifyJwt(req, res, next) {
   const [scheme, jwtToken] = authHeader.split(" ");
 
   if (scheme !== "Bearer") {
-    res.json("Invalid authorization, invalid authorization scheme");
+    res.json({sucess: false, err: "Invalid authorization, invalid authorization scheme"});
     return;
   }
 
@@ -204,6 +193,28 @@ app.use(async function verifyJwt(req, res, next) {
   }
 
   await next();
+});
+
+app.post("/workspace/users", async (req, res) => {
+  try {
+
+    const { workspace_id } = req.body
+
+    // get all rows from Users table
+    const [rows] = await req.db.query(`SELECT Users.user_id, username, email, Workspace_Users.workspace_role
+                                       FROM Workspace_Users
+                                       INNER JOIN Users ON Workspace_Users.user_id = Users.user_id
+                                       WHERE workspace_id = :workspace_id
+                                       ORDER BY username`, {
+                                        workspace_id
+                                       }
+    );
+
+    res.json({ success: true, data: rows });
+  } catch (error) {
+    console.error("error getting users", error);
+    res.json({ success: false, err: "internal server error" });
+  }
 });
 
 //endpoint for geting a specific users information after signing in
@@ -267,6 +278,12 @@ app.put("/changepassword", async (req, res) => {
   }
 });
 
+/* 
+*
+* Endpoints for Projects
+*
+*
+*/
 //gets the recent project data to display on home page
 app.post('/projects/recent', async (req, res) => {
     try {
@@ -286,13 +303,59 @@ app.post('/projects/recent', async (req, res) => {
             workspace_id
         })
 
-        res.json(recent);
+        res.json({success: true, data: recent});
 
     } catch (err) {
         res.json({success: false, err: "Internal Server Error"});
         console.log(err);
     }
 })
+
+//gets all projects data for a workspace
+app.post('/projects/all', async (req, res) => {
+  try {
+    const { workspace_id } = req.body;
+
+    const [projects] = await req.db.query(` SELECT Projects.project_id, project_name, SUM(total_time) AS total_time
+                                            FROM Projects
+                                            LEFT JOIN Entries ON Projects.project_id = Entries.project_id 
+                                            WHERE workspace_id = :workspace_id AND Projects.deleted_flag=0 AND Entries.deleted_flag=0
+                                            GROUP BY Projects.project_id;`, {
+                                              workspace_id
+                                            })
+    
+    res.json({success: true, data: projects})
+
+  } catch (err) {
+    console.log(err);
+    res.json({success: false, err: "Internal server error"});
+  }
+})
+
+//gets information for a specific project
+app.post('/project/:project_id', async (req, res) => {
+
+  try {
+    const { project_id } = req.params
+
+    const [data] = await req.db.query(`SELECT username, total_time, entry_desc, entry_id
+                                       FROM Entries 
+                                       INNER JOIN Users ON Entries.user_id = Users.user_id
+                                       WHERE project_id=:project_id AND Entries.deleted_flag = 0
+                                       ORDER BY Entries.end_time DESC`, { 
+                                        project_id
+                                      })
+
+    res.json({success: true, data: data})
+
+  } catch (err) {
+    console.log(err);
+    res.json({success: false, err: "Internal Server Error"})
+  }
+})
+
+
+
 
 app.listen(port, () => {
   console.log(`server started at http://localhost:${port}`);
