@@ -16,6 +16,7 @@ const ProjectsPage = () => {
     getProjects()
   }, [])
 
+  //gets all the project data for the workspace
   const getProjects = async () => {
     const jwt = getJwt();
 
@@ -31,14 +32,51 @@ const ProjectsPage = () => {
         })
       })
 
+      //verify the data, make sure the error isnt jwt related then return the json res object
       const {success, data} = await verifyData(response, navigate);
+
 
       if (success) {
         setProjects(data);
+      } else {
+        window.alert("Error getting data");
       }
-      // setProjects(data);
+      
     } catch(err) {
       console.log(err);
+    }
+  }
+
+  //is used to create a new project
+  const createNewProject = async () => {
+    try {
+      const jwt = getJwt();
+      
+      const response = await fetch('http://localhost:3000/projects/new', {
+        method: 'PUT',
+        headers: {
+          "Content-Type": "application/json",
+          "authorization": jwt
+        }, 
+        body: JSON.stringify({
+          workspace_id,
+          "project_name": newProjectName
+        })
+      })
+
+      //verify the data, make sure the error isnt jwt related then return the json res object
+      const {success, err} = await verifyData(response);
+
+      console.log(success)
+
+      if (success) {
+        getProjects();
+      } else {
+        window.alert(err);
+      }
+
+    } catch(err) {
+      window.alert(err)
     }
   }
 
@@ -46,31 +84,53 @@ const ProjectsPage = () => {
     setSearchProject(event.target.value);
   };
 
-  const handleNewProjectNameChange = (event) => {
-    setNewProjectName(event.target.value);
-  };
-
   const filteredProjects = projects.filter((project) =>
     project.project_name.toLowerCase().includes(searchProject.toLowerCase())
   );
 
-  const addNewProject = () => {
-    // Add a new project with a default tracked time of '0h'
-    if (newProjectName.trim() !== "") {
-      const newProject = {
-        project_id: projects.length + 1,
-        project_name: newProjectName || `New Project ${projects.length + 1}`,
-        total_time: "0",
-      };
+  // const addNewProject = () => {
 
-      setProjects([...projects, newProject]);
-      setNewProjectName(""); // Clear input after adding
+  //   if (newProjectName.trim() !== "") {
+  //     const newProject = {
+  //       project_id: projects.length + 1,
+  //       project_name: newProjectName || `New Project ${projects.length + 1}`,
+  //       total_time: "0",
+  //     };
+
+  //     setProjects([...projects, newProject]);
+  //     setNewProjectName(""); 
+  //   }
+  // };
+
+  // const deleteProject = (projectId) => {
+  //   setProjects(projects.filter((project) => project.project_id !== projectId));
+  // };
+
+  const deleteProject = async (projectId) => {
+    try {
+      const jwt = getJwt();
+      
+      const response = await fetch(`http://localhost:3000/projects/delete/${projectId}`, {
+        method: 'DELETE',
+        headers: {
+          "Content-Type": "application/json",
+          "authorization": jwt
+        }
+      })
+
+      //verify the data, make sure the error isnt jwt related then return the json res object
+      const {success, err} = await verifyData(response);
+
+      if (success) {
+        getProjects();
+      } else {
+        window.alert(err);
+      }
+
+    } catch(err) {
+      window.alert(err)
     }
-  };
-
-  const deleteProject = (projectId) => {
-    setProjects(projects.filter((project) => project.project_id !== projectId));
-  };
+  }
 
   return (
     <div className="container mx-auto p-4 ">
@@ -96,10 +156,11 @@ const ProjectsPage = () => {
           type="text"
           placeholder="New Project"
           value={newProjectName}
-          onChange={handleNewProjectNameChange}
+          onChange={(e) => 
+            setNewProjectName(e.target.value)}
         />
         <button
-          onClick={addNewProject}
+          onClick={createNewProject}
           className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 ml-2 rounded"
           aria-label="Add new project"
         >

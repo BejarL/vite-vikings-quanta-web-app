@@ -15,7 +15,7 @@ const corsOptions = {
   "access-control-allow-credentials": true,
   optionSuccessStatus: 200,
 };
-
+ 
 app.use(cors(corsOptions));
 
 // Makes Express parse the JSON body of any requests and adds the body to the req object
@@ -319,7 +319,7 @@ app.post('/projects/all', async (req, res) => {
     const [projects] = await req.db.query(` SELECT Projects.project_id, project_name, SUM(total_time) AS total_time
                                             FROM Projects
                                             LEFT JOIN Entries ON Projects.project_id = Entries.project_id 
-                                            WHERE workspace_id = :workspace_id AND Projects.deleted_flag=0 AND Entries.deleted_flag=0
+                                            WHERE workspace_id = :workspace_id AND Projects.deleted_flag = 0 OR Entries.deleted_flag = 0
                                             GROUP BY Projects.project_id;`, {
                                               workspace_id
                                             })
@@ -341,7 +341,7 @@ app.post('/project/:project_id', async (req, res) => {
     const [data] = await req.db.query(`SELECT username, total_time, entry_desc, entry_id
                                        FROM Entries 
                                        INNER JOIN Users ON Entries.user_id = Users.user_id
-                                       WHERE project_id=:project_id AND Entries.deleted_flag = 0
+                                       WHERE project_id = :project_id AND Entries.deleted_flag = 0
                                        ORDER BY Entries.end_time DESC`, { 
                                         project_id
                                       })
@@ -354,8 +354,52 @@ app.post('/project/:project_id', async (req, res) => {
   }
 })
 
+app.put('/projects/new', async (req, res) => {
+  try {
 
+    //gets the workspace id and project name
+    const { workspace_id, project_name } = req.body;
 
+    //inserts a new row in the db for the new project
+    await req.db.query(`INSERT INTO Projects (project_name, workspace_id)
+                                        VALUES (:project_name, :workspace_id)`, {
+                                            project_name,  workspace_id
+                                          });
+
+    res.json({ success: true });
+   
+  } catch(err) {
+    res.json({ success: false, err: "Internal Server Error" })
+    console.log(err)
+  }
+})
+
+app.delete('/projects/delete/:project_id', async (req, res) => {
+  try {
+    //get project id to delete from the url
+    const { project_id } = req.params
+
+    // checks projects table and entries table
+    // updates deleted_flag of project to 1
+     await req.db.query(`UPDATE Projects 
+                         SET deleted_flag = 1 
+                         WHERE project_id = :project_id `, {
+                         project_id 
+                       })
+                       
+     await req.db.query(`UPDATE Entries 
+                         SET deleted_flag = 1 
+                         WHERE project_id = :project_id `, {
+                         project_id 
+                       })
+
+    res.json({success: true })
+
+  } catch (err) {
+    console.log(err);
+    res.json({success: false, err: "internal server error"})
+  }
+})
 
 app.listen(port, () => {
   console.log(`server started at http://localhost:${port}`);

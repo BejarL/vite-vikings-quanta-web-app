@@ -33,6 +33,6 @@ const dbConnect = async (req, res, next) => {
       if (req.db) req.db.release();
       throw err;
     }
-  }
-
+  } 
+ 
   module.exports = dbConnect;
