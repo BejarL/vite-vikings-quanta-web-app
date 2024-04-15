@@ -367,15 +367,19 @@ app.delete('/projects/delete/:project_id', async (req, res) => {
     //get project id to delete from the url
     const { project_id } = req.params
 
-    // checks either projects table or entries table
+    // checks projects table and entries table
     // updates deleted_flag of project to 1
-    // on either projects table or entries table
      await req.db.query(`UPDATE Projects 
-                        LEFT JOIN Entries ON Projects.project_id = Entries.project_id
-                        SET Projects.deleted_flag = 1 OR Entries.deleted_flag = 1
-                        WHERE Projects.project_id = :project_id OR Entries.project_id = :project_id`, {
-                        project_id 
-                      })
+                         SET deleted_flag = 1 
+                         WHERE project_id = :project_id `, {
+                         project_id 
+                       })
+                       
+     await req.db.query(`UPDATE Entries 
+                         SET deleted_flag = 1 
+                         WHERE project_id = :project_id `, {
+                         project_id 
+                       })
 
     res.json({success: true })
 
