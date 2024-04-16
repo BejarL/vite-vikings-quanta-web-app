@@ -52,23 +52,17 @@ app.put("/signup", async (req, res) => {
             const defaultProfilePic = await fs.readFile('./imgs/DefaultProfilePic.jpg');
             
             //attempt to insert the data into the database
-            await req.db.query(`INSERT INTO Users (username, email, password, profile_pic) 
+            const [query] = await req.db.query(`INSERT INTO Users (username, email, password, profile_pic) 
                                                           VALUES (:username, :email, :hashedPassword, :defaultProfilePic);`, 
             { username, email, hashedPassword, defaultProfilePic });
 
-      //need to query into the db to get the newly created users id, username, and profilepic
-      const [[userData]] = await req.db.query(
-        `SELECT user_id, username, email FROM Users WHERE username = :username`,
-        {
-          username,
-        }
-      );
+            const { insertId: user_id } = query
 
             //create a payload for the jwt
             const payload = {
-                user_id: userData.user_id,
-                username: userData.username,
-                email: userData.email,
+                user_id: user_id,
+                username: username,
+                email: email,
             }
  
             //creates the jwt
@@ -367,6 +361,10 @@ app.delete('/projects/delete/:project_id', async (req, res) => {
     //get project id to delete from the url
     const { project_id } = req.params
 
+
+    //begin transaction
+    await req.db.beginTransaction();
+
     // checks projects table and entries table
     // updates deleted_flag of project to 1
      await req.db.query(`UPDATE Projects 
@@ -380,6 +378,9 @@ app.delete('/projects/delete/:project_id', async (req, res) => {
                          WHERE project_id = :project_id `, {
                          project_id 
                        })
+
+    //commit the transaction
+    await req.db.commit();
 
     res.json({success: true })
 
