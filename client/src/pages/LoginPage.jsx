@@ -123,7 +123,7 @@ const LoginPage = () => {
             alt="Login image"
             className="main-img w-[85%] md:w-[80%]"
           />
-        </div>
+        </div>  
 
         {/* Login Page */}
         <div className="z-[1] h-[100%] flex items-center justify-center md:w-[100%]">
