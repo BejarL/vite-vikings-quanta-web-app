@@ -6,7 +6,7 @@ const getAllEntries = async (req, res) => {
 
         const [entries] = await req.db.query(`SELECT entry_id, start_time, end_time, total_time, entry_desc, tag, project_id
                                           FROM Entries 
-                                          WHERE user_id = :user_id
+                                          WHERE user_id = :user_id AND deleted_flag = 0
                                           ORDER BY end_time DESC`, {
                                             user_id
                                           })
@@ -15,7 +15,7 @@ const getAllEntries = async (req, res) => {
         
     } catch (err) {
         console.log(err);
-        res.json({success: false, err: "Internal Server Error"})
+        res.json({success: false, err: "Internal server error"})
     }
 }
  
@@ -36,7 +36,7 @@ const createEntry = async (req, res) => {
                             VALUES (:start_time, :end_time, :total_time, :entry_desc, :tag, :project_id,:user_id)`, {
                             start_time, end_time, total_time, entry_desc, tag, project_id, user_id,
                             })
-        res.json({success: true, message: 'Successfully created an entry'})
+        res.json({success: true, message: 'Successfully created entry'})
     } catch (err) {
         res.json({success: false, err: 'Internal server error'})
         console.log(err)
@@ -47,11 +47,13 @@ const deleteEntry = async (req, res) => {
     try {
         const { entry_id } = req.params
 
-        await req.db.query(`UPDATE Entries 
+        const query = await req.db.query(`UPDATE Entries 
                             SET deleted_flag = 1
                             WHERE entry_id = :entry_id`, {
                             entry_id
                             })
+
+        res.json({ success: true, query: query })
         
     } catch (err) {
         console.log(err);

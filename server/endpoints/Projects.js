@@ -7,7 +7,7 @@ const getRecentProjects = async (req, res) => {
             return;
         }
 
-        const [recent] = await req.db.query(`SELECT Projects.project_id, project_name 
+        const [recent] = await req.db.query(`SELECT DISTINCT Projects.project_id, project_name 
                                              FROM Projects 
                                              INNER JOIN Entries ON Projects.project_id = Entries.project_id
                                              WHERE workspace_id = :workspace_id AND Projects.deleted_flag = 0
