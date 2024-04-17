@@ -9,7 +9,7 @@ const { getRecentProjects,
         getProjectInfo,
         addNewProject,
         deleteProject } = require('./endpoints/Projects');
-const { getWorkspaceUsers, createWorkspace, joinWorkspace } = require('./endpoints/Workspace')
+const { getWorkspaceUsers, createWorkspace, joinWorkspace, inviteUser } = require('./endpoints/Workspace')
 const { getAllEntries, deleteEntry, updateEntry, createEntry } = require('./endpoints/TimeTracker');
 
 //middle ware
@@ -54,8 +54,12 @@ app.put('/changepassword', (req, res) => chagnePassword(req, res));
 *
 */
 app.post('/workspace/users', (req, res) => getWorkspaceUsers(req, res));
+
 app.post('/workspace/new', (req, res) => createWorkspace(req, res));
-app.post(`workspace/join`, (req, res) => joinWorkspace(req, res));
+
+app.post(`/workspace/join`, (req, res) => joinWorkspace(req, res));
+
+app.post('/workspace/invite', (req, res) => inviteUser(req, res));
 
 /* 
 *
