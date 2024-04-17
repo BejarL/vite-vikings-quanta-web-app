@@ -1,3 +1,4 @@
+//gets all users from a workspace
 const getWorkspaceUsers = async (req, res) => {
     try {
   
@@ -20,4 +21,58 @@ const getWorkspaceUsers = async (req, res) => {
     }
   }
 
-  exports.getWorkspaceUsers = getWorkspaceUsers;
+  // delete a workspace
+
+  // create a workspace
+  const createWorkspace = async (req, res) => {
+    try {
+      const { user_id } = req.user
+      const { workspace_name  } = req.body
+
+      await req.db.beginTransaction();
+
+      const [query] = await req.db.query(`INSERT INTO Workspace (workspace_name)
+                          VALUES (:workspace_name)`, {
+                            workspace_name
+                          });
+
+      const { insertId: workspace_id } = query;
+
+      await req.db.query(`INSERT INTO Workspace_Users (user_id, workspace_role, workspace_id)
+                              VALUES (:user_id, "Creator", :workspace_id)`, {
+                                user_id, workspace_id
+                              });
+
+      await req.db.commit();
+  
+      res.json({success: true, message: 'Successfully created workspace'});   
+
+    } catch (err) {
+      console.log(err)
+      res.json({success: false, err: err})
+    }
+  }
+
+//join a user to a workspace
+const joinWorkspace = async (req, res) => {
+  try {
+
+    const { user_id } = req.user;
+    const { workspace_id } = req.body
+
+    await req.db.query(`INSERT INTO Workspace_Users (user_id, workspace_role, workspace_id)
+                        VALUES (:user_id, "member", :workspace_id)`, {
+                          user_id, workspace_id
+                        });
+
+    res.json({ success: true, message: "Successfully Added to workspace"});
+    
+  } catch (err) {
+    console.log(err);
+    res.json({success: false, err: "Internal server error"})
+  }
+}
+ 
+exports.getWorkspaceUsers = getWorkspaceUsers;
+exports.createWorkspace = createWorkspace;
+exports.joinWorkspace = joinWorkspace;

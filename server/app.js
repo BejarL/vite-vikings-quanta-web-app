@@ -9,8 +9,8 @@ const { getRecentProjects,
         getProjectInfo,
         addNewProject,
         deleteProject } = require('./endpoints/Projects');
-const { getWorkspaceUsers } = require('./endpoints/Workspace')
-const { getAllEntries, deleteEntry, createEntry } = require('./endpoints/TimeTracker');
+const { getWorkspaceUsers, createWorkspace, joinWorkspace } = require('./endpoints/Workspace')
+const { getAllEntries, deleteEntry, updateEntry, createEntry } = require('./endpoints/TimeTracker');
 
 //middle ware
 const { dbConnect, verifyJwt } = require('./endpoints/Middleware')
@@ -54,7 +54,8 @@ app.put('/changepassword', (req, res) => chagnePassword(req, res));
 *
 */
 app.post('/workspace/users', (req, res) => getWorkspaceUsers(req, res));
-
+app.post('/workspace/new', (req, res) => createWorkspace(req, res));
+app.post(`workspace/join`, (req, res) => joinWorkspace(req, res));
 
 /* 
 *
@@ -79,6 +80,8 @@ app.delete('/projects/delete/:project_id', (req, res) => deleteProject(req, res)
 app.get('/entries/all', (req, res) => getAllEntries(req, res));
 
 app.post('/entries/new', (req, res) => createEntry(req, res));
+
+app.post(`/entries/update`, (req, res) => updateEntry(req, res));
 
 app.delete('/entries/delete/:entry_id', (req, res) => deleteEntry(req, res));
 
