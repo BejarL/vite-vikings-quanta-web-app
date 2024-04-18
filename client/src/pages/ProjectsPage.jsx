@@ -67,8 +67,6 @@ const ProjectsPage = () => {
       //verify the data, make sure the error isnt jwt related then return the json res object
       const {success, err} = await verifyData(response);
 
-      console.log(success)
-
       if (success) {
         getProjects();
       } else {

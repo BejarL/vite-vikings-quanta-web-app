@@ -8,7 +8,7 @@ const Layout = () => {
   const [showOffCanvas, setShowOffCanvas] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [workspace, setWorkspace] = useState(1);
-  const [profilePic, setProfilePic] = useState("")
+  const [profilePic, setProfilePic] = useState("");
 
   const navigate = useNavigate();
 
@@ -33,7 +33,6 @@ const Layout = () => {
 
     //try to hit the endpoint to get the users data
     try {
-
       const res = await fetch("http://localhost:3000/user", {
         method: "GET",
         headers: {
