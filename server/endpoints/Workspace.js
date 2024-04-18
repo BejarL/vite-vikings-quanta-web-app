@@ -1,4 +1,4 @@
-const { sendInvite } = require('./Mailer');
+const { sendEmail } = require('./Mailer');
 
 //gets all users from a workspace
 const getWorkspaceUsers = async (req, res) => {
@@ -78,20 +78,39 @@ const joinWorkspace = async (req, res) => {
 //is used to invite users to a workspace
 const inviteUser = async (req, res) => {
   try {
-      const { email } = req.body;
+      const { user_email, user_name, workspace_id } = req.body;
+
+      const subject = `Invitation To Workspace`;
+
+      const html = `
+        <div>
+            <h4>You have been invited to join a workspace by ${user_name}</h4>
+            <h6>Check it out <a href="http://localhost:5173/Quanta">here</a></h6>
+        </div>
+      `
 
       //need to make sure the email is associated with a user
       const [[query]] = await req.db.query(`SELECT user_id 
                                             FROM Users
-                                            WHERE email = :email`, {
-                                              email
-                                            })
-
+                                            WHERE email = :user_email`, {
+                                              user_email
+                                            });
+      
+      //if the user is found, add them to the workspace
       if (query) {
-        sendInvite(email)
-        res.json({success: true, msg: "User Exists"});
+
+        const { user_id } = query;
+
+        await req.db.query(`INSERT INTO Workspace_Users (user_id, workspace_id, workspace_role)
+                            VALUES (:user_id, :workspace_id, "member")`, {
+                              user_id, workspace_id
+                            });
+      
+        //send email to the user to let them know they have been invited
+        sendEmail(user_email, html, subject)
+        res.json({success: true, msg: "Email sent"});
       } else {
-        res.json({success: false, err: `User with Email: ${email} not Found`});
+        res.json({success: false, err: `User with Email: ${user_email} not Found`});
       }
  
   } catch (err) {

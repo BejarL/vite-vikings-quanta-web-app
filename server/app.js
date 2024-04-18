@@ -3,7 +3,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 
 //endpoints
-const { signUp, signIn, getUserInfo, chagnePassword } = require('./endpoints/UserRegistration');
+const { signUp, signIn, getUserInfo, changePassword, sendResetPassword } = require('./endpoints/UserRegistration');
 const { getRecentProjects,
         getAllProjects,                    
         getProjectInfo,
@@ -42,11 +42,14 @@ app.put('/signup', (req, res) => signUp(req, res));
 
 app.post('/signin', (req, res) => signIn(req, res));
 
+app.post('/resetpassword/send', (req, res) => sendResetPassword(req, res));
+
 app.use((req, res, next) => verifyJwt(req, res, next)); // middleware after signing in
+
+app.post('/resetpassword/confirm', (req, res) => changePassword(req, res));
 
 app.get('/user', (req, res) => getUserInfo(req, res));
 
-app.put('/changepassword', (req, res) => chagnePassword(req, res));
 
 /* 
 *

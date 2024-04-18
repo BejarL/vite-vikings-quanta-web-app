@@ -14,19 +14,15 @@ const transporter = mailer.createTransport({
     }
 })
 
-const inviteHTML = `
-        <div>Hello There Testing</div>
-    `
-
-//is used to invite a user
-const sendInvite = async (email, workspace_id) => {
+//is used to send emails. 
+//takes in 3 variables, 1 being the email address to send to, 2nd being the body content of the email, 3rd being the subject
+const sendEmail = async (email, html, subject) => {
     try {
- 
         const info = await transporter.sendMail({
             from: `Quanta Time Tracker <quantatimetracker@gmail.com>`,
             to: email,
-            subject: "Invitation To Join Workspace",
-            html: inviteHTML
+            subject: subject,
+            html: html
         })
         
         console.log(info.messageId)
@@ -35,4 +31,4 @@ const sendInvite = async (email, workspace_id) => {
     }
 }
 
-exports.sendInvite = sendInvite;
+exports.sendEmail = sendEmail;
