@@ -42,7 +42,7 @@ app.put('/signup', (req, res) => signUp(req, res));
 
 app.post('/signin', (req, res) => signIn(req, res));
 
-app.use((req, res, next) => verifyJwt(req, res, next));
+app.use((req, res, next) => verifyJwt(req, res, next)); // middleware after signing in
 
 app.get('/user', (req, res) => getUserInfo(req, res));
 

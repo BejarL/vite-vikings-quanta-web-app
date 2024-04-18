@@ -98,8 +98,7 @@ const updateEntry = async (req, res) => {
 
 const deleteEntry = async (req, res) => {
     try {
-        const { entry_id } = req.params
-
+        const { entry_id } = req.params;
         const query = await req.db.query(`UPDATE Entries 
                             SET deleted_flag = 1
                             WHERE entry_id = :entry_id`, {
