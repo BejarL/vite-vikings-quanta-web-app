@@ -1,4 +1,5 @@
 const mysql = require('mysql2/promise');
+const jwt = require('jsonwebtoken');
 
 //Allows us to access the ENV file
 require('dotenv').config();
@@ -34,5 +35,47 @@ const dbConnect = async (req, res, next) => {
       throw err;
     }
   } 
- 
-  module.exports = dbConnect;
+
+const verifyJwt = async (req, res, next) => {
+    //get the jwt token from req header
+    const { authorization: authHeader } = req.headers;
+  
+    //check if there is a jwt token
+    if (!authHeader) {
+      res.json({success: false, err: "Invalid authorization, no authorization headers"});
+      return;
+    }
+  
+    //split the authorization, then verify it starts with bearer
+    const [scheme, jwtToken] = authHeader.split(" ");
+  
+    if (scheme !== "Bearer") {
+      res.json({sucess: false, err: "Invalid authorization, invalid authorization scheme"});
+      return;
+    }
+  
+    try {
+      //decode the jwt, then tack on the payload of user info to the req obj to be used in later requests
+      const decodedJwtObject = jwt.verify(jwtToken, process.env.JWT_KEY);
+      req.user = decodedJwtObject;
+  
+    } catch (err) {
+      console.log(err);
+      if (
+        err.message &&
+        (err.message.toUpperCase() === "INVALID TOKEN" ||
+          err.message.toUpperCase() === "JWT EXPIRED")
+      ) {
+        req.status = err.status || 500;
+        req.body = err.message;
+        req.app.emit("jwt-error", err, req);
+      } else {
+        throw (err.status || 500, err.message);
+      }
+    }
+  
+    await next();
+}
+
+exports.dbConnect = dbConnect;
+exports.verifyJwt = verifyJwt;
