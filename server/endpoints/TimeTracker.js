@@ -31,12 +31,24 @@ const createEntry = async (req, res) => {
                 entry_desc, 
                 tag,
                 project_id,
-            } = req.body
+                workspace_id
+            } = req.body;
+
+        //begin transaction to ensure both queries both pass or both fail
+        await req.db.beginTransaction();
         
         await req.db.query(`INSERT INTO Entries (start_time, end_time, entry_desc, tag, project_id, user_id)
                             VALUES (:start_time, :end_time, :entry_desc, :tag, :project_id,:user_id)`, {
                             start_time, end_time, entry_desc, tag, project_id, user_id,
                             })
+
+        await req.db.query(`INSERT INTO Change_Log (edit_desc, edit_timestamp, user_id, workspace_id, project_id)
+                            VALUES ("Created an Entry", NOW(), :user_id, :workspace_id, :project_id)`, {
+                                user_id, workspace_id, project_id
+                            });
+                            
+        //start transaction
+        await req.db.commit();
 
         res.json({success: true, message: 'Successfully created entry'})
     } catch (err) {
@@ -50,7 +62,7 @@ const updateEntry = async (req, res) => {
 
         const { user_id } = req.user
         
-        const { entry_id, start_time, end_time, entry_desc, project_id } = req.body
+        const { entry_id, start_time, end_time, entry_desc, project_id, workspace_id } = req.body
 
         //need to figure out what to change, so we build a string below.
         //we start with nothing, then check each value sent. if there is data, then we add onto the update variable to insert into the query
@@ -82,11 +94,22 @@ const updateEntry = async (req, res) => {
             update += `project_id = :project_id `
         }
 
+        //uses transaction, so both queries happen or both dont
+        await req.db.beginTransaction();
+
         await req.db.query(`UPDATE Entries 
                             SET ${update}
                             WHERE entry_id = :entry_id`, { 
                             entry_id, start_time, end_time, entry_desc, project_id 
                         });
+
+        await req.db.query(`INSERT INTO Change_Log (edit_desc, edit_timestamp, user_id, workspace_id, project_id)
+                        VALUES ("Edited an Entry", NOW(), :user_id, :workspace_id, :project_id)`, {
+                            user_id, workspace_id, project_id
+                        });
+                        
+        //start transaction
+        await req.db.commit();
 
         res.json({ sucess: true });
                              
@@ -98,12 +121,24 @@ const updateEntry = async (req, res) => {
 
 const deleteEntry = async (req, res) => {
     try {
-        const { entry_id } = req.params;
+        const { entry_id, workspace_id, project_id } = req.body;
+
+        //begin transaction, so both queries happen or both dont
+        await req.db.beginTransaction()
+
         const query = await req.db.query(`UPDATE Entries 
                             SET deleted_flag = 1
                             WHERE entry_id = :entry_id`, {
                             entry_id
                             })
+                            
+        await req.db.query(`INSERT INTO Change_Log (edit_desc, edit_timestamp, user_id, workspace_id, project_id)
+                            VALUES ("Deleted an Entry", NOW(), :user_id, :workspace_id, :project_id)`, {
+            user_id, workspace_id, project_id
+        });
+
+        //start the transaction
+        await req.db.commit();
 
         res.json({ success: true, query: query })
         

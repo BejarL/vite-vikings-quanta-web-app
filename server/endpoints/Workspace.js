@@ -45,6 +45,14 @@ const createWorkspace = async (req, res) => {
                               user_id, workspace_id
                             });
 
+    await req.db.query(`INSERT INTO Change_Log (edit_desc, edit_timestamp, user_id, workspace_id)
+                            VALUES ("Create Workspace", NOW(), :user_id, :workspace_id)`, {
+                                user_id, workspace_id
+                            });
+                            
+        //start transaction
+        await req.db.commit();
+
     await req.db.commit();
 
     res.json({success: true, message: 'Successfully created workspace'});   
@@ -67,6 +75,11 @@ const joinWorkspace = async (req, res) => {
                           user_id, workspace_id
                         });
 
+    await req.db.query(`INSERT INTO Change_Log (edit_desc, edit_timestamp, user_id, workspace_id)
+                        VALUES ("Joined Workspace", NOW(), :user_id, :workspace_id)`, {
+                            user_id, workspace_id
+                        });
+
     res.json({ success: true, message: "Successfully Added to workspace"});
     
   } catch (err) {
@@ -78,7 +91,7 @@ const joinWorkspace = async (req, res) => {
 //is used to invite users to a workspace
 const inviteUser = async (req, res) => {
   try {
-      const { user_email, user_name, workspace_id } = req.body;
+      const { user_email, workspace_id } = req.body;
 
       const subject = `Invitation To Workspace`;
 
@@ -86,11 +99,10 @@ const inviteUser = async (req, res) => {
         <div>
             <h4>You have been invited to join a workspace by ${user_name}</h4>
             <h6>Check it out <a href="http://localhost:5173/Quanta">here</a></h6>
-        </div>
-      `
+        </div>`
 
       //need to make sure the email is associated with a user
-      const [[query]] = await req.db.query(`SELECT user_id 
+      const [[query]] = await req.db.query(`SELECT user_id, username 
                                             FROM Users
                                             WHERE email = :user_email`, {
                                               user_email
@@ -99,19 +111,33 @@ const inviteUser = async (req, res) => {
       //if the user is found, add them to the workspace
       if (query) {
 
-        const { user_id } = query;
+        const { user_id, username } = query;
+
+        //start transaction to ensure 
+        await req.db.beginTransaction();
 
         await req.db.query(`INSERT INTO Workspace_Users (user_id, workspace_id, workspace_role)
                             VALUES (:user_id, :workspace_id, "member")`, {
                               user_id, workspace_id
                             });
-      
+
+        const log_desc = `Added user ${username}`;
+
+        await req.db.query(`INSERT INTO Change_Log (edit_desc, edit_timestamp, user_id, workspace_id)
+                            VALUES (:log_desc, NOW(), :user_id, :workspace_id)`, {
+                                log_desc, user_id, workspace_id
+                            });
+
+        //start transaction
+        await req.db.commit();
+
         //send email to the user to let them know they have been invited
         sendEmail(user_email, html, subject)
         res.json({success: true, msg: "Email sent"});
       } else {
         res.json({success: false, err: `User with Email: ${user_email} not Found`});
       }
+
  
   } catch (err) {
       console.log(err);

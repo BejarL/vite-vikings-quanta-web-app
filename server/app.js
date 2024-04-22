@@ -77,7 +77,7 @@ app.post('/project/:project_id', (req, res) => getProjectInfo(req, res));
 
 app.put('/projects/new', (req, res) => addNewProject(req, res));
 
-app.delete('/projects/delete/:project_id', (req, res) => deleteProject(req, res));
+app.post('/projects/delete', (req, res) => deleteProject(req, res));
 
 /* 
 *
@@ -90,7 +90,7 @@ app.post('/entries/new', (req, res) => createEntry(req, res));
 
 app.post(`/entries/update`, (req, res) => updateEntry(req, res));
 
-app.delete('/entries/delete/:entry_id', (req, res) => deleteEntry(req, res));
+app.post('/entries/delete', (req, res) => deleteEntry(req, res));
 
 app.listen(port, () => {
   console.log(`server started at http://localhost:${port}`);
