@@ -39,7 +39,7 @@ const getAllProjects = async (req, res) => {
                                                 workspace_id
                                               })
       
-      res.json({success: true, data: projects})
+      res.json({success: true, data: projects});
   
     } catch (err) {
       console.log(err);
@@ -71,14 +71,29 @@ const getProjectInfo = async (req, res) => {
 const addNewProject = async (req, res) => {
     try {
   
+      const { user_id } = req.user;
+      
       //gets the workspace id and project name
       const { workspace_id, project_name } = req.body;
+
+      //start transaction to ensure new projectand log table entry both get crated, or neither does, not one or the other
+      await req.db.beginTransaction();
   
       //inserts a new row in the db for the new project
-      await req.db.query(`INSERT INTO Projects (project_name, workspace_id)
+      const [query] = await req.db.query(`INSERT INTO Projects (project_name, workspace_id)
                                           VALUES (:project_name, :workspace_id)`, {
                                               project_name,  workspace_id
                                             });
+
+      //destructure query to get just project_id
+      const { insertId: project_id } = query;
+
+      await req.db.query(`INSERT INTO Change_Log (edit_desc, edit_timestamp, user_id, workspace_id, project_id)
+                          VALUES ("Created a project", NOW(), :user_id, :workspace_id, :project_id)`, {
+                            user_id, workspace_id, project_id 
+                          });
+
+      await req.db.commit();
   
       res.json({ success: true });
      
@@ -91,13 +106,14 @@ const addNewProject = async (req, res) => {
 const deleteProject = async (req, res) => {
     try {
       //get project id to delete from the url
-      const { project_id } = req.params
+      const { user_id } = req.user
+      const { project_id, workspace_id } = req.body
   
-      //uses a transaction, so that way if one one the queries fails
+      //uses a transaction, so that way if one of the queries fails
       //it wont run the other, so we dont end up with deleted entries for a project that wasnt deleted
   
       //begin transaction
-      await req.db.beginTransaction();
+      await req.db.beginTransaction();        
   
       // checks projects table and entries table
       // updates deleted_flag of project to 1
@@ -112,6 +128,11 @@ const deleteProject = async (req, res) => {
                            WHERE project_id = :project_id `, {
                            project_id 
                          })
+
+      await req.db.query(`INSERT INTO Change_Log (edit_desc, edit_timestamp, user_id, workspace_id, project_id)
+                         VALUES ("Deleted a project", NOW(), :user_id, :workspace_id, :project_id)`, {
+                          user_id, workspace_id, project_id
+                         }); 
   
       //commit the transaction
       await req.db.commit();

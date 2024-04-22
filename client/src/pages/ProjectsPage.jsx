@@ -108,12 +108,16 @@ const ProjectsPage = () => {
     try {
       const jwt = getJwt();
       
-      const response = await fetch(`http://localhost:3000/projects/delete/${projectId}`, {
-        method: 'DELETE',
+      const response = await fetch(`http://localhost:3000/projects/delete`, {
+        method: 'POST',
         headers: {
           "Content-Type": "application/json",
           "authorization": jwt
-        }
+        }, 
+        body: JSON.stringify({
+          project_id: projectId,
+          workspace_id
+        })
       })
 
       //verify the data, make sure the error isnt jwt related then return the json res object
