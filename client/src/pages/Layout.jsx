@@ -11,6 +11,7 @@ const Layout = () => {
   const [ workspaces, setWorkspaces ] = useState([]);
 
   const navigate = useNavigate();
+  const { workspace_role: role } = currentWorkspace
 
   // get which page is on to decide which nav link to select
   const location = window.location.href;
@@ -52,10 +53,18 @@ const Layout = () => {
 
       setWorkspaces(data.workspaces);
 
-      //set state for last workspace the user was in if there is one
+      //set state for last workspace the user was in if there is one.
+      //use a for loop to find the index of their last workspace id
       //otherwise, set the currentworkspace to the first one in state
       if (data.user.last_workspace_id) {
-
+        let index = 0;
+        for (let i = 0; i < data.workspaces.length; i++) {
+          if (data.workspaces[i].workspace_id == data.user.last_workspace_id) {
+            index = i;
+            break;
+          }
+        }
+        setCurrentWorkspace(data.workspaces[index])
       } else {
         setCurrentWorkspace(data.workspaces[0]);
       }
@@ -69,9 +78,28 @@ const Layout = () => {
   //also closes dropdown/offcanvas
   const switchWorkspace = (index) => {
     setCurrentWorkspace(workspaces[index]);
+    updateWorkspace(workspaces[index].workspace_id);
     setShowDropdown(false);
     setShowOffCanvas(false);
     navigate('/quanta/');
+  }
+
+  //updates a users last_workspace_id whenever they switch workspaces, to keep track of what workspace they should be put in when logging in next time.
+  const updateWorkspace = async (workspace_id) => {
+      try {
+        const jwt = getJwt();
+
+        const res = await fetch("http://localhost:3000/workspace/update-last", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "authorization": jwt
+          }, 
+          body: JSON.stringify({workspace_id})
+        });
+      } catch (err) {
+        console.log(err);
+      }
   }
  
   //toggles the offcanvas on mobile
@@ -245,7 +273,7 @@ const Layout = () => {
               </svg>
               <p className="pl-[10px]">Projects</p>
             </Link>
-            <Link
+            { role === "member" || role === "admin" || role === "Creator" ? <Link
               className="flex items-center text-3xl mt-[20px] pl-[10px]"
               to="/quanta/users"
             >
@@ -261,7 +289,7 @@ const Layout = () => {
                 />
               </svg>
               <p className="pl-[10px]">Users</p>
-            </Link>
+            </Link> : null }
           </div>
           <button
             onClick={handleSignout}
@@ -343,7 +371,7 @@ const Layout = () => {
                 </svg>
                 <p className="pl-[10px]">Projects</p>
               </Link>
-              <Link
+              { role === "member" || role === "admin" || role === "Creator" ? <Link
                 className={` ${
                   page === "users" ? "bg-lightpurple-selected" : null
                 }
@@ -362,7 +390,14 @@ const Layout = () => {
                   />
                 </svg>
                 <p className="pl-[10px]">Users</p>
-              </Link>
+              </Link> : null }
+              { role === "admin" || role === "Creator" ? <Link
+                className={` ${page === "audit-log" ? "bg-lightpurple-selected" : null } flex items-center text-3xl mt-[20px] p-[10px] hover:bg-lightpurple-selected`}
+                to="/quanta/audit-log"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 256 256"><path fill="currentColor" d="m213.66 82.34l-56-56A8 8 0 0 0 152 24H56a16 16 0 0 0-16 16v176a16 16 0 0 0 16 16h144a16 16 0 0 0 16-16V88a8 8 0 0 0-2.34-5.66M160 51.31L188.69 80H160ZM200 216H56V40h88v48a8 8 0 0 0 8 8h48zm-45.54-48.85a36.05 36.05 0 1 0-11.31 11.31l11.19 11.2a8 8 0 0 0 11.32-11.32ZM104 148a20 20 0 1 1 20 20a20 20 0 0 1-20-20"></path></svg>
+                <p className="pl-[10px] text-3xl">Audit</p>
+              </Link> : null }
             </div>
             <button
               onClick={handleSignout}
