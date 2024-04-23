@@ -1,6 +1,39 @@
-import React from 'react';
+import React, { useEffect,useRef, useState } from 'react';
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
-function TimeTrackerPage() {
+const TimeTrackerPage = () => {
+
+    const [startDate, setStartDate] = useState(new Date());
+    const [time, setTime] = useState({ hr: 0, min: 0, sec: 0});
+    const [showButton, setShowButton] = useState(true);
+
+    //clears our handleTime function
+    useEffect(() => {
+        return () => clearInterval(id.current);
+      }, []);
+
+    let id = useRef();
+
+    const handleTime = () => {
+        id.current = setInterval(() => {
+            setTime((prev) => {
+              if (prev.sec == 60) {
+                return { ...prev, min: prev.min + 1, sec: 0 };
+              }
+              if (prev.min == 60) {
+                return { ...prev, hr: prev.hr + 1, min: 0, sec: 0 };
+              }
+      
+              return { ...prev, sec: prev.sec + 1 };
+            });
+          }, 1000);
+    };
+
+    const togglePlayButton = () => {
+        setShowButton((prev) => !prev);
+      };
+
     return (
         <>
            
@@ -28,14 +61,32 @@ function TimeTrackerPage() {
                         </button>
                         
                         {/* Timer */}
-                        <div className="border border-gray p-4 py-2 w-3/4 min-w-[201px] rounded-md mr-2 my-2 md:w-1/4 lg:w-1/5 lg:mr-auto">00:00:00</div>
-                       {/* Play Button */}
-                       <button className="bg-gray text-black p-2 py-2 rounded-md mr-2 md:order-3 ">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" className="fill-current">
-                                <path d="M8 5v14l11-7z"/>
-                            </svg>
+                            <div className="border border-gray p-4 py-2 w-3/4 min-w-[201px] rounded-md mr-2 my-2 md:w-1/4 lg:w-1/5 lg:mr-auto">{time.hr.toLocaleString("en-US", {
+                                minimumIntegerDigits: 2,
+                                useGrouping: false,
+                            })}
+                                :
+                                {time.min.toLocaleString("en-US", {
+                                    minimumIntegerDigits: 2,
+                                    useGrouping: false,
+                                })}
+                                :
+                                {time.sec.toLocaleString("en-US", {
+                                    minimumIntegerDigits: 2,
+                                    useGrouping: false,
+                                })}
+                                </div>
+                       {/* Play Button and Stop Button */}
+                            {showButton ? <button className="bg-gray text-black p-2 py-2 rounded-md mr-2 md:order-3" onClick={() => { handleTime(); togglePlayButton() }}>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" className="fill-current">
+                                    <path d="M8 5v14l11-7z" />
+                                </svg>
                             </button>
-                        
+                            :
+                            <button className="bg-gray text-black p-2 py-2 rounded-md mr-2 md:order-3" onClick={() => {clearInterval(id.current); setTime({ hr: 0, min: 0, sec: 0}); togglePlayButton() }}>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><path fill="black" d="M3 21V3h18v18z"></path></svg> 
+                            </button>
+                            }
                     </div>
                     </div> 
 
@@ -70,8 +121,14 @@ function TimeTrackerPage() {
                         <input type="text" placeholder="3:00pm" className="border border-gray p-4 ml-2 py-2 w-2/5 rounded-md mr-2 my-2 md:w-1/5 lg:w-[8%] "/>
                        
                        {/* Date */}
-                       <input type="text" placeholder="3/26/24" className="border border-gray p-4 ml-2 py-2 w-2/6 rounded-md mr-2 my-2 md:w-1/5 lg:w-[8%]"/>
-                       
+                       <div className="customDatePickerWidth w-[100px]">
+                            <DatePicker
+                                
+                                selected={startDate}
+                                onChange={(date) => setStartDate(date)}
+                                className="border border-gray p-2 my-2 rounded w-5/6 lg:w-full"
+                            />
+                       </div>
                        {/* Hours Tracked */}
                        <div className="border border-gray p-4 ml-2 py-2 w-2/6 rounded-md mr-2 my-2 md:w-1/6 lg:w-[8%] lg:mr-auto">1.5hrs</div>
                        
