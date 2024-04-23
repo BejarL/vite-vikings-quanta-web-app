@@ -2,89 +2,90 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getJwt, verifyData } from "../Auth/jwt";
 
-const ProjectDetails = ({ Project }) => {
-  const [project, setProject] = useState([])
+const ProjectDetails = () => {
+  const [project, setProject] = useState([]);
+  const [totalTime, setTotalTime] = useState(0);
   const { projectId } = useParams();
   const navigate = useNavigate();
 
-  // Fetch project details using projectId
-  // Using mock data for now
+  // Fetch project data on component mount and when projectId changes
   useEffect(() => {
-    getProjectData();
-  }, [])
+    const fetchProjectData = async () => {
+      try {
+        const jwt = getJwt();
+        const response = await fetch(
+          `http://localhost:3000/project/${projectId}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json", authorization: jwt },
+          }
+        );
+        const { success, data } = await verifyData(response, navigate);
+        if (success) setProject(data);
+      } catch (error) {
+        console.error("Failed to fetch project data:", error);
+      }
+    };
 
-  const getProjectData = async () => {
-    try {
-      const jwt = getJwt();
+    fetchProjectData();
+  }, [projectId, navigate]);
 
-      const res = await fetch(`http://localhost:3000/project/${projectId}`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "authorization": jwt
-                }
-            })
-      
-      const { success, data } = await verifyData(res, navigate);
-      
-      console.log(data);
+  useEffect(() => {
+    // Helper function to convert time string "HH:MM:SS" to seconds
+    const timeStringToSeconds = (timeString) => {
+      const [hours, minutes, seconds] = timeString.split(":").map(Number);
+      return hours * 3600 + minutes * 60 + seconds;
+    };
 
-      setProject(data);
-      
-    } catch (err) {
-      console.log(err)
-    }
-  }
+    // Helper function to format seconds into "HH:MM:SS"
+    const secondsToTimeString = (seconds) => {
+      const hours = Math.floor(seconds / 3600);
+      const minutes = Math.floor((seconds % 3600) / 60);
+      const remainingSeconds = seconds % 60;
+      return [hours, minutes, remainingSeconds]
+        .map((val) => val.toString().padStart(2, "0")) // Ensure two digits
+        .join(":");
+    };
 
-  // const project = {
-  //   name: "Project Name",
-  //   tasks: [
-  //     {
-  //       id: 1,
-  //       description: "Worked on wireframes",
-  //       user: "Lisset",
-  //       time: "30h",
-  //     },
-  //     { id: 2, description: "Worked on wireframes", user: "Ben", time: "30h" },
-  //     { id: 3, description: "Worked on wireframes", user: "RJ", time: "30h" },
-  //   ],
-  //   totalTrackedTime: "90h",
-  // };
+    // Calculate the total time in seconds, then convert back to "HH:MM:SS"
+    const totalSeconds = project.reduce(
+      (sum, task) => sum + timeStringToSeconds(task.total_time),
+      0
+    );
+    const totalTimeString = secondsToTimeString(totalSeconds);
 
-  let totalTime = 0;
+    setTotalTime(totalTimeString);
+  }, [project]);
 
-  const taskElems = project.map((task) => {
-    totalTime += task.total_time;
-    return (
+  // Generate table rows
+  const taskElements = project.map((task) => (
     <tr className="bg-white border-b" key={task.entry_id}>
       <td className="px-6 py-4">{task.entry_desc}</td>
       <td className="px-6 py-4">{task.username}</td>
       <td className="px-6 py-4 text-end">{task.total_time}</td>
     </tr>
-  )})
+  ));
 
   return (
-    <div className="container mx-auto p-4 ">
-      <div>
-        <button
-        onClick={() => navigate(-1)}>
-          <svg
-            className="w-10 h-10"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M5 12h14M5 12l4-4m-4 4 4 4"
-            /> 
-          </svg>
-        </button>
-      </div>
-      <div className="overflow-hidden overflow-x-auto rounded-lg shadow-md">
+    <div className="container mx-auto p-4">
+      <button onClick={() => navigate(-1)} className="mb-4">
+        <svg
+          className="w-6 h-6"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M5 12h14M5 12l4-4m-4 4 4 4"
+          />
+        </svg>
+      </button>
+      <div className="overflow-hidden rounded-lg shadow-md">
         <table className="w-full text-sm text-left">
-          <thead className=" text-black uppercase bg-lightpurple-login rounded-lg">
+          <thead className="text-black uppercase bg-lightpurple-login rounded-lg">
             <tr>
               <th scope="col" className="px-6 py-4">
                 Task
@@ -97,9 +98,7 @@ const ProjectDetails = ({ Project }) => {
               </th>
             </tr>
           </thead>
-          <tbody>
-            {taskElems}
-          </tbody>
+          <tbody>{taskElements}</tbody>
         </table>
         <div className="text-lg flex justify-end px-6 py-3 bg-lightpurple-login">
           <span>Total Time: </span>

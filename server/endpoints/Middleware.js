@@ -30,7 +30,7 @@ const dbConnect = async (req, res, next) => {
     } catch (err) {
       // If anything downstream throw an error, we must release the connection allocated for the request
       console.log(err)
-      // If an error occurs, disconnects from the database
+      // If an error occurs, disconnects from the database 
       if (req.db) req.db.release();
       throw err;
     }

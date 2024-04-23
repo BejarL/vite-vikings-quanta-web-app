@@ -1,4 +1,36 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+
 const ResetPasswordPage = () => {
+
+  const [email, setEmail] = useState('')
+  const navigate = useNavigate();
+  
+  const handleResetPassword = async () => {
+    try {
+      const res = await fetch("http://localhost:3000/resetpassword/send", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          email,
+        }),
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        navigate('/')
+      } else {
+        window.alert("Invalid Email");
+      }
+
+    } catch (error) {
+      console.log("Error:", error);
+    }
+  }
+  
   return (
     <div className="bg-lightpurple-login w-[100vw] h-[100vh] md:p-[50px]">
       <div className="z-[1] h-[80%] flex items-center justify-center md:w-[100%]">
@@ -25,6 +57,7 @@ const ResetPasswordPage = () => {
                 placeholder="Enter email"
                 className="appearance-none w-full bg-transparent border-0 border-b border-gray-700 focus:outline-none py-1 md:mb-[20px]"
                 id="email"
+                onChange={(e) => setEmail(e.target.value)}
               />
             </div>
             
@@ -32,6 +65,7 @@ const ResetPasswordPage = () => {
               <button
                 className="text-gray-700 w-full hover:bg-lightpurple bg-lightpurple-login rounded-3xl font-bold py-2 px-4 focus:outline-none focus:shadow-outline"
                 type="button"
+                onClick={handleResetPassword}
               >
                 Request reset link
               </button>

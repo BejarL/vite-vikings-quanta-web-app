@@ -1,4 +1,4 @@
-const { sendInvite } = require('./Mailer');
+const { sendEmail } = require('./Mailer');
 
 //gets all users from a workspace
 const getWorkspaceUsers = async (req, res) => {
@@ -23,7 +23,53 @@ const getWorkspaceUsers = async (req, res) => {
     }
   }
 
-  // delete a workspace
+// deletes a workspace
+const deleteWorkspace = async (req, res) => {
+  try {
+    const { workspace_id } = req.body
+
+    //create transaction
+    await req.db.beginTransaction();
+
+    //'deletes' the workspace 
+    await req.db.query(`UPDATE Workspace
+                        SET deleted_flag = 1
+                        WHERE workspace_id = :workspace_id`, {
+                          workspace_id
+                        });
+
+    //'deletes' users access to the workspace
+    await req.db.query(`UPDATE Workspace_Users
+                        SET deleted_flag = 1
+                        WHERE workspace_id = :workspace_id`, {
+                          workspace_id
+                        });
+
+    //'deletes' the projects associated with the workspace
+    await req.db.query(`UPDATE Projects
+                        SET deleted_flag = 1
+                        WHERE workspace_id = :workspace_id`, {
+                          workspace_id
+                        });
+
+    //'deletes' the entries associated with projects in that workspace
+    await req.db.query(`UPDATE Entries 
+                        SET deleted_flag = 1
+                        WHERE project_id IN (SELECT project_id FROM Projects WHERE workspace_id = :workspace_id)`, {
+                          workspace_id
+                        });
+
+    //start transaction
+    await req.db.commit();
+
+
+    res.json({success: true, message: 'Successfully deleted a workspace'})
+
+    } catch (error) {
+      console.log('Error deleting workspace')
+      res.json({success: false, error: error})
+    }
+  }
 
   // create a workspace
 const createWorkspace = async (req, res) => {
@@ -44,6 +90,14 @@ const createWorkspace = async (req, res) => {
                             VALUES (:user_id, "Creator", :workspace_id)`, {
                               user_id, workspace_id
                             });
+
+    await req.db.query(`INSERT INTO Change_Log (edit_desc, edit_timestamp, user_id, workspace_id)
+                            VALUES ("Create Workspace", NOW(), :user_id, :workspace_id)`, {
+                                user_id, workspace_id
+                            });
+                            
+        //start transaction
+        await req.db.commit();
 
     await req.db.commit();
 
@@ -67,6 +121,11 @@ const joinWorkspace = async (req, res) => {
                           user_id, workspace_id
                         });
 
+    await req.db.query(`INSERT INTO Change_Log (edit_desc, edit_timestamp, user_id, workspace_id)
+                        VALUES ("Joined Workspace", NOW(), :user_id, :workspace_id)`, {
+                            user_id, workspace_id
+                        });
+
     res.json({ success: true, message: "Successfully Added to workspace"});
     
   } catch (err) {
@@ -78,21 +137,53 @@ const joinWorkspace = async (req, res) => {
 //is used to invite users to a workspace
 const inviteUser = async (req, res) => {
   try {
-      const { email } = req.body;
+      const { user_email, workspace_id } = req.body;
+
+      const subject = `Invitation To Workspace`;
+
+      const html = `
+        <div>
+            <h4>You have been invited to join a workspace by ${user_name}</h4>
+            <h6>Check it out <a href="http://localhost:5173/Quanta">here</a></h6>
+        </div>`
 
       //need to make sure the email is associated with a user
-      const [[query]] = await req.db.query(`SELECT user_id 
+      const [[query]] = await req.db.query(`SELECT user_id, username 
                                             FROM Users
-                                            WHERE email = :email`, {
-                                              email
-                                            })
-
+                                            WHERE email = :user_email`, {
+                                              user_email
+                                            });
+      
+      //if the user is found, add them to the workspace
       if (query) {
-        sendInvite(email)
-        res.json({success: true, msg: "User Exists"});
+
+        const { user_id, username } = query;
+
+        //start transaction to ensure 
+        await req.db.beginTransaction();
+
+        await req.db.query(`INSERT INTO Workspace_Users (user_id, workspace_id, workspace_role)
+                            VALUES (:user_id, :workspace_id, "member")`, {
+                              user_id, workspace_id
+                            });
+
+        const log_desc = `Added user ${username}`;
+
+        await req.db.query(`INSERT INTO Change_Log (edit_desc, edit_timestamp, user_id, workspace_id)
+                            VALUES (:log_desc, NOW(), :user_id, :workspace_id)`, {
+                                log_desc, user_id, workspace_id
+                            });
+
+        //start transaction
+        await req.db.commit();
+
+        //send email to the user to let them know they have been invited
+        sendEmail(user_email, html, subject)
+        res.json({success: true, msg: "Email sent"});
       } else {
-        res.json({success: false, err: `User with Email: ${email} not Found`});
+        res.json({success: false, err: `User with Email: ${user_email} not Found`});
       }
+
  
   } catch (err) {
       console.log(err);
@@ -100,6 +191,7 @@ const inviteUser = async (req, res) => {
   }
 }
  
+exports.deleteWorkspace = deleteWorkspace;
 exports.inviteUser = inviteUser;
 exports.getWorkspaceUsers = getWorkspaceUsers;
 exports.createWorkspace = createWorkspace;

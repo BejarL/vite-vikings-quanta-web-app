@@ -1,5 +1,8 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const { sendEmail } = require('./Mailer');
+require('dotenv').config();
+
 
 const signUp = async (req, res) => {
     try {
@@ -136,11 +139,13 @@ const getUserInfo = async (req, res) => {
     }
 }
 
-const chagnePassword = async (req, res) => {
+//is used to reset a users password
+const changePassword = async (req, res) => {
+
     try {
       //get password from the request and user id
       const { password } = req.body;
-      const { user_id } = req.user;
+      const { email } = req.user;
   
       //if theres no password return false
       if (!password) {
@@ -153,9 +158,9 @@ const chagnePassword = async (req, res) => {
   
       //query the database and update the users password
       const [query] = await req.db.query(
-        `UPDATE Users SET password = :hashedPassword WHERE user_id = :user_id`,
+        `UPDATE Users SET password = :hashedPassword WHERE email = :email`,
         {
-          user_id,
+          email,
           hashedPassword,
         }
       );
@@ -165,9 +170,41 @@ const chagnePassword = async (req, res) => {
       res.json({ success: false, err: "Internal server error" });
       console.log("error changing password: " + err);
     }
-  }
+}
+
+//is used to send the email to reset a users password
+const sendResetPassword = async (req, res) => {
+    try {
+
+      const { email } = req.body;
+
+      //create jwt token
+      const payload = {
+        email
+      };
+      const jwtToken = jwt.sign(payload, process.env.JWT_KEY);
+
+      //create subjec and body to send
+      const subject = "Quanta | Reset your password";
+
+      const body = `
+        <div>
+          <h2>Reset Your password <a href="http://localhost:5173/reset-password/${jwtToken}">here</a></h2>
+        </div>
+      `;
+
+      sendEmail(email, body, subject);
+
+      res.json({success: true, msg: "Email sent"});
+
+    } catch (err) {
+      console.log(err);
+      res.json({success: false, err: "Internal Server Error"});
+    }
+}
 
 exports.signUp = signUp
 exports.signIn = signIn;
 exports.getUserInfo = getUserInfo;
-exports.chagnePassword = chagnePassword;
+exports.sendResetPassword = sendResetPassword;
+exports.changePassword = changePassword;

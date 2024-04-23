@@ -3,13 +3,13 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 
 //endpoints
-const { signUp, signIn, getUserInfo, chagnePassword } = require('./endpoints/UserRegistration');
+const { signUp, signIn, getUserInfo, changePassword, sendResetPassword } = require('./endpoints/UserRegistration');
 const { getRecentProjects,
         getAllProjects,                    
         getProjectInfo,
         addNewProject,
         deleteProject } = require('./endpoints/Projects');
-const { getWorkspaceUsers, createWorkspace, joinWorkspace, inviteUser } = require('./endpoints/Workspace')
+const { getWorkspaceUsers, getUsersWorkspaces, createWorkspace, joinWorkspace, inviteUser } = require('./endpoints/Workspace')
 const { getAllEntries, deleteEntry, updateEntry, createEntry } = require('./endpoints/TimeTracker');
 
 //middle ware
@@ -42,11 +42,14 @@ app.put('/signup', (req, res) => signUp(req, res));
 
 app.post('/signin', (req, res) => signIn(req, res));
 
-app.use((req, res, next) => verifyJwt(req, res, next));
+app.post('/resetpassword/send', (req, res) => sendResetPassword(req, res));
+
+app.use((req, res, next) => verifyJwt(req, res, next)); // middleware after signing in
+
+app.post('/resetpassword/confirm', (req, res) => changePassword(req, res));
 
 app.get('/user', (req, res) => getUserInfo(req, res));
 
-app.put('/changepassword', (req, res) => chagnePassword(req, res));
 
 /* 
 *
@@ -61,6 +64,9 @@ app.post(`/workspace/join`, (req, res) => joinWorkspace(req, res));
 
 app.post('/workspace/invite', (req, res) => inviteUser(req, res));
 
+app.post('/workspace/delete', (req,res) => deleteWorkspace(req, res));
+
+
 /* 
 *
 * Endpoints for Projects - see /endpoints/Projects.js
@@ -74,7 +80,8 @@ app.post('/project/:project_id', (req, res) => getProjectInfo(req, res));
 
 app.put('/projects/new', (req, res) => addNewProject(req, res));
 
-app.delete('/projects/delete/:project_id', (req, res) => deleteProject(req, res));
+app.post('/projects/delete', (req, res) => deleteProject(req, res));
+
 
 /* 
 *
@@ -87,7 +94,7 @@ app.post('/entries/new', (req, res) => createEntry(req, res));
 
 app.post(`/entries/update`, (req, res) => updateEntry(req, res));
 
-app.delete('/entries/delete/:entry_id', (req, res) => deleteEntry(req, res));
+app.post('/entries/delete', (req, res) => deleteEntry(req, res));
 
 app.listen(port, () => {
   console.log(`server started at http://localhost:${port}`);
