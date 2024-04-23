@@ -10,7 +10,7 @@
 
 ## Overview
 
-Create a user-friendly platform for employees to record their work hours and employers to gain insights into the hours recorded for specific tasks. 
+Create a user-friendly platform for employees to record their work hours and employers to gain insights into the hours recorded for specific tasks.
 
 ### Links
 
@@ -26,7 +26,6 @@ Create a user-friendly platform for employees to record their work hours and emp
 - Express JS
 - MySQL
 - Axios
-
 
 ## Authors
 

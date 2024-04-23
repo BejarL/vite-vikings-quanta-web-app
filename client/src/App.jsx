@@ -16,7 +16,7 @@ const App = () => {
       <Routes>
         <Route path="/" element={<LoginPage />} />
         <Route path="/forgot-password" element={<ResetPasswordPage />} />
-        <Route path="/reset-password" element={<ConfirmResetPasswordPage />} />
+        <Route path="/reset-password/:jwt" element={<ConfirmResetPasswordPage />} />
         <Route path="/quanta" element={<Layout />}>
           <Route path="" element={<HomePage />} />
           <Route path="timetracker" element={<TimeTrackerPage />} />
