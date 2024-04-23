@@ -5,10 +5,10 @@ import { clearJwt, getJwt, verifyData } from "../Auth/jwt";
 export const workspaceContext = createContext(null);
 
 const Layout = () => {
-  const [showOffCanvas, setShowOffCanvas] = useState(false);
-  const [showDropdown, setShowDropdown] = useState(false);
-  const [workspace, setWorkspace] = useState(1);
-  const [profilePic, setProfilePic] = useState("");
+  const [ showOffCanvas, setShowOffCanvas ] = useState(false);
+  const [ showDropdown, setShowDropdown ] = useState(false);
+  const [ currentWorkspace, setCurrentWorkspace ] = useState({});
+  const [ workspaces, setWorkspaces ] = useState([]);
 
   const navigate = useNavigate();
 
@@ -50,12 +50,30 @@ const Layout = () => {
         return;
       }
 
+      setWorkspaces(data.workspaces);
+
+      //set state for last workspace the user was in if there is one
+      //otherwise, set the currentworkspace to the first one in state
+      if (data.user.last_workspace_id) {
+
+      } else {
+        setCurrentWorkspace(data.workspaces[0]);
+      }
 
     } catch(err) {
       console.log(err);
     }
   }
 
+  //changes workspace state then redirects to the home page.
+  //also closes dropdown/offcanvas
+  const switchWorkspace = (index) => {
+    setCurrentWorkspace(workspaces[index]);
+    setShowDropdown(false);
+    setShowOffCanvas(false);
+    navigate('/quanta/');
+  }
+ 
   //toggles the offcanvas on mobile
   const toggleOffCanvas = () => {
     setShowOffCanvas((prev) => !prev);
@@ -71,6 +89,14 @@ const Layout = () => {
     clearJwt();
     navigate("/");
   };
+
+  const workspaceElems = workspaces.map((item, index) => {
+    return (
+      <button key={item.workspace_id} onClick={() => switchWorkspace(index)}>
+        <p className="text-xl py-[5px]">{item.workspace_name}</p>
+      </button>
+    )
+  })
 
   return (
     <>
@@ -94,11 +120,12 @@ const Layout = () => {
             </svg>
           </button>
           <p className="ml-2 text-3xl text-darkpurple">Quanta</p>
+          {/* dropdown button desktop view */}
           <button
             className="hidden ml-[70px] items-center md:flex"
             onClick={toggleDropdown}
           >
-            <p className="text-2xl">{workspace.name}</p>
+            <p className="text-2xl">{currentWorkspace ? currentWorkspace.workspace_name : null }</p>
             <svg
               className={`${!showDropdown && "transform rotate-90"} ml-[10px]`}
               xmlns="http://www.w3.org/2000/svg"
@@ -115,9 +142,11 @@ const Layout = () => {
           {/* button drop down */}
           <div
             className={`${
-              !showDropdown ? "" : "md:block"
-            } hidden w-[500px] h-[100px] border absolute left-[185px] top-[45px] bg-white`}
-          ></div>
+              !showDropdown ? "" : "md:flex"
+            } hidden w-auto max-h-[200px] px-[20px] border absolute left-[185px] top-[45px] bg-white flex-col`}
+          >
+            {workspaceElems}
+          </div>
         </div>
         {/* profile picture */}
         <img
@@ -134,9 +163,9 @@ const Layout = () => {
           } transition-all absolute w-[250px] bg-lightpurple-login h-[100%] flex flex-col justify-between md:hidden pl-[10px] py-[10px]`}
         >
           <div>
-            {/* drop down for workspace selection */}
+            {/* drop down for workspace selection mobile view*/}
             <div className="flex justify-between items-center mx-[14px] mb-[5px]">
-              <p className="text-3xl">{workspace.name}</p>
+              <p className="text-3xl">{currentWorkspace ? currentWorkspace.workspace_name : null}</p>
               <button
                 onClick={toggleDropdown}
                 className={`${
@@ -156,12 +185,14 @@ const Layout = () => {
                 </svg>
               </button>
             </div>
-            {/* list workspaces here */}
+            {/* list workspaces here mobile view*/}
             <div
               className={`${
-                showDropdown ? "h-[200px]" : "h-0"
-              } mr-[10px] border-b-2 border-slate-100 transition-all`}
-            ></div>
+                showDropdown ? "h-auto" : "h-0"
+              } mr-[10px] border-b-2 border-slate-100 transition-all flex flex-col items-start overflow-hidden px-[14px]`}
+            >
+              {workspaceElems}
+            </div>
             {/* links to navigate to other pages */}
             <Link
               className="flex items-center text-3xl mt-[20px] pl-[10px]"
@@ -352,7 +383,7 @@ const Layout = () => {
             </button>
           </div>
           <div className="bg-lightpurple-body w-[100%]">
-            <workspaceContext.Provider value={workspace}>
+            <workspaceContext.Provider value={currentWorkspace ? currentWorkspace.workspace_id : null}>
               <Outlet />
             </workspaceContext.Provider>
           </div>

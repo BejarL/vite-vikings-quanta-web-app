@@ -6,7 +6,6 @@ import { getJwt, verifyData } from '../Auth/jwt';
 const HomePage = () => {
     const [recentProjects, setRecentProjects] = useState([]);
     const workspace = useContext(workspaceContext);
-
     const navigate = useNavigate();
 
     useEffect(() =>{
@@ -32,8 +31,6 @@ const HomePage = () => {
             // checks only for jwt errors. if there are errors, navigate to sign in
             // if no error, gets data
             const { success, data } = await verifyData(res, navigate);
-
-            console.log(data);
     
             if (success) {
                 setRecentProjects(data);

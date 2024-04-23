@@ -23,7 +23,53 @@ const getWorkspaceUsers = async (req, res) => {
     }
   }
 
-  // delete a workspace
+// deletes a workspace
+const deleteWorkspace = async (req, res) => {
+  try {
+    const { workspace_id } = req.body
+
+    //create transaction
+    await req.db.beginTransaction();
+
+    //'deletes' the workspace 
+    await req.db.query(`UPDATE Workspace
+                        SET deleted_flag = 1
+                        WHERE workspace_id = :workspace_id`, {
+                          workspace_id
+                        });
+
+    //'deletes' users access to the workspace
+    await req.db.query(`UPDATE Workspace_Users
+                        SET deleted_flag = 1
+                        WHERE workspace_id = :workspace_id`, {
+                          workspace_id
+                        });
+
+    //'deletes' the projects associated with the workspace
+    await req.db.query(`UPDATE Projects
+                        SET deleted_flag = 1
+                        WHERE workspace_id = :workspace_id`, {
+                          workspace_id
+                        });
+
+    //'deletes' the entries associated with projects in that workspace
+    await req.db.query(`UPDATE Entries 
+                        SET deleted_flag = 1
+                        WHERE project_id IN (SELECT project_id FROM Projects WHERE workspace_id = :workspace_id)`, {
+                          workspace_id
+                        });
+
+    //start transaction
+    await req.db.commit();
+
+
+    res.json({success: true, message: 'Successfully deleted a workspace'})
+
+    } catch (error) {
+      console.log('Error deleting workspace')
+      res.json({success: false, error: error})
+    }
+  }
 
   // create a workspace
 const createWorkspace = async (req, res) => {
@@ -145,6 +191,7 @@ const inviteUser = async (req, res) => {
   }
 }
  
+exports.deleteWorkspace = deleteWorkspace;
 exports.inviteUser = inviteUser;
 exports.getWorkspaceUsers = getWorkspaceUsers;
 exports.createWorkspace = createWorkspace;
