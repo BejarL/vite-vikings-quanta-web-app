@@ -1,82 +1,45 @@
 import { useState, useContext, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { workspaceContext } from "./Layout";
-import { getJwt, verifyData} from '../Auth/jwt.js'
+import { getJwt, verifyData } from "../Auth/jwt.js";
+import ProjectModal from "../modals/ProjectModal.jsx";
 
 const ProjectsPage = () => {
   const [projects, setProjects] = useState([]);
-  const [newProjectName, setNewProjectName] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchProject, setSearchProject] = useState("");
 
   const navigate = useNavigate();
-
-  const workspace_id  = useContext(workspaceContext);
+  const workspace_id = useContext(workspaceContext);
 
   useEffect(() => {
-    getProjects()
-  }, [])
+    getProjects();
+  }, [workspace_id]); // Added dependency on workspace_id
 
-  //gets all the project data for the workspace
   const getProjects = async () => {
     const jwt = getJwt();
 
     try {
-      const response = await fetch('http://localhost:3000/projects/all', {
-        method: 'POST',
+      const response = await fetch("http://localhost:3000/projects/all", {
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "authorization": jwt
-        }, 
-        body: JSON.stringify({
-          workspace_id
-        })
-      })
+          authorization: jwt,
+        },
+        body: JSON.stringify({ workspace_id }),
+      });
 
-      //verify the data, make sure the error isnt jwt related then return the json res object
-      const {success, data} = await verifyData(response, navigate);
-
-
+      const { success, data } = await verifyData(response, navigate);
       if (success) {
+        // The API should provide the 'total_time' as a part of each project's data
         setProjects(data);
       } else {
         window.alert("Error getting data");
       }
-      
-    } catch(err) {
-      console.log(err);
+    } catch (err) {
+      console.error("Error fetching projects:", err);
     }
-  }
-
-  //is used to create a new project
-  const createNewProject = async () => {
-    try {
-      const jwt = getJwt();
-      
-      const response = await fetch('http://localhost:3000/projects/new', {
-        method: 'PUT',
-        headers: {
-          "Content-Type": "application/json",
-          "authorization": jwt
-        }, 
-        body: JSON.stringify({
-          workspace_id,
-          "project_name": newProjectName
-        })
-      })
-
-      //verify the data, make sure the error isnt jwt related then return the json res object
-      const {success, err} = await verifyData(response);
-
-      if (success) {
-        getProjects();
-      } else {
-        window.alert(err);
-      }
-
-    } catch(err) {
-      window.alert(err)
-    }
-  }
+  };
 
   const handleSearchChange = (event) => {
     setSearchProject(event.target.value);
@@ -86,53 +49,44 @@ const ProjectsPage = () => {
     project.project_name.toLowerCase().includes(searchProject.toLowerCase())
   );
 
-  // const addNewProject = () => {
-
-  //   if (newProjectName.trim() !== "") {
-  //     const newProject = {
-  //       project_id: projects.length + 1,
-  //       project_name: newProjectName || `New Project ${projects.length + 1}`,
-  //       total_time: "0",
-  //     };
-
-  //     setProjects([...projects, newProject]);
-  //     setNewProjectName(""); 
-  //   }
-  // };
-
-  // const deleteProject = (projectId) => {
-  //   setProjects(projects.filter((project) => project.project_id !== projectId));
-  // };
-
   const deleteProject = async (projectId) => {
     try {
       const jwt = getJwt();
-      
-      const response = await fetch(`http://localhost:3000/projects/delete`, {
-        method: 'POST',
-        headers: {
-          "Content-Type": "application/json",
-          "authorization": jwt
-        }, 
-        body: JSON.stringify({
-          project_id: projectId,
-          workspace_id
-        })
-      })
+
+      const response = await fetch(
+        `http://localhost:3000/projects/delete/${projectId}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            authorization: jwt,
+          },
+        }
+      );
 
       //verify the data, make sure the error isnt jwt related then return the json res object
-      const {success, err} = await verifyData(response);
+      const { success, err } = await verifyData(response);
 
       if (success) {
         getProjects();
       } else {
         window.alert(err);
       }
-
-    } catch(err) {
-      window.alert(err)
+    } catch (err) {
+      window.alert(err);
     }
-  }
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    getProjects();
+  };
+
+  const formatTime = (timeString) => {
+    if (!timeString) return "00:00";
+    const [hours, minutes] = timeString.split(":");
+    return `${hours}h ${minutes}m`;
+  };
 
   return (
     <div className="container mx-auto p-4 ">
@@ -152,22 +106,19 @@ const ProjectsPage = () => {
         </svg>
       </div>
       <div>
-        <input
-          className="shadow appearance-none border rounded w-[20%] py-2 pl-4 pr-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-          id="add"
-          type="text"
-          placeholder="New Project"
-          value={newProjectName}
-          onChange={(e) => 
-            setNewProjectName(e.target.value)}
-        />
         <button
-          onClick={createNewProject}
-          className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 ml-2 rounded"
-          aria-label="Add new project"
+          className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded"
+          onClick={() => setIsModalOpen(true)} // Open the modal to create a new project
+          aria-label="Open modal to add new project"
         >
-          +
+          New Project +
         </button>
+        <ProjectModal
+          isOpen={isModalOpen}
+          onClose={handleModalClose}
+          workspace_id={workspace_id}
+          getProjects={getProjects}
+        />
       </div>
 
       {/* Project List Section */}
@@ -189,7 +140,7 @@ const ProjectsPage = () => {
                   </Link>
                 </td>
                 <td className="py-4 px-6 border-b border-gray-200">
-                  {project.total_time} mn
+                  {formatTime(project.total_project_time)}
                 </td>
                 <td className="py-4 px-6 border-b border-gray-200 text-end">
                   <button

@@ -24,7 +24,7 @@ const sendEmail = async (email, html, subject) => {
             subject: subject,
             html: html
         })
-        
+
         console.log(info.messageId)
     } catch (err) {
         console.log(err);
