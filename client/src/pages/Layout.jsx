@@ -3,7 +3,7 @@ import { Outlet, Link, useNavigate } from "react-router-dom";
 import { clearJwt, getJwt, verifyData } from "../Auth/jwt";
 import LetteredAvatar from "../components/LetteredAvatar";
 
-export const workspaceContext = createContext(null);
+export const userContext = createContext(null);
 
 const Layout = () => {
   const [showOffCanvas, setShowOffCanvas] = useState(false);
@@ -446,9 +446,9 @@ const Layout = () => {
           </div>
           <div className="bg-lightpurple-body w-[100%]">
             { !loading ? 
-            <workspaceContext.Provider value={currentWorkspace ? {workspace_id: currentWorkspace.workspace_id, user: user } : null}>
+            <userContext.Provider value={currentWorkspace ? {workspace_id: currentWorkspace.workspace_id, user } : undefined}>
               <Outlet />
-            </workspaceContext.Provider>
+            </userContext.Provider>
             : null
             }
           </div>

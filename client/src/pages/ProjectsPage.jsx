@@ -1,6 +1,6 @@
 import { useState, useContext, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { workspaceContext } from "./Layout";
+import { userContext } from "./Layout";
 import { getJwt, verifyData } from "../Auth/jwt.js";
 import ProjectModal from "../modals/ProjectModal.jsx";
 
@@ -10,7 +10,7 @@ const ProjectsPage = () => {
   const [searchProject, setSearchProject] = useState("");
 
   const navigate = useNavigate();
-  const { workspace_id } = useContext(workspaceContext);
+  const { workspace_id } = useContext(userContext);
 
   useEffect(() => {
     getProjects();

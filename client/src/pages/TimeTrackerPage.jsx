@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, useContext } from 'react';
 import { getJwt, verifyData } from '../Auth/jwt';
 import { useNavigate } from 'react-router-dom';
-import { workspaceContext } from './Layout';
+import { userContext } from './Layout';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
@@ -14,7 +14,7 @@ const TimeTrackerPage = () => {
     const [ selectedProject, setSelectedProject ] = useState();
 
     const navigate = useNavigate();
-    const { workspace_id } = useContext(workspaceContext);
+    const { workspace_id } = useContext(userContext);
     let id = useRef();
 
     //clears our handleTime function
