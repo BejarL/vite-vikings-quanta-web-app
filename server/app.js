@@ -9,7 +9,7 @@ const { getRecentProjects,
         getProjectInfo,
         addNewProject,
         deleteProject } = require('./endpoints/Projects');
-const { getWorkspaceUsers, changeLastWorkspace, createWorkspace, joinWorkspace, inviteUser } = require('./endpoints/Workspace')
+const { getWorkspaceUsers, changeLastWorkspace, deleteWorkspace, createWorkspace, joinWorkspace, leaveWorkspace, inviteUser } = require('./endpoints/Workspace');
 const { getAllEntries, deleteEntry, updateEntry, createEntry } = require('./endpoints/TimeTracker');
 
 //middle ware
@@ -46,6 +46,8 @@ app.post('/resetpassword/send', (req, res) => sendResetPassword(req, res));
 
 app.use((req, res, next) => verifyJwt(req, res, next)); // middleware after signing in
 
+app.post((req, res) => deleteAccount(req, res))
+
 app.post('/resetpassword/confirm', (req, res) => changePassword(req, res));
 
 app.get('/user', (req, res) => getUserInfo(req, res));
@@ -61,6 +63,8 @@ app.post('/workspace/users', (req, res) => getWorkspaceUsers(req, res));
 app.post('/workspace/new', (req, res) => createWorkspace(req, res));
 
 app.post(`/workspace/join`, (req, res) => joinWorkspace(req, res));
+
+app.post('/workspace/leave', (req, res) => leaveWorkspace(req, res));
 
 app.post('/workspace/invite', (req, res) => inviteUser(req, res));
 
@@ -82,8 +86,7 @@ app.post('/project/:project_id', (req, res) => getProjectInfo(req, res));
 
 app.put('/projects/new', (req, res) => addNewProject(req, res));
 
-app.post('/projects/delete', (req, res) => deleteProject(req, res));
-
+app.post('/projects/delete/:project_id', (req, res) => deleteProject(req, res));
 
 /* 
 *
@@ -92,7 +95,7 @@ app.post('/projects/delete', (req, res) => deleteProject(req, res));
 */
 app.get('/entries/all', (req, res) => getAllEntries(req, res));
 
-app.post('/entries/new', (req, res) => createEntry(req, res));
+app.put('/entries/new', (req, res) => createEntry(req, res));
 
 app.post(`/entries/update`, (req, res) => updateEntry(req, res));
 

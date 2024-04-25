@@ -22,6 +22,7 @@ const getAllEntries = async (req, res) => {
  
 // create new entry
 const createEntry = async (req, res) => {
+    console.log("/create entry hit")
     try {
 
         const { user_id } = req.user;
@@ -34,12 +35,15 @@ const createEntry = async (req, res) => {
                 workspace_id
             } = req.body;
 
+        let insertStartDate = new Date(start_time);
+        let insertEndDate = new Date(end_time);
+
         //begin transaction to ensure both queries both pass or both fail
         await req.db.beginTransaction();
         
         await req.db.query(`INSERT INTO Entries (start_time, end_time, entry_desc, tag, project_id, user_id)
-                            VALUES (:start_time, :end_time, :entry_desc, :tag, :project_id,:user_id)`, {
-                            start_time, end_time, entry_desc, tag, project_id, user_id,
+                            VALUES (:insertStartDate, :insertEndDate, :entry_desc, :tag, :project_id,:user_id)`, {
+                            insertStartDate, insertEndDate, entry_desc, tag, project_id, user_id,
                             })
 
         await req.db.query(`INSERT INTO Change_Log (edit_desc, edit_timestamp, user_id, workspace_id, project_id)

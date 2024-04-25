@@ -9,6 +9,7 @@ const Layout = () => {
   const [ showDropdown, setShowDropdown ] = useState(false);
   const [ currentWorkspace, setCurrentWorkspace ] = useState({});
   const [ workspaces, setWorkspaces ] = useState([]);
+  const [ loading, setLoading ] = useState(true);
 
   const navigate = useNavigate();
   const { workspace_role: role } = currentWorkspace
@@ -68,6 +69,8 @@ const Layout = () => {
       } else {
         setCurrentWorkspace(data.workspaces[0]);
       }
+
+      setLoading(false);
 
     } catch(err) {
       console.log(err);
@@ -418,9 +421,12 @@ const Layout = () => {
             </button>
           </div>
           <div className="bg-lightpurple-body w-[100%]">
+            { !loading ? 
             <workspaceContext.Provider value={currentWorkspace ? currentWorkspace.workspace_id : null}>
               <Outlet />
             </workspaceContext.Provider>
+            : null
+            }
           </div>
         </div>
       </div>

@@ -56,7 +56,7 @@ const ProjectsPage = () => {
       const response = await fetch(
         `http://localhost:3000/projects/delete/${projectId}`,
         {
-          method: "DELETE",
+          method: "POST",
           headers: {
             "Content-Type": "application/json",
             authorization: jwt,

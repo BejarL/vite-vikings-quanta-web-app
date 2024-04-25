@@ -10,14 +10,17 @@ const signUp = async (req, res) => {
         const { username, email, password } = req.body;
     
         //check if the email or username is being used
-        const [[validateEmail]] = await req.db.query(
-          `SELECT email FROM Users WHERE email = :email AND deleted_flag=0`,
-          { email }
-        );
-        const [[validateUser]] = await req.db.query(
-          `SELECT username FROM Users WHERE username = :username AND deleted_flag=0`,
-          { username }
-        );
+        const [[validateEmail]] = await req.db.query(`SELECT email 
+                                                      FROM Users 
+                                                      WHERE email = :email AND deleted_flag=0`,
+                                                        { email }
+                                                      );
+
+        const [[validateUser]] = await req.db.query(`SELECT username 
+                                                    FROM Users 
+                                                    WHERE username = :username AND deleted_flag=0`,
+                                                      { username }
+                                                    );
     
             if (validateEmail) {
                 res.json({success: false, err: "Email already in use"});
@@ -31,8 +34,9 @@ const signUp = async (req, res) => {
                 await req.db.beginTransaction();
                 //attempt to insert the data into the database
                 const [query] = await req.db.query(`INSERT INTO Users (username, email, password) 
-                                                              VALUES (:username, :email, :hashedPassword);`, 
-                { username, email, hashedPassword });
+                                                    VALUES (:username, :email, :hashedPassword)`,{ 
+                                                      username, email, hashedPassword 
+                                                    });
     
                 const { insertId: user_id } = query;
     
@@ -86,16 +90,18 @@ const signIn = async (req, res) => {
         const emailCheck = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     
         if (emailCheck.test(login)) {
-          const [[userData]] = await req.db.query(
-            `SELECT user_id, email, username, password FROM Users WHERE email = :login AND deleted_flag=0`,
-            { login }
-          );
+          const [[userData]] = await req.db.query(`SELECT user_id, email, username, password 
+                                                  FROM Users 
+                                                  WHERE email = :login AND deleted_flag = 0`,{
+                                                     login 
+                                                  });
           data = userData;
         } else {
-          const [[userData]] = await req.db.query(
-            `SELECT user_id, email, username, password FROM Users WHERE username = :login AND deleted_flag=0`,
-            { login }
-          );
+          const [[userData]] = await req.db.query(`SELECT user_id, email, username, password 
+                                                   FROM Users 
+                                                   WHERE username = :login AND deleted_flag = 0`,{ 
+                                                    login 
+                                                  });
           data = userData;
         }
     
@@ -133,6 +139,25 @@ const signIn = async (req, res) => {
       }
 }
 
+const deleteAccount = async (req, res) => {
+  try {
+    const { user_id } = req.user
+
+    await req.db.query(`UPDATE Users
+                        SET deleted_flag = 1
+                        WHERE user_id = :user_id`, {
+                          user_id
+                        });
+
+    res.json({success: true, message: "account successfully deleted"});
+
+
+  } catch (err) {
+    console.log(err);
+    res.json({success: false, err: "Internal Server Error"});
+  }
+}
+
 const getUserInfo = async (req, res) => {
     try {
 
@@ -148,9 +173,9 @@ const getUserInfo = async (req, res) => {
         const [workspaceData] = await req.db.query(`SELECT Workspace_Users.workspace_id, workspace_name, workspace_role
                                                     FROM Workspace_Users
                                                     INNER JOIN Workspace ON Workspace_Users.workspace_id = Workspace.workspace_id
-                                                    WHERE user_id = :user_id AND Workspace.deleted_flag = 0`, {
+                                                    WHERE user_id = :user_id AND Workspace_Users.deleted_flag = 0`, {
                                              user_id
-                                         })
+                                         });
 
         //respond with success of true and the data that was just queried
         res.json({success: true, data: {user: userData, workspaces: workspaceData}})
@@ -225,8 +250,11 @@ const sendResetPassword = async (req, res) => {
     }
 }
 
+
+
 exports.signUp = signUp
 exports.signIn = signIn;
 exports.getUserInfo = getUserInfo;
 exports.sendResetPassword = sendResetPassword;
+exports.deleteAccount = deleteAccount;
 exports.changePassword = changePassword;
