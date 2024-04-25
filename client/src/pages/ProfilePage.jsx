@@ -1,10 +1,17 @@
 import { useState, useEffect } from "react";
 import LetteredAvatar from "../components/LetteredAvatar";
+import PasswordModal from "../modals/PasswordModal";
+import UsernameModal from "../modals/UsernameModal";
 
 const UserProfile = () => {
-  const [userName, setUserName] = useState("Loading...");
+  const [username, setUserName] = useState("");
   const [newUsername, setNewUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+  };
 
   useEffect(() => {
     fetchUsername();
@@ -14,7 +21,7 @@ const UserProfile = () => {
     try {
       const response = await fetch("http://localhost:3000/user");
       const data = await response.json();
-      setUserName(data.username);
+      setUserName(data.user.username);
     } catch (error) {
       console.error("Failed to fetch username:", error);
       setUserName("Failed to load username");
@@ -34,45 +41,31 @@ const UserProfile = () => {
   };
 
   return (
-    <div className="bg-gray-100 p-4 rounded-lg shadow-md flex flex-col items-center">
-      <LetteredAvatar name={userName} />
-      <h2 className="mt-4 text-lg font-semibold">{userName}</h2>
-      <button
-        className="mt-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-        onClick={fetchUsername}
-      >
-        Refresh Username
-      </button>
-      <form onSubmit={handleUsernameChange}>
-        <input
-          type="text"
-          placeholder="New username"
-          value={newUsername}
-          onChange={(e) => setNewUsername(e.target.value)}
-          className="mt-2 p-1 rounded"
-        />
-        <button
-          type="submit"
-          className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-        >
-          Change Username
-        </button>
-      </form>
-      <form onSubmit={handlePasswordChange}>
-        <input
-          type="password"
-          placeholder="New password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="mt-2 p-1 rounded"
-        />
-        <button
-          type="submit"
-          className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-        >
-          Change Password
-        </button>
-      </form>
+    <div className="flex justify-center items-center mt-5">
+      <div className="flex flex-col items-center p-4 w-[80%] h-[60%] rounded-lg shadow-md bg-lightpurple">
+        {username && <LetteredAvatar name={username} />}
+        <h2 className="mt-4 text-lg font-semibold">{fetchUsername}</h2>
+        <form onSubmit={handleUsernameChange}>
+          <button
+            type="submit"
+            onClick={() => setIsModalOpen(true)} 
+            className="bg-green-500 hover:bg-green-700 text-white m-3 font-bold py-2 px-4 rounded-lg"
+          >
+            Change Username
+          </button>
+          <UsernameModal isOpen={isModalOpen} onClose={handleModalClose} />
+        </form>
+        <form onSubmit={handlePasswordChange}>
+          <button
+            type="submit"
+            onClick={() => setIsModalOpen(true)} 
+            className="bg-red-500 hover:bg-red-700 text-white m-3 font-bold py-2 px-4 rounded-lg"
+          >
+            Change Password
+          </button>
+          <PasswordModal isOpen={isModalOpen} onClose={handleModalClose} />
+        </form>
+      </div>
     </div>
   );
 };

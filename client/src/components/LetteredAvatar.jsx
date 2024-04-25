@@ -1,5 +1,8 @@
 const getInitials = (name = "??") => {
-  const parts = name.split(" ").filter(Boolean).map(part => part.replace(/[^a-zA-Z0-9]/g, ""))
+  const parts = name
+    .split(" ")
+    .filter(Boolean)
+    .map((part) => part.replace(/[^a-zA-Z0-9]/g, ""));
   if (parts.length < 2) return parts[0][0] || "??";
   return `${parts[0][0]}${parts[1][0]}`;
 };
