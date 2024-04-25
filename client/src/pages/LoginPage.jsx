@@ -62,7 +62,7 @@ const LoginPage = () => {
       //if successfull and the jwt token exist, save the jwt token
       if (data.success && data.jwt) {
         setJwt(data.jwt);
-        navigate("/Quanta");
+        navigate("/quanta");
       } else {
         window.alert(`error creating user: ${data.err}`);
       }

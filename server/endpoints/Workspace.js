@@ -23,7 +23,53 @@ const getWorkspaceUsers = async (req, res) => {
     }
   }
 
-  // delete a workspace
+// deletes a workspace
+const deleteWorkspace = async (req, res) => {
+  try {
+    const { workspace_id } = req.body
+
+    //create transaction
+    await req.db.beginTransaction();
+
+    //'deletes' the workspace 
+    await req.db.query(`UPDATE Workspace
+                        SET deleted_flag = 1
+                        WHERE workspace_id = :workspace_id`, {
+                          workspace_id
+                        });
+
+    //'deletes' users access to the workspace
+    await req.db.query(`UPDATE Workspace_Users
+                        SET deleted_flag = 1
+                        WHERE workspace_id = :workspace_id`, {
+                          workspace_id
+                        });
+
+    //'deletes' the projects associated with the workspace
+    await req.db.query(`UPDATE Projects
+                        SET deleted_flag = 1
+                        WHERE workspace_id = :workspace_id`, {
+                          workspace_id
+                        });
+
+    //'deletes' the entries associated with projects in that workspace
+    await req.db.query(`UPDATE Entries 
+                        SET deleted_flag = 1
+                        WHERE project_id IN (SELECT project_id FROM Projects WHERE workspace_id = :workspace_id)`, {
+                          workspace_id
+                        });
+
+    //start transaction
+    await req.db.commit();
+
+
+    res.json({success: true, message: 'Successfully deleted a workspace'})
+
+    } catch (error) {
+      console.log('Error deleting workspace')
+      res.json({success: false, error: error})
+    }
+  }
 
   // create a workspace
 const createWorkspace = async (req, res) => {
@@ -46,7 +92,7 @@ const createWorkspace = async (req, res) => {
                             });
 
     await req.db.query(`INSERT INTO Change_Log (edit_desc, edit_timestamp, user_id, workspace_id)
-                            VALUES ("Create Workspace", NOW(), :user_id, :workspace_id)`, {
+                            VALUES ("Created Workspace", NOW(), :user_id, :workspace_id)`, {
                                 user_id, workspace_id
                             });
                             
@@ -144,7 +190,28 @@ const inviteUser = async (req, res) => {
       res.json({success: false, err: "Internal Server Error"})
   }
 }
- 
+
+//changes last workspace
+const changeLastWorkspace = async (req, res) => {
+  try {
+    const { user_id } = req.user;
+    const { workspace_id } = req.body;
+
+    await req.db.query(`UPDATE Users
+                        SET last_workspace_id = :workspace_id
+                        WHERE user_id = :user_id`, {
+                          user_id, workspace_id
+                        });
+
+    res.json({success: true, message: 'Successfully saved last workspace'})
+  } catch (err) {
+    console.log(err);
+    res.json({success: false, err: "Internal Server Error"});
+  }
+}
+
+exports.changeLastWorkspace = changeLastWorkspace;
+exports.deleteWorkspace = deleteWorkspace;
 exports.inviteUser = inviteUser;
 exports.getWorkspaceUsers = getWorkspaceUsers;
 exports.createWorkspace = createWorkspace;

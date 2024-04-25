@@ -27,23 +27,45 @@ const signUp = async (req, res) => {
     
                 //hash their password
                 const hashedPassword = await bcrypt.hash(password, 10);
-                
+
+                await req.db.beginTransaction();
                 //attempt to insert the data into the database
                 const [query] = await req.db.query(`INSERT INTO Users (username, email, password) 
                                                               VALUES (:username, :email, :hashedPassword);`, 
                 { username, email, hashedPassword });
     
-                const { insertId: user_id } = query
+                const { insertId: user_id } = query;
     
                 //create a payload for the jwt
                 const payload = {
                     user_id: user_id,
                     username: username,
                     email: email,
-                }
+                };
      
-                //creates the jwt
+                //creates the jwt to send to the user
                 const jwtEncodedUser = jwt.sign(payload, process.env.JWT_KEY);
+
+                //create the users personal workspace
+                const workspace_name = `${username}'s Personal`;
+                const [workspace] = await req.db.query(`INSERT INTO Workspace (workspace_name)
+                                                        VALUES (:workspace_name)`, {
+                                                          workspace_name
+                                                        });
+
+                const { insertId: workspace_id } = workspace
+                // add users access to their personal workspace
+                await req.db.query(`INSERT INTO Workspace_Users (user_id, workspace_id, workspace_role)
+                                    VALUES (:user_id, :workspace_id, "personal")`, {
+                                      user_id, workspace_id
+                                    });
+
+                await req.db.query(`INSERT INTO Change_Log (edit_desc, edit_timestamp, user_id, workspace_id)
+                                    VALUES ("Create Workspace", NOW(), :user_id, :workspace_id)`, {
+                                        user_id, workspace_id
+                                    });
+
+                await req.db.commit();
                     
                 //respond with the jwt and userData
                 res.json({ jwt: jwtEncodedUser, success: true, userData: payload });
@@ -123,7 +145,7 @@ const getUserInfo = async (req, res) => {
                                          })
         
         //table join to get the information for which workspace a user has access too 
-        const [workspaceData] = await req.db.query(`SELECT Workspace_Users.workspace_id, workspace_name
+        const [workspaceData] = await req.db.query(`SELECT Workspace_Users.workspace_id, workspace_name, workspace_role
                                                     FROM Workspace_Users
                                                     INNER JOIN Workspace ON Workspace_Users.workspace_id = Workspace.workspace_id
                                                     WHERE user_id = :user_id AND Workspace.deleted_flag = 0`, {

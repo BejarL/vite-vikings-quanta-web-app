@@ -9,7 +9,7 @@ const { getRecentProjects,
         getProjectInfo,
         addNewProject,
         deleteProject } = require('./endpoints/Projects');
-const { getWorkspaceUsers, createWorkspace, joinWorkspace, inviteUser } = require('./endpoints/Workspace')
+const { getWorkspaceUsers, changeLastWorkspace, createWorkspace, joinWorkspace, inviteUser } = require('./endpoints/Workspace')
 const { getAllEntries, deleteEntry, updateEntry, createEntry } = require('./endpoints/TimeTracker');
 
 //middle ware
@@ -64,6 +64,11 @@ app.post(`/workspace/join`, (req, res) => joinWorkspace(req, res));
 
 app.post('/workspace/invite', (req, res) => inviteUser(req, res));
 
+app.post('/workspace/delete', (req,res) => deleteWorkspace(req, res));
+
+app.post('/workspace/update-last', (req, res) => changeLastWorkspace(req, res));
+
+
 /* 
 *
 * Endpoints for Projects - see /endpoints/Projects.js
@@ -78,6 +83,7 @@ app.post('/project/:project_id', (req, res) => getProjectInfo(req, res));
 app.put('/projects/new', (req, res) => addNewProject(req, res));
 
 app.post('/projects/delete', (req, res) => deleteProject(req, res));
+
 
 /* 
 *

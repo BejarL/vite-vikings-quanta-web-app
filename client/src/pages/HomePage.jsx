@@ -5,18 +5,17 @@ import { getJwt, verifyData } from "../Auth/jwt";
 import CreateModal from "../modals/CreateModal";
 
 const HomePage = () => {
-  const [recentProjects, setRecentProjects] = useState([]);
-  const workspace = useContext(workspaceContext);
-  const [isModalOpen, setModalOpen] = useState(false);
+    const [recentProjects, setRecentProjects] = useState([]);
+    const [isModalOpen, setModalOpen] = useState(false)
+    const workspace = useContext(workspaceContext);
+    const navigate = useNavigate();
 
-  const navigate = useNavigate();
+    useEffect(() => {
+      handleGetRecent();
+    }, []);
 
-  useEffect(() => {
-    handleGetRecent();
-  }, []);
-
-  //fetches the recent projects
-  const handleGetRecent = async () => {
+    //fetches the recent projects
+    const handleGetRecent = async () => {
     const jwt = getJwt();
 
     try {
@@ -31,19 +30,18 @@ const HomePage = () => {
         }),
       });
 
-      // checks only for jwt errors. if there are errors, navigate to sign in
-      // if no error, gets data
-      const { success, data } = await verifyData(res, navigate);
+        // checks only for jwt errors. if there are errors, navigate to sign in
+        // if no error, gets data
+        const { success, data } = await verifyData(res, navigate);
 
-      console.log(data);
+        if (success) {
+            setRecentProjects(data);
+        }
 
-      if (success) {
-        setRecentProjects(data);
-      }
-    } catch (err) {
-      console.log(err);
-    }
-  };
+        } catch (err) {
+            console.log(err);
+        }
+    }  
 
   const recentElems = recentProjects.map((project) => {
     return (
