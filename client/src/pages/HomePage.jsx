@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from "react";
-import { workspaceContext } from "./Layout";
+import { userContext } from "./Layout";
 import { useNavigate } from "react-router-dom";
 import { getJwt, verifyData } from "../Auth/jwt";
 import CreateModal from "../modals/CreateModal";
@@ -7,7 +7,7 @@ import CreateModal from "../modals/CreateModal";
 const HomePage = () => {
     const [recentProjects, setRecentProjects] = useState([]);
     const [isModalOpen, setModalOpen] = useState(false)
-    const workspace = useContext(workspaceContext);
+    const { workspace } = useContext(userContext);
     const navigate = useNavigate();
 
     useEffect(() => {

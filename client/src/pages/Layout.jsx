@@ -3,14 +3,15 @@ import { Outlet, Link, useNavigate } from "react-router-dom";
 import { clearJwt, getJwt, verifyData } from "../Auth/jwt";
 import LetteredAvatar from "../components/LetteredAvatar";
 
-export const workspaceContext = createContext(null);
+export const userContext = createContext(null);
 
 const Layout = () => {
   const [showOffCanvas, setShowOffCanvas] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [currentWorkspace, setCurrentWorkspace] = useState({});
   const [workspaces, setWorkspaces] = useState([]);
-  const [username, setUserName] = useState("");
+  const [loading, setLoading ] = useState(true);
+  const [user, setUser] = useState("");
 
   const navigate = useNavigate();
   const role = currentWorkspace?.workspace_role;
@@ -22,7 +23,6 @@ const Layout = () => {
   //is used to get a usersData from the server
   useEffect(() => {
     getUserData();
-    fetchUsername();
   }, []);
 
   const getUserData = async () => {
@@ -55,6 +55,7 @@ const Layout = () => {
       }
 
       setWorkspaces(data.workspaces);
+      setUser(data.user);
 
       //set state for last workspace the user was in if there is one.
       //use a for loop to find the index of their last workspace id
@@ -71,19 +72,11 @@ const Layout = () => {
       } else {
         setCurrentWorkspace(data.workspaces[0]);
       }
-    } catch (err) {
-      console.log(err);
-    }
-  };
 
-  const fetchUsername = async () => {
-    try {
-      const response = await fetch("http://localhost:3000/user");
-      const data = await response.json();
-      setUserName(data.user.username);
-    } catch (error) {
-      console.error("Failed to fetch username:", error);
-      setUserName("Failed to load username");
+      setLoading(false);
+
+    } catch(err) {
+      console.log(err);
     }
   };
 
@@ -102,7 +95,7 @@ const Layout = () => {
     try {
       const jwt = getJwt();
 
-      const res = await fetch("http://localhost:3000/workspace/update-last", {
+      await fetch("http://localhost:3000/workspace/update-last", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -193,7 +186,7 @@ const Layout = () => {
         </div>
         {/* profile picture */}
         <Link to="/quanta/profile">
-          {username && <LetteredAvatar name={username} />}
+          {user.username && <LetteredAvatar name={user.username} />}
         </Link>
       </div>
       {/* body wrapper */}
@@ -452,11 +445,12 @@ const Layout = () => {
             </button>
           </div>
           <div className="bg-lightpurple-body w-[100%]">
-            <workspaceContext.Provider
-              value={currentWorkspace ? currentWorkspace.workspace_id : null}
-            >
+            { !loading ? 
+            <userContext.Provider value={currentWorkspace ? {workspace_id: currentWorkspace.workspace_id, user } : undefined}>
               <Outlet />
-            </workspaceContext.Provider>
+            </userContext.Provider>
+            : null
+            }
           </div>
         </div>
       </div>

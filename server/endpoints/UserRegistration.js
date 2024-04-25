@@ -5,67 +5,71 @@ require('dotenv').config();
 
 
 const signUp = async (req, res) => {
-  try {
-    //get the data from the request to create a new user
-    const { username, email, password } = req.body;
+    try {
+        //get the data from the request to create a new user
+        const { username, email, password } = req.body;
+    
+        //check if the email or username is being used
+        const [[validateEmail]] = await req.db.query(`SELECT email 
+                                                      FROM Users 
+                                                      WHERE email = :email AND deleted_flag=0`,
+                                                        { email }
+                                                      );
 
-    //check if the email or username is being used
-    const [[validateEmail]] = await req.db.query(
-      `SELECT email FROM Users WHERE email = :email AND deleted_flag=0`,
-      { email }
-    );
-    const [[validateUser]] = await req.db.query(
-      `SELECT username FROM Users WHERE username = :username AND deleted_flag=0`,
-      { username }
-    );
+        const [[validateUser]] = await req.db.query(`SELECT username 
+                                                    FROM Users 
+                                                    WHERE username = :username AND deleted_flag=0`,
+                                                      { username }
+                                                    );
+    
+            if (validateEmail) {
+                res.json({success: false, err: "Email already in use"});
+            } else if (validateUser) {
+                res.json({success: false, err: "Username already taken"});
+            } else {
+    
+                //hash their password
+                const hashedPassword = await bcrypt.hash(password, 10);
 
-    if (validateEmail) {
-      res.json({ success: false, err: "Email already in use" });
-    } else if (validateUser) {
-      res.json({ success: false, err: "Username already taken" });
-    } else {
+                await req.db.beginTransaction();
+                //attempt to insert the data into the database
+                const [query] = await req.db.query(`INSERT INTO Users (username, email, password) 
+                                                    VALUES (:username, :email, :hashedPassword)`,{ 
+                                                      username, email, hashedPassword 
+                                                    });
+    
+                const { insertId: user_id } = query;
+    
+                //create a payload for the jwt
+                const payload = {
+                    user_id: user_id,
+                    username: username,
+                    email: email,
+                };
+     
+                //creates the jwt to send to the user
+                const jwtEncodedUser = jwt.sign(payload, process.env.JWT_KEY);
 
-      //hash their password
-      const hashedPassword = await bcrypt.hash(password, 10);
+                //create the users personal workspace
+                const workspace_name = `${username}'s Personal`;
+                const [workspace] = await req.db.query(`INSERT INTO Workspace (workspace_name)
+                                                                  VALUES (:workspace_name)`, {
+                  workspace_name
+                });
 
-      await req.db.beginTransaction();
-      //attempt to insert the data into the database
-      const [query] = await req.db.query(`INSERT INTO Users (username, email, password) 
-                                                              VALUES (:username, :email, :hashedPassword);`,
-        { username, email, hashedPassword });
+                const { insertId: workspace_id } = workspace
+                // add users access to their personal workspace
+                await req.db.query(`INSERT INTO Workspace_Users (user_id, workspace_id, workspace_role)
+                                              VALUES (:user_id, :workspace_id, "personal")`, {
+                  user_id, workspace_id
+                });
 
-      const { insertId: user_id } = query;
+                await req.db.query(`INSERT INTO Change_Log (edit_desc, edit_timestamp, user_id, workspace_id)
+                                              VALUES ("Create Workspace", NOW(), :user_id, :workspace_id)`, {
+                  user_id, workspace_id
+                });
 
-      //create a payload for the jwt
-      const payload = {
-        user_id: user_id,
-        username: username,
-        email: email,
-      };
-
-      //creates the jwt to send to the user
-      const jwtEncodedUser = jwt.sign(payload, process.env.JWT_KEY);
-
-      //create the users personal workspace
-      const workspace_name = `${username}'s Personal`;
-      const [workspace] = await req.db.query(`INSERT INTO Workspace (workspace_name)
-                                                        VALUES (:workspace_name)`, {
-        workspace_name
-      });
-
-      const { insertId: workspace_id } = workspace
-      // add users access to their personal workspace
-      await req.db.query(`INSERT INTO Workspace_Users (user_id, workspace_id, workspace_role)
-                                    VALUES (:user_id, :workspace_id, "personal")`, {
-        user_id, workspace_id
-      });
-
-      await req.db.query(`INSERT INTO Change_Log (edit_desc, edit_timestamp, user_id, workspace_id)
-                                    VALUES ("Create Workspace", NOW(), :user_id, :workspace_id)`, {
-        user_id, workspace_id
-      });
-
-      await req.db.commit();
+                await req.db.commit();
 
       //respond with the jwt and userData
       res.json({ jwt: jwtEncodedUser, success: true, userData: payload });
@@ -77,59 +81,80 @@ const signUp = async (req, res) => {
 }
 
 const signIn = async (req, res) => {
+    try {
+        //get credentials from req
+        const { username: login, password: userEnteredPassword } = req.body;
+    
+        //check if the login is an email or username, then do the corresponding query for it
+        let data = {};
+        const emailCheck = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    
+        if (emailCheck.test(login)) {
+          const [[userData]] = await req.db.query(`SELECT user_id, email, username, password 
+                                                  FROM Users 
+                                                  WHERE email = :login AND deleted_flag = 0`,{
+                                                     login 
+                                                  });
+          data = userData;
+        } else {
+          const [[userData]] = await req.db.query(`SELECT user_id, email, username, password 
+                                                   FROM Users 
+                                                   WHERE username = :login AND deleted_flag = 0`,{ 
+                                                    login 
+                                                  });
+          data = userData;
+        }
+    
+        //get the users data
+        //if no user data, return false
+        if (!data) {
+          res.json({ success: false, err: "no user found" });
+          return;
+        }
+    
+        //hash the entered password and then compare them
+        const hashedPassword = `${data.password}`;
+        const passwordMatches = await bcrypt.compare(
+          userEnteredPassword,
+          hashedPassword
+        );
+    
+        //check if the password is correct, if not then res with success of false
+        if (!passwordMatches) {
+          res.json({ success: false, err: "Invalid Credentials" });
+        } else {
+          //create a payload for the jwt with user info
+          const payload = {
+            user_id: data.user_id,
+            username: data.username,
+            email: data.email,
+          };
+    
+          const jwtToken = jwt.sign(payload, process.env.JWT_KEY);
+          res.json({ success: true, jwt: jwtToken, data: payload });
+        }
+      } catch (err) {
+        console.log(err);
+        res.json({ success: false, err: "internal server error" });
+      }
+}
+
+const deleteAccount = async (req, res) => {
   try {
-    //get credentials from req
-    const { username: login, password: userEnteredPassword } = req.body;
+    const { user_id } = req.user
 
-    //check if the login is an email or username, then do the corresponding query for it
-    let data = {};
-    const emailCheck = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    await req.db.query(`UPDATE Users
+                        SET deleted_flag = 1
+                        WHERE user_id = :user_id`, {
+                          user_id
+                        });
 
-    if (emailCheck.test(login)) {
-      const [[userData]] = await req.db.query(
-        `SELECT user_id, email, username, password FROM Users WHERE email = :login AND deleted_flag=0`,
-        { login }
-      );
-      data = userData;
-    } else {
-      const [[userData]] = await req.db.query(
-        `SELECT user_id, email, username, password FROM Users WHERE username = :login AND deleted_flag=0`,
-        { login }
-      );
-      data = userData;
-    }
+    res.json({success: true, message: "account successfully deleted"});
 
-    //get the users data
-    //if no user data, return false
-    if (!data) {
-      res.json({ success: false, err: "no user found" });
-      return;
-    }
 
-    //hash the entered password and then compare them
-    const hashedPassword = `${data.password}`;
-    const passwordMatches = await bcrypt.compare(
-      userEnteredPassword,
-      hashedPassword
-    );
-
-    //check if the password is correct, if not then res with success of false
-    if (!passwordMatches) {
-      res.json({ success: false, err: "Invalid Credentials" });
-    } else {
-      //create a payload for the jwt with user info
-      const payload = {
-        user_id: data.user_id,
-        username: data.username,
-        email: data.email,
-      };
-
-      const jwtToken = jwt.sign(payload, process.env.JWT_KEY);
-      res.json({ success: true, jwt: jwtToken, data: payload });
-    }
   } catch (err) {
     console.log(err);
-    res.json({ success: false, err: "internal server error" });
+    res.json({success: false, err: "Internal Server Error"});
   }
 }
 
@@ -148,9 +173,9 @@ const getUserInfo = async (req, res) => {
     const [workspaceData] = await req.db.query(`SELECT Workspace_Users.workspace_id, workspace_name, workspace_role
                                                     FROM Workspace_Users
                                                     INNER JOIN Workspace ON Workspace_Users.workspace_id = Workspace.workspace_id
-                                                    WHERE user_id = :user_id AND Workspace.deleted_flag = 0`, {
-      user_id
-    })
+                                                    WHERE user_id = :user_id AND Workspace_Users.deleted_flag = 0`, {
+                                             user_id
+                                         });
 
     //respond with success of true and the data that was just queried
     res.json({ success: true, data: { user: userData, workspaces: workspaceData } })
@@ -179,7 +204,7 @@ const changePassword = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     //query the database and update the users password
-    const [query] = await req.db.query(
+    await req.db.query(
       `UPDATE Users SET password = :hashedPassword WHERE email = :email`,
       {
         email,
@@ -206,7 +231,7 @@ const sendResetPassword = async (req, res) => {
     };
     const jwtToken = jwt.sign(payload, process.env.JWT_KEY);
 
-    //create subjec and body to send
+    //create subject and body to send
     const subject = "Quanta | Reset your password";
 
     const body = `
@@ -225,8 +250,11 @@ const sendResetPassword = async (req, res) => {
   }
 }
 
+
+
 exports.signUp = signUp
 exports.signIn = signIn;
 exports.getUserInfo = getUserInfo;
 exports.sendResetPassword = sendResetPassword;
+exports.deleteAccount = deleteAccount;
 exports.changePassword = changePassword;

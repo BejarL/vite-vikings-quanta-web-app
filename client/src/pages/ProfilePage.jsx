@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
+import { userContext } from "./Layout";
 import LetteredAvatar from "../components/LetteredAvatar";
 import PasswordModal from "../modals/PasswordModal";
 import UsernameModal from "../modals/UsernameModal";
@@ -9,24 +10,26 @@ const UserProfile = () => {
   const [password, setPassword] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const { user } = useContext(userContext);
+
   const handleModalClose = () => {
     setIsModalOpen(false);
   };
 
-  useEffect(() => {
-    fetchUsername();
-  }, []);
+  // useEffect(() => {
+  //   fetchUsername();
+  // }, []);
 
-  const fetchUsername = async () => {
-    try {
-      const response = await fetch("http://localhost:3000/user");
-      const data = await response.json();
-      setUserName(data.user.username);
-    } catch (error) {
-      console.error("Failed to fetch username:", error);
-      setUserName("Failed to load username");
-    }
-  };
+  // const fetchUsername = async () => {
+  //   try {
+  //     const response = await fetch("http://localhost:3000/user");
+  //     const data = await response.json();
+  //     setUserName(user.username);
+  //   } catch (error) {
+  //     console.error("Failed to fetch username:", error);
+  //     setUserName("Failed to load username");
+  //   }
+  // };
 
   const handleUsernameChange = async (e) => {
     e.preventDefault();
@@ -43,8 +46,8 @@ const UserProfile = () => {
   return (
     <div className="flex justify-center items-center mt-5">
       <div className="flex flex-col items-center p-4 w-[80%] h-[60%] rounded-lg shadow-md bg-lightpurple">
-        {username && <LetteredAvatar name={username} />}
-        <h2 className="mt-4 text-lg font-semibold">{fetchUsername}</h2>
+        {username && <LetteredAvatar name={user.username} />}
+        <h2 className="mt-4 text-lg font-semibold">{user.username}</h2>
         <form onSubmit={handleUsernameChange}>
           <button
             type="submit"

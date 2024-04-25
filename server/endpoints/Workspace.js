@@ -96,9 +96,7 @@ const createWorkspace = async (req, res) => {
                                 user_id, workspace_id
                             });
                             
-        //start transaction
-        await req.db.commit();
-
+    //start transaction
     await req.db.commit();
 
     res.json({success: true, message: 'Successfully created workspace'});   
@@ -116,21 +114,70 @@ const joinWorkspace = async (req, res) => {
     const { user_id } = req.user;
     const { workspace_id } = req.body
 
+    await req.body.beginTransaction();
+
     await req.db.query(`INSERT INTO Workspace_Users (user_id, workspace_role, workspace_id)
                         VALUES (:user_id, "member", :workspace_id)`, {
                           user_id, workspace_id
                         });
 
+    const [[query]] = await req.db.query(`SELECT username 
+                                          FROM Users
+                                          WHERE user_id = :user_id`, {
+                                            user_id
+                                          });
+    
+    const updateString = `${query.username} joined.`
+
     await req.db.query(`INSERT INTO Change_Log (edit_desc, edit_timestamp, user_id, workspace_id)
-                        VALUES ("Joined Workspace", NOW(), :user_id, :workspace_id)`, {
-                            user_id, workspace_id
+                        VALUES (:updateString, NOW(), :user_id, :workspace_id)`, {
+                            updateString ,user_id, workspace_id
                         });
+
+    await req.db.commit();
 
     res.json({ success: true, message: "Successfully Added to workspace"});
     
   } catch (err) {
     console.log(err);
     res.json({success: false, err: "Internal server error"})
+  }
+}
+
+const leaveWorkspace = async (req, res) => {
+  try {
+    const { user_id, workspace_id } = req.body
+
+    //declares transaction
+    await req.db.beginTransaction();
+
+    await req.db.query(`UPDATE Workspace_Users
+                        SET deleted_flag = 1
+                        WHERE user_id = :user_id AND workspace_id = :workspace_id`, {
+                          user_id, workspace_id
+                        });
+
+    const [[query]] = await req.db.query(`SELECT username 
+                                          FROM Users
+                                          WHERE user_id = :user_id`, {
+                                            user_id
+                                          });
+    
+    const updateString = `${query.username} left`;
+    
+    await req.db.query(`INSERT INTO Change_Log (edit_desc, user_id, workspace_id)
+                        VALUES (:updateString, :user_id, :workspace_id)`, {
+                            updateString, user_id, workspace_id
+                        });
+
+    //starts transaction
+    await req.db.commit();
+
+    res.json({success: true, message: "Successfully removed from workspace"});
+    
+  } catch (err) {
+    console.log(err);
+    res.json({success: false, err: "Internal Server Error"});
   }
 }
 
@@ -143,7 +190,7 @@ const inviteUser = async (req, res) => {
 
       const html = `
         <div>
-            <h4>You have been invited to join a workspace by ${user_name}</h4>
+            <h4>You have been added to a workspace by ${user_name}</h4>
             <h6>Check it out <a href="http://localhost:5173/Quanta">here</a></h6>
         </div>`
 
@@ -210,6 +257,7 @@ const changeLastWorkspace = async (req, res) => {
   }
 }
 
+exports.leaveWorkspace = leaveWorkspace;
 exports.changeLastWorkspace = changeLastWorkspace;
 exports.deleteWorkspace = deleteWorkspace;
 exports.inviteUser = inviteUser;
