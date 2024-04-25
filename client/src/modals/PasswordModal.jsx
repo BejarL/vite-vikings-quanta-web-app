@@ -1,12 +1,19 @@
 import { useState } from "react";
 
-const ExampleModal = ({ isOpen, onClose }) => {
-  const [workspaceName, setWorkspaceName] = useState("");
+const PasswordModal = ({ isOpen, onClose }) => {
+  const [newPassword, setNewPassword] = useState("");
+
+  const createNewPassword = async () => {
+    try {
+      console.log("new password");
+    } catch (err) {
+      window.alert(err);
+    }
+  };
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    console.log("Creating workspace:", workspaceName);
-    onClose();
+    createNewPassword();
   };
 
   if (!isOpen) {
@@ -18,16 +25,25 @@ const ExampleModal = ({ isOpen, onClose }) => {
       <div className="bg-white rounded-lg overflow-hidden shadow-xl transform transition-all sm:max-w-lg sm:w-full p-4">
         <div className="text-center p-5">
           <h3 className="text-lg leading-6 font-medium text-gray-900">
-            Create New Project
+            Create New Password
           </h3>
-          <form onSubmit={handleSubmit} className="mt-8 space-y-6">
+          <form onSubmit={handleSubmit} className="mt-8 space-y-2">
             <input
               type="text"
-              name="project-name"
+              name="old-password"
               className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-              placeholder="Project name..."
-              value={workspaceName}
-              onChange={(e) => setWorkspaceName(e.target.value)}
+              placeholder="Old password..."
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              required
+            />
+            <input
+              type="text"
+              name="new-password"
+              className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+              placeholder="New password..."
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
               required
             />
             <div className="flex justify-end space-x-4">
@@ -42,7 +58,7 @@ const ExampleModal = ({ isOpen, onClose }) => {
                 type="submit"
                 className="inline-flex justify-center rounded-md border border-transparent px-4 py-2 text-sm font-medium text-purple-700 bg-purple-100 hover:bg-purple-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2"
               >
-                Create
+                Confirm
               </button>
             </div>
           </form>
@@ -52,4 +68,4 @@ const ExampleModal = ({ isOpen, onClose }) => {
   );
 };
 
-export default ExampleModal;
+export default PasswordModal;

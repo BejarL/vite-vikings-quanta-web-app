@@ -50,34 +50,34 @@ const signUp = async (req, res) => {
                 //creates the jwt to send to the user
                 const jwtEncodedUser = jwt.sign(payload, process.env.JWT_KEY);
 
-                //create the users personal workspace
-                const workspace_name = `${username}'s Personal`;
-                const [workspace] = await req.db.query(`INSERT INTO Workspace (workspace_name)
+      //create the users personal workspace
+      const workspace_name = `${username}'s Personal`;
+      const [workspace] = await req.db.query(`INSERT INTO Workspace (workspace_name)
                                                         VALUES (:workspace_name)`, {
-                                                          workspace_name
-                                                        });
+        workspace_name
+      });
 
-                const { insertId: workspace_id } = workspace
-                // add users access to their personal workspace
-                await req.db.query(`INSERT INTO Workspace_Users (user_id, workspace_id, workspace_role)
+      const { insertId: workspace_id } = workspace
+      // add users access to their personal workspace
+      await req.db.query(`INSERT INTO Workspace_Users (user_id, workspace_id, workspace_role)
                                     VALUES (:user_id, :workspace_id, "personal")`, {
-                                      user_id, workspace_id
-                                    });
+        user_id, workspace_id
+      });
 
-                await req.db.query(`INSERT INTO Change_Log (edit_desc, edit_timestamp, user_id, workspace_id)
+      await req.db.query(`INSERT INTO Change_Log (edit_desc, edit_timestamp, user_id, workspace_id)
                                     VALUES ("Create Workspace", NOW(), :user_id, :workspace_id)`, {
-                                        user_id, workspace_id
-                                    });
+        user_id, workspace_id
+      });
 
-                await req.db.commit();
-                    
-                //respond with the jwt and userData
-                res.json({ jwt: jwtEncodedUser, success: true, userData: payload });
-            }
-        } catch(error) {
-            res.json({success: false, err: "Internal server error"});
-            console.log(`error creating user ${error}`);
-        }
+      await req.db.commit();
+
+      //respond with the jwt and userData
+      res.json({ jwt: jwtEncodedUser, success: true, userData: payload });
+    }
+  } catch (error) {
+    res.json({ success: false, err: "Internal server error" });
+    console.log(`error creating user ${error}`);
+  }
 }
 
 const signIn = async (req, res) => {
@@ -159,95 +159,95 @@ const deleteAccount = async (req, res) => {
 }
 
 const getUserInfo = async (req, res) => {
-    try {
+  try {
 
-        //get the users id from their jwt token
-        const { user_id } = req.user
+    //get the users id from their jwt token
+    const { user_id } = req.user
 
-        //get the users info, then query again for workspace id and name
-        const [[userData]] = await req.db.query(`SELECT username, email, profile_pic, last_workspace_id FROM Users WHERE user_id = :user_id`, { 
-                                            user_id 
-                                         })
-        
-        //table join to get the information for which workspace a user has access too 
-        const [workspaceData] = await req.db.query(`SELECT Workspace_Users.workspace_id, workspace_name, workspace_role
+    //get the users info, then query again for workspace id and name
+    const [[userData]] = await req.db.query(`SELECT username, email, profile_pic, last_workspace_id FROM Users WHERE user_id = :user_id`, {
+      user_id
+    })
+
+    //table join to get the information for which workspace a user has access too 
+    const [workspaceData] = await req.db.query(`SELECT Workspace_Users.workspace_id, workspace_name, workspace_role
                                                     FROM Workspace_Users
                                                     INNER JOIN Workspace ON Workspace_Users.workspace_id = Workspace.workspace_id
                                                     WHERE user_id = :user_id AND Workspace_Users.deleted_flag = 0`, {
                                              user_id
                                          });
 
-        //respond with success of true and the data that was just queried
-        res.json({success: true, data: {user: userData, workspaces: workspaceData}})
+    //respond with success of true and the data that was just queried
+    res.json({ success: true, data: { user: userData, workspaces: workspaceData } })
 
-    } catch (err) {
-        console.log(err);
-        res.json({success: false, err: "Internal server error"});
-    }
+  } catch (err) {
+    console.log(err);
+    res.json({ success: false, err: "Internal server error" });
+  }
 }
 
 //is used to reset a users password
 const changePassword = async (req, res) => {
 
-    try {
-      //get password from the request and user id
-      const { password } = req.body;
-      const { email } = req.user;
-  
-      //if theres no password return false
-      if (!password) {
-        res.json({ success: false, err: "missing password" });
-        return;
-      }
-  
-      //hash the password
-      const hashedPassword = await bcrypt.hash(password, 10);
-  
-      //query the database and update the users password
-      const [query] = await req.db.query(
-        `UPDATE Users SET password = :hashedPassword WHERE email = :email`,
-        {
-          email,
-          hashedPassword,
-        }
-      );
-  
-      res.json({ success: true });
-    } catch (err) {
-      res.json({ success: false, err: "Internal server error" });
-      console.log("error changing password: " + err);
+  try {
+    //get password from the request and user id
+    const { password } = req.body;
+    const { email } = req.user;
+
+    //if theres no password return false
+    if (!password) {
+      res.json({ success: false, err: "missing password" });
+      return;
     }
+
+    //hash the password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    //query the database and update the users password
+    const [query] = await req.db.query(
+      `UPDATE Users SET password = :hashedPassword WHERE email = :email`,
+      {
+        email,
+        hashedPassword,
+      }
+    );
+
+    res.json({ success: true });
+  } catch (err) {
+    res.json({ success: false, err: "Internal server error" });
+    console.log("error changing password: " + err);
+  }
 }
 
 //is used to send the email to reset a users password
 const sendResetPassword = async (req, res) => {
-    try {
+  try {
 
-      const { email } = req.body;
+    const { email } = req.body;
 
-      //create jwt token
-      const payload = {
-        email
-      };
-      const jwtToken = jwt.sign(payload, process.env.JWT_KEY);
+    //create jwt token
+    const payload = {
+      email
+    };
+    const jwtToken = jwt.sign(payload, process.env.JWT_KEY);
 
-      //create subjec and body to send
-      const subject = "Quanta | Reset your password";
+    //create subjec and body to send
+    const subject = "Quanta | Reset your password";
 
-      const body = `
+    const body = `
         <div>
           <h2>Reset Your password <a href="http://localhost:5173/reset-password/${jwtToken}">here</a></h2>
         </div>
       `;
 
-      sendEmail(email, body, subject);
+    sendEmail(email, body, subject);
 
-      res.json({success: true, msg: "Email sent"});
+    res.json({ success: true, msg: "Email sent" });
 
-    } catch (err) {
-      console.log(err);
-      res.json({success: false, err: "Internal Server Error"});
-    }
+  } catch (err) {
+    console.log(err);
+    res.json({ success: false, err: "Internal Server Error" });
+  }
 }
 
 

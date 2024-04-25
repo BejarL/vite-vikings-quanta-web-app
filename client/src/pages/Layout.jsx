@@ -1,18 +1,20 @@
 import { useState, useEffect, createContext } from "react";
 import { Outlet, Link, useNavigate } from "react-router-dom";
 import { clearJwt, getJwt, verifyData } from "../Auth/jwt";
+import LetteredAvatar from "../components/LetteredAvatar";
 
 export const workspaceContext = createContext(null);
 
 const Layout = () => {
-  const [ showOffCanvas, setShowOffCanvas ] = useState(false);
-  const [ showDropdown, setShowDropdown ] = useState(false);
-  const [ currentWorkspace, setCurrentWorkspace ] = useState({});
-  const [ workspaces, setWorkspaces ] = useState([]);
+  const [showOffCanvas, setShowOffCanvas] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [currentWorkspace, setCurrentWorkspace] = useState({});
+  const [workspaces, setWorkspaces] = useState([]);
   const [ loading, setLoading ] = useState(true);
+  const [username, setUserName] = useState("");
 
   const navigate = useNavigate();
-  const { workspace_role: role } = currentWorkspace
+  const role = currentWorkspace?.workspace_role;
 
   // get which page is on to decide which nav link to select
   const location = window.location.href;
@@ -21,7 +23,8 @@ const Layout = () => {
   //is used to get a usersData from the server
   useEffect(() => {
     getUserData();
-  }, [])
+    fetchUsername();
+  }, []);
 
   const getUserData = async () => {
     //get the users jwt token
@@ -39,9 +42,9 @@ const Layout = () => {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          "authorization": jwt
-        }
-      })
+          authorization: jwt,
+        },
+      });
 
       //get the data from the response
       const { success, data } = await verifyData(res, navigate);
@@ -65,7 +68,7 @@ const Layout = () => {
             break;
           }
         }
-        setCurrentWorkspace(data.workspaces[index])
+        setCurrentWorkspace(data.workspaces[index]);
       } else {
         setCurrentWorkspace(data.workspaces[0]);
       }
@@ -75,7 +78,18 @@ const Layout = () => {
     } catch(err) {
       console.log(err);
     }
-  }
+  };
+
+  const fetchUsername = async () => {
+    try {
+      const response = await fetch("http://localhost:3000/user");
+      const data = await response.json();
+      setUserName(data.user.username);
+    } catch (error) {
+      console.error("Failed to fetch username:", error);
+      setUserName("Failed to load username");
+    }
+  };
 
   //changes workspace state then redirects to the home page.
   //also closes dropdown/offcanvas
@@ -84,27 +98,27 @@ const Layout = () => {
     updateWorkspace(workspaces[index].workspace_id);
     setShowDropdown(false);
     setShowOffCanvas(false);
-    navigate('/quanta/');
-  }
+    navigate("/quanta/");
+  };
 
   //updates a users last_workspace_id whenever they switch workspaces, to keep track of what workspace they should be put in when logging in next time.
   const updateWorkspace = async (workspace_id) => {
-      try {
-        const jwt = getJwt();
+    try {
+      const jwt = getJwt();
 
-        const res = await fetch("http://localhost:3000/workspace/update-last", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "authorization": jwt
-          }, 
-          body: JSON.stringify({workspace_id})
-        });
-      } catch (err) {
-        console.log(err);
-      }
-  }
- 
+      const res = await fetch("http://localhost:3000/workspace/update-last", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          authorization: jwt,
+        },
+        body: JSON.stringify({ workspace_id }),
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   //toggles the offcanvas on mobile
   const toggleOffCanvas = () => {
     setShowOffCanvas((prev) => !prev);
@@ -126,8 +140,8 @@ const Layout = () => {
       <button key={item.workspace_id} onClick={() => switchWorkspace(index)}>
         <p className="text-xl py-[5px]">{item.workspace_name}</p>
       </button>
-    )
-  })
+    );
+  });
 
   return (
     <>
@@ -156,7 +170,9 @@ const Layout = () => {
             className="hidden ml-[70px] items-center md:flex"
             onClick={toggleDropdown}
           >
-            <p className="text-2xl">{currentWorkspace ? currentWorkspace.workspace_name : null }</p>
+            <p className="text-2xl">
+              {currentWorkspace ? currentWorkspace.workspace_name : null}
+            </p>
             <svg
               className={`${!showDropdown && "transform rotate-90"} ml-[10px]`}
               xmlns="http://www.w3.org/2000/svg"
@@ -180,10 +196,9 @@ const Layout = () => {
           </div>
         </div>
         {/* profile picture */}
-        <img
-          alt="profile-picture"
-          className="border w-[50px] h-[50px] rounded-full"
-        ></img>
+        <Link to="/quanta/profile">
+          {username && <LetteredAvatar name={username} />}
+        </Link>
       </div>
       {/* body wrapper */}
       <div className="h-[calc(100vh-60px)] relative overflow-x-auto">
@@ -196,7 +211,9 @@ const Layout = () => {
           <div>
             {/* drop down for workspace selection mobile view*/}
             <div className="flex justify-between items-center mx-[14px] mb-[5px]">
-              <p className="text-3xl">{currentWorkspace ? currentWorkspace.workspace_name : null}</p>
+              <p className="text-3xl">
+                {currentWorkspace ? currentWorkspace.workspace_name : null}
+              </p>
               <button
                 onClick={toggleDropdown}
                 className={`${
@@ -276,23 +293,25 @@ const Layout = () => {
               </svg>
               <p className="pl-[10px]">Projects</p>
             </Link>
-            { role === "member" || role === "admin" || role === "Creator" ? <Link
-              className="flex items-center text-3xl mt-[20px] pl-[10px]"
-              to="/quanta/users"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="1em"
-                height="1em"
-                viewBox="0 0 256 256"
+            {role === "member" || role === "admin" || role === "Creator" ? (
+              <Link
+                className="flex items-center text-3xl mt-[20px] pl-[10px]"
+                to="/quanta/users"
               >
-                <path
-                  fill="currentColor"
-                  d="M117.25 157.92a60 60 0 1 0-66.5 0a95.83 95.83 0 0 0-47.22 37.71a8 8 0 1 0 13.4 8.74a80 80 0 0 1 134.14 0a8 8 0 0 0 13.4-8.74a95.83 95.83 0 0 0-47.22-37.71M40 108a44 44 0 1 1 44 44a44.05 44.05 0 0 1-44-44m210.14 98.7a8 8 0 0 1-11.07-2.33A79.83 79.83 0 0 0 172 168a8 8 0 0 1 0-16a44 44 0 1 0-16.34-84.87a8 8 0 1 1-5.94-14.85a60 60 0 0 1 55.53 105.64a95.83 95.83 0 0 1 47.22 37.71a8 8 0 0 1-2.33 11.07"
-                />
-              </svg>
-              <p className="pl-[10px]">Users</p>
-            </Link> : null }
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="1em"
+                  height="1em"
+                  viewBox="0 0 256 256"
+                >
+                  <path
+                    fill="currentColor"
+                    d="M117.25 157.92a60 60 0 1 0-66.5 0a95.83 95.83 0 0 0-47.22 37.71a8 8 0 1 0 13.4 8.74a80 80 0 0 1 134.14 0a8 8 0 0 0 13.4-8.74a95.83 95.83 0 0 0-47.22-37.71M40 108a44 44 0 1 1 44 44a44.05 44.05 0 0 1-44-44m210.14 98.7a8 8 0 0 1-11.07-2.33A79.83 79.83 0 0 0 172 168a8 8 0 0 1 0-16a44 44 0 1 0-16.34-84.87a8 8 0 1 1-5.94-14.85a60 60 0 0 1 55.53 105.64a95.83 95.83 0 0 1 47.22 37.71a8 8 0 0 1-2.33 11.07"
+                  />
+                </svg>
+                <p className="pl-[10px]">Users</p>
+              </Link>
+            ) : null}
           </div>
           <button
             onClick={handleSignout}
@@ -374,33 +393,49 @@ const Layout = () => {
                 </svg>
                 <p className="pl-[10px]">Projects</p>
               </Link>
-              { role === "member" || role === "admin" || role === "Creator" ? <Link
-                className={` ${
-                  page === "users" ? "bg-lightpurple-selected" : null
-                }
+              {role === "member" || role === "admin" || role === "Creator" ? (
+                <Link
+                  className={` ${
+                    page === "users" ? "bg-lightpurple-selected" : null
+                  }
                                         flex items-center text-3xl mt-[20px] p-[10px] hover:bg-lightpurple-selected`}
-                to="/quanta/users"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="1em"
-                  height="1em"
-                  viewBox="0 0 256 256"
+                  to="/quanta/users"
                 >
-                  <path
-                    fill="currentColor"
-                    d="M117.25 157.92a60 60 0 1 0-66.5 0a95.83 95.83 0 0 0-47.22 37.71a8 8 0 1 0 13.4 8.74a80 80 0 0 1 134.14 0a8 8 0 0 0 13.4-8.74a95.83 95.83 0 0 0-47.22-37.71M40 108a44 44 0 1 1 44 44a44.05 44.05 0 0 1-44-44m210.14 98.7a8 8 0 0 1-11.07-2.33A79.83 79.83 0 0 0 172 168a8 8 0 0 1 0-16a44 44 0 1 0-16.34-84.87a8 8 0 1 1-5.94-14.85a60 60 0 0 1 55.53 105.64a95.83 95.83 0 0 1 47.22 37.71a8 8 0 0 1-2.33 11.07"
-                  />
-                </svg>
-                <p className="pl-[10px]">Users</p>
-              </Link> : null }
-              { role === "admin" || role === "Creator" ? <Link
-                className={` ${page === "audit-log" ? "bg-lightpurple-selected" : null } flex items-center text-3xl mt-[20px] p-[10px] hover:bg-lightpurple-selected`}
-                to="/quanta/audit-log"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 256 256"><path fill="currentColor" d="m213.66 82.34l-56-56A8 8 0 0 0 152 24H56a16 16 0 0 0-16 16v176a16 16 0 0 0 16 16h144a16 16 0 0 0 16-16V88a8 8 0 0 0-2.34-5.66M160 51.31L188.69 80H160ZM200 216H56V40h88v48a8 8 0 0 0 8 8h48zm-45.54-48.85a36.05 36.05 0 1 0-11.31 11.31l11.19 11.2a8 8 0 0 0 11.32-11.32ZM104 148a20 20 0 1 1 20 20a20 20 0 0 1-20-20"></path></svg>
-                <p className="pl-[10px] text-3xl">Audit</p>
-              </Link> : null }
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="1em"
+                    height="1em"
+                    viewBox="0 0 256 256"
+                  >
+                    <path
+                      fill="currentColor"
+                      d="M117.25 157.92a60 60 0 1 0-66.5 0a95.83 95.83 0 0 0-47.22 37.71a8 8 0 1 0 13.4 8.74a80 80 0 0 1 134.14 0a8 8 0 0 0 13.4-8.74a95.83 95.83 0 0 0-47.22-37.71M40 108a44 44 0 1 1 44 44a44.05 44.05 0 0 1-44-44m210.14 98.7a8 8 0 0 1-11.07-2.33A79.83 79.83 0 0 0 172 168a8 8 0 0 1 0-16a44 44 0 1 0-16.34-84.87a8 8 0 1 1-5.94-14.85a60 60 0 0 1 55.53 105.64a95.83 95.83 0 0 1 47.22 37.71a8 8 0 0 1-2.33 11.07"
+                    />
+                  </svg>
+                  <p className="pl-[10px]">Users</p>
+                </Link>
+              ) : null}
+              {role === "admin" || role === "Creator" ? (
+                <Link
+                  className={` ${
+                    page === "audit-log" ? "bg-lightpurple-selected" : null
+                  } flex items-center text-3xl mt-[20px] p-[10px] hover:bg-lightpurple-selected`}
+                  to="/quanta/audit-log"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="1em"
+                    height="1em"
+                    viewBox="0 0 256 256"
+                  >
+                    <path
+                      fill="currentColor"
+                      d="m213.66 82.34l-56-56A8 8 0 0 0 152 24H56a16 16 0 0 0-16 16v176a16 16 0 0 0 16 16h144a16 16 0 0 0 16-16V88a8 8 0 0 0-2.34-5.66M160 51.31L188.69 80H160ZM200 216H56V40h88v48a8 8 0 0 0 8 8h48zm-45.54-48.85a36.05 36.05 0 1 0-11.31 11.31l11.19 11.2a8 8 0 0 0 11.32-11.32ZM104 148a20 20 0 1 1 20 20a20 20 0 0 1-20-20"
+                    ></path>
+                  </svg>
+                  <p className="pl-[10px] text-3xl">Audit</p>
+                </Link>
+              ) : null}
             </div>
             <button
               onClick={handleSignout}
