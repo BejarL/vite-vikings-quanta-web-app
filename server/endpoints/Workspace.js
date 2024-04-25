@@ -96,9 +96,7 @@ const createWorkspace = async (req, res) => {
                                 user_id, workspace_id
                             });
                             
-        //start transaction
-        await req.db.commit();
-
+    //start transaction
     await req.db.commit();
 
     res.json({success: true, message: 'Successfully created workspace'});   

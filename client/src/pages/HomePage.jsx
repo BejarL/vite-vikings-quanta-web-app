@@ -7,7 +7,7 @@ import CreateModal from "../modals/CreateModal";
 const HomePage = () => {
     const [recentProjects, setRecentProjects] = useState([]);
     const [isModalOpen, setModalOpen] = useState(false)
-    const workspace = useContext(workspaceContext);
+    const { workspace } = useContext(workspaceContext);
     const navigate = useNavigate();
 
     useEffect(() => {

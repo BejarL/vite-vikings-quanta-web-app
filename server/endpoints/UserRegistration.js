@@ -50,26 +50,26 @@ const signUp = async (req, res) => {
                 //creates the jwt to send to the user
                 const jwtEncodedUser = jwt.sign(payload, process.env.JWT_KEY);
 
-      //create the users personal workspace
-      const workspace_name = `${username}'s Personal`;
-      const [workspace] = await req.db.query(`INSERT INTO Workspace (workspace_name)
-                                                        VALUES (:workspace_name)`, {
-        workspace_name
-      });
+                //create the users personal workspace
+                const workspace_name = `${username}'s Personal`;
+                const [workspace] = await req.db.query(`INSERT INTO Workspace (workspace_name)
+                                                                  VALUES (:workspace_name)`, {
+                  workspace_name
+                });
 
-      const { insertId: workspace_id } = workspace
-      // add users access to their personal workspace
-      await req.db.query(`INSERT INTO Workspace_Users (user_id, workspace_id, workspace_role)
-                                    VALUES (:user_id, :workspace_id, "personal")`, {
-        user_id, workspace_id
-      });
+                const { insertId: workspace_id } = workspace
+                // add users access to their personal workspace
+                await req.db.query(`INSERT INTO Workspace_Users (user_id, workspace_id, workspace_role)
+                                              VALUES (:user_id, :workspace_id, "personal")`, {
+                  user_id, workspace_id
+                });
 
-      await req.db.query(`INSERT INTO Change_Log (edit_desc, edit_timestamp, user_id, workspace_id)
-                                    VALUES ("Create Workspace", NOW(), :user_id, :workspace_id)`, {
-        user_id, workspace_id
-      });
+                await req.db.query(`INSERT INTO Change_Log (edit_desc, edit_timestamp, user_id, workspace_id)
+                                              VALUES ("Create Workspace", NOW(), :user_id, :workspace_id)`, {
+                  user_id, workspace_id
+                });
 
-      await req.db.commit();
+                await req.db.commit();
 
       //respond with the jwt and userData
       res.json({ jwt: jwtEncodedUser, success: true, userData: payload });
@@ -204,7 +204,7 @@ const changePassword = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     //query the database and update the users password
-    const [query] = await req.db.query(
+    await req.db.query(
       `UPDATE Users SET password = :hashedPassword WHERE email = :email`,
       {
         email,
@@ -231,7 +231,7 @@ const sendResetPassword = async (req, res) => {
     };
     const jwtToken = jwt.sign(payload, process.env.JWT_KEY);
 
-    //create subjec and body to send
+    //create subject and body to send
     const subject = "Quanta | Reset your password";
 
     const body = `

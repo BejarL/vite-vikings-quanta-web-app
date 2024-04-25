@@ -37,7 +37,7 @@ app.use((req, res, next) => dbConnect(req, res, next));
 *
 * User Registration - /endpoints/UserRegistration.js
 *
-*/
+*/ 
 app.put('/signup', (req, res) => signUp(req, res));
 
 app.post('/signin', (req, res) => signIn(req, res));

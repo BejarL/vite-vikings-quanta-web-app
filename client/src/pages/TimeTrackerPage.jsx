@@ -14,7 +14,7 @@ const TimeTrackerPage = () => {
     const [ selectedProject, setSelectedProject ] = useState();
 
     const navigate = useNavigate();
-    const workspace_id = useContext(workspaceContext);
+    const { workspace_id } = useContext(workspaceContext);
     let id = useRef();
 
     //clears our handleTime function

@@ -10,7 +10,7 @@ const ProjectsPage = () => {
   const [searchProject, setSearchProject] = useState("");
 
   const navigate = useNavigate();
-  const workspace_id = useContext(workspaceContext);
+  const { workspace_id } = useContext(workspaceContext);
 
   useEffect(() => {
     getProjects();
