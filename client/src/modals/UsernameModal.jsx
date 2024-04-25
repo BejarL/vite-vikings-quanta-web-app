@@ -25,27 +25,18 @@ const UsernameModal = ({ isOpen, onClose }) => {
       <div className="bg-white rounded-lg overflow-hidden shadow-xl transform transition-all sm:max-w-lg sm:w-full p-4">
         <div className="text-center p-5">
           <h3 className="text-lg leading-6 font-medium text-gray-900">
-            Create New Username
+            Change Username
           </h3>
           <form onSubmit={handleSubmit} className="mt-8 space-y-2">
             <input
               type="text"
-              name="old-password"
+              name="new-username"
               className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-              placeholder="Old password..."
+              placeholder="New username..."
               value={newUsername}
               onChange={(e) => setNewUsername(e.target.value)}
               required
-            />
-            <input
-              type="text"
-              name="new-password"
-              className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-              placeholder="New password..."
-              value={newUsername}
-              onChange={(e) => setNewUsername(e.target.value)}
-              required
-            />
+            />           
             <div className="flex justify-end space-x-4">
               <button
                 type="button"
