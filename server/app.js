@@ -3,7 +3,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 
 //endpoints
-const { signUp, signIn, getUserInfo, changePassword, sendResetPassword } = require('./endpoints/UserRegistration');
+const { signUp, signIn, getUserInfo, changePassword, sendResetPassword, changeUsername } = require('./endpoints/UserRegistration');
 const { getRecentProjects,
   getAllProjects,
   getProjectInfo,
@@ -50,7 +50,11 @@ app.post((req, res) => deleteAccount(req, res))
 
 app.post('/resetpassword/confirm', (req, res) => changePassword(req, res));
 
+app.put('/user/change-username', (req, res) => changeUsername(req, res))
+
 app.get('/user', (req, res) => getUserInfo(req, res));
+
+
 
 
 

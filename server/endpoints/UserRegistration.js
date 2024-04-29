@@ -250,9 +250,26 @@ const sendResetPassword = async (req, res) => {
   }
 }
 
+const changeUsername = async (req, res) => {
+  try {
+    const { username } = req.body;
+    const { user_id } = req.user;
+
+    await req.db.query(`UPDATE Users SET username = :username WHERE user_id = :user_id`,{
+                        user_id, username
+                      })
+
+    res.json({success: true, message: 'Username updated successfully'})
+  } catch (err) {
+    console.log(err)
+    res.json({success: false, err: 'Internal server error'})
+  }
+}
+
 exports.signUp = signUp
 exports.signIn = signIn;
 exports.getUserInfo = getUserInfo;
 exports.sendResetPassword = sendResetPassword;
 exports.deleteAccount = deleteAccount;
 exports.changePassword = changePassword;
+exports.changeUsername = changeUsername;
