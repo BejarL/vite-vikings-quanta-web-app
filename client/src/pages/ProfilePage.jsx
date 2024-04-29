@@ -11,6 +11,7 @@ const UserProfile = () => {
   const [isPasswordModalOpen, setPasswordModalOpen] = useState(false);
   const [isEmailModalOpen, setEmailModalOpen] = useState(false);
   const [username, setUsername] = useState(user.username);
+  const [email, setEmail] = useState(user.email);
 
   return (
     <div className="flex justify-center items-center mt-5">
@@ -32,11 +33,12 @@ const UserProfile = () => {
           </div>
 
           <div className="flex items-center justify-between mb-4">
-            <p className="text-gray-700">{user.email}</p>
+            <p className="text-gray-700">{email}</p>
             <UserInfo onEdit={() => setEmailModalOpen(true)} />
             <EmailModal
               isOpen={isEmailModalOpen}
               onClose={() => setEmailModalOpen(false)}
+              setEmail={setEmail}
             />
           </div>
 
