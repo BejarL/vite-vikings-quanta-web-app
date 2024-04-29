@@ -153,7 +153,9 @@ const Layout = () => {
               ></path>
             </svg>
           </button>
+          <Link to="/quanta/timetracker">
           <p className="ml-2 text-3xl text-darkpurple">Quanta</p>
+          </Link>
           {/* dropdown button desktop view */}
           <button
             className="hidden ml-[70px] items-center md:flex"
