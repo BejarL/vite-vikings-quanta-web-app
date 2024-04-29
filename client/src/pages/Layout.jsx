@@ -445,8 +445,12 @@ const Layout = () => {
             </button>
           </div>
           <div className="bg-lightpurple-body w-[100%]">
-            { !loading ? 
-            <userContext.Provider value={currentWorkspace ? {workspace_id: currentWorkspace.workspace_id, user } : undefined}>
+          {/* Changed the value so the key is undefined instead of the whole context */}
+          { !loading ? 
+            <userContext.Provider value={{
+              workspace: currentWorkspace ? currentWorkspace.workspace_id : undefined,
+              user: user
+            }}>
               <Outlet />
             </userContext.Provider>
             : null

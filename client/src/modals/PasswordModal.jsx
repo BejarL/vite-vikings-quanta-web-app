@@ -1,13 +1,35 @@
 import { useState } from "react";
+import { getJwt } from "../Auth/jwt";
 
 const PasswordModal = ({ isOpen, onClose }) => {
+  const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const [error, setError] = useState("");
 
   const createNewPassword = async () => {
+    const jwt = getJwt();
+
     try {
-      console.log("new password");
+      const response = await fetch("http://localhost:3000/user", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          authorization: jwt,
+        },
+        body: JSON.stringify({ oldPassword, newPassword }),
+      });
+      if (!response.ok) {
+        throw new Error("Failed to update password");
+      }
+      const data = await response.json();
+      if (data.success) {
+        alert("Password updated successfully");
+        onClose();
+      } else {
+        setError(data.error || "Unknown error occurred");
+      }
     } catch (err) {
-      window.alert(err);
+      setError(err.message);
     }
   };
 
@@ -27,18 +49,19 @@ const PasswordModal = ({ isOpen, onClose }) => {
           <h3 className="text-lg leading-6 font-medium text-gray-900">
             Change Password
           </h3>
+          {error && <div className="text-red-500">{error}</div>}
           <form onSubmit={handleSubmit} className="mt-8 space-y-2">
             <input
-              type="text"
+              type="password"
               name="old-password"
               className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
               placeholder="Old password..."
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
+              value={oldPassword}
+              onChange={(e) => setOldPassword(e.target.value)}
               required
             />
             <input
-              type="text"
+              type="password"
               name="new-password"
               className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
               placeholder="New password..."

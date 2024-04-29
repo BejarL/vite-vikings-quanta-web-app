@@ -1,13 +1,29 @@
 import { useState } from "react";
+import { getJwt } from "../Auth/jwt";
 
 const UsernameModal = ({ isOpen, onClose }) => {
   const [newUsername, setNewUsername] = useState("");
+  const [error, setError] = useState(""); // Added error state
 
   const createNewUsername = async () => {
+    const jwt = getJwt();
     try {
-      console.log("new username");
-    } catch (err) {
-      window.alert(err);
+      const response = await fetch("http://localhost:3000/user/username", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          authorization: jwt,
+        },
+        body: JSON.stringify({ username: newUsername }),
+      });
+      if (!response.ok) {
+        throw new Error("Failed to update username");
+      }
+      setNewUsername("");
+      setError("");
+      onClose();
+    } catch (error) {
+      setError(error.message);
     }
   };
 
@@ -36,7 +52,8 @@ const UsernameModal = ({ isOpen, onClose }) => {
               value={newUsername}
               onChange={(e) => setNewUsername(e.target.value)}
               required
-            />           
+            />
+            {error && <div className="text-red-500 text-sm">{error}</div>}{" "}
             <div className="flex justify-end space-x-4">
               <button
                 type="button"
