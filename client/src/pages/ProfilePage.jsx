@@ -10,22 +10,24 @@ const UserProfile = () => {
   const [isUsernameModalOpen, setUsernameModalOpen] = useState(false);
   const [isPasswordModalOpen, setPasswordModalOpen] = useState(false);
   const [isEmailModalOpen, setEmailModalOpen] = useState(false);
+  const [username, setUsername] = useState(user.username);
 
   return (
     <div className="flex justify-center items-center mt-5">
       <div className="flex flex-col items-center p-6 w-full max-w-lg rounded-lg shadow-lg bg-lightpurple">
-        <LetteredAvatar name={user.username} size="large" />
+        <LetteredAvatar name={username} size="large" />
         <h2 className="mt-4 text-lg font-semibold text-gray-700 text-shadow">
-          {user.username}
+          {username}
         </h2>
 
         <div className="w-full px-4 mt-4">
           <div className="flex items-center justify-between mb-4">
-            <p className="text-gray-700">{user.username}</p>
+            <p className="text-gray-700">{username}</p>
             <UserInfo onEdit={() => setUsernameModalOpen(true)} />
             <UsernameModal
               isOpen={isUsernameModalOpen}
               onClose={() => setUsernameModalOpen(false)}
+              setName={setUsername}
             />
           </div>
 
