@@ -9,6 +9,7 @@ import ProjectsPage from "./pages/ProjectsPage";
 import ProfilePage from "./pages/ProfilePage";
 import HomePage from "./pages/HomePage";
 import ProjectDetails from "./components/ProjectDetails";
+// import AuditLog from "./pages/AuditLog"
 
 const App = () => {
   return (
@@ -16,7 +17,10 @@ const App = () => {
       <Routes>
         <Route path="/" element={<LoginPage />} />
         <Route path="/forgot-password" element={<ResetPasswordPage />} />
-        <Route path="/reset-password/:jwt" element={<ConfirmResetPasswordPage />} />
+        <Route
+          path="/reset-password/:jwt"
+          element={<ConfirmResetPasswordPage />}
+        />
         <Route path="/quanta" element={<Layout />}>
           <Route path="" element={<HomePage />} />
           <Route path="timetracker" element={<TimeTrackerPage />} />
@@ -27,6 +31,7 @@ const App = () => {
             element={<ProjectDetails />}
           />
           <Route path="profile" element={<ProfilePage />} />
+          <Route path="audit-log" element={<ProfilePage />} />
         </Route>
       </Routes>
     </BrowserRouter>

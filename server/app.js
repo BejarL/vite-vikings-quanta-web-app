@@ -5,11 +5,11 @@ const bodyParser = require('body-parser');
 //endpoints
 const { signUp, signIn, getUserInfo, changePassword, sendResetPassword } = require('./endpoints/UserRegistration');
 const { getRecentProjects,
-        getAllProjects,                    
-        getProjectInfo,
-        addNewProject,
-        deleteProject } = require('./endpoints/Projects');
-const { getWorkspaceUsers, getUsersWorkspaces, createWorkspace, joinWorkspace, inviteUser } = require('./endpoints/Workspace')
+  getAllProjects,
+  getProjectInfo,
+  addNewProject,
+  deleteProject } = require('./endpoints/Projects');
+const { getWorkspaceUsers, changeLastWorkspace, deleteWorkspace, createWorkspace, joinWorkspace, leaveWorkspace, inviteUser } = require('./endpoints/Workspace');
 const { getAllEntries, deleteEntry, updateEntry, createEntry } = require('./endpoints/TimeTracker');
 
 //middle ware
@@ -24,7 +24,7 @@ const corsOptions = {
   "access-control-allow-credentials": true,
   optionSuccessStatus: 200,
 };
- 
+
 app.use(cors(corsOptions));
 
 // Makes Express parse the JSON body of any requests and adds the body to the req object
@@ -46,9 +46,12 @@ app.post('/resetpassword/send', (req, res) => sendResetPassword(req, res));
 
 app.use((req, res, next) => verifyJwt(req, res, next)); // middleware after signing in
 
+app.post((req, res) => deleteAccount(req, res))
+
 app.post('/resetpassword/confirm', (req, res) => changePassword(req, res));
 
 app.get('/user', (req, res) => getUserInfo(req, res));
+
 
 
 /* 
@@ -62,9 +65,13 @@ app.post('/workspace/new', (req, res) => createWorkspace(req, res));
 
 app.post(`/workspace/join`, (req, res) => joinWorkspace(req, res));
 
+app.post('/workspace/leave', (req, res) => leaveWorkspace(req, res));
+
 app.post('/workspace/invite', (req, res) => inviteUser(req, res));
 
-app.post('/workspace/delete', (req,res) => deleteWorkspace(req, res));
+app.post('/workspace/delete', (req, res) => deleteWorkspace(req, res));
+
+app.post('/workspace/update-last', (req, res) => changeLastWorkspace(req, res));
 
 
 /* 
@@ -74,14 +81,13 @@ app.post('/workspace/delete', (req,res) => deleteWorkspace(req, res));
 */
 app.post('/projects/recent', (req, res) => getRecentProjects(req, res));
 
-app.post('/projects/all', (req, res) => getAllProjects(req,res));
+app.post('/projects/all', (req, res) => getAllProjects(req, res));
 
 app.post('/project/:project_id', (req, res) => getProjectInfo(req, res));
 
 app.put('/projects/new', (req, res) => addNewProject(req, res));
 
-app.post('/projects/delete', (req, res) => deleteProject(req, res));
-
+app.delete('/projects/delete/:project_id', (req, res) => deleteProject(req, res));
 
 /* 
 *
@@ -90,7 +96,7 @@ app.post('/projects/delete', (req, res) => deleteProject(req, res));
 */
 app.get('/entries/all', (req, res) => getAllEntries(req, res));
 
-app.post('/entries/new', (req, res) => createEntry(req, res));
+app.put('/entries/new', (req, res) => createEntry(req, res));
 
 app.post(`/entries/update`, (req, res) => updateEntry(req, res));
 

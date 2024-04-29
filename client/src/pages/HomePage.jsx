@@ -1,13 +1,15 @@
 import { useState, useEffect, useContext } from "react";
-import { workspaceContext } from "./Layout";
+import { userContext } from "./Layout";
 import { useNavigate } from "react-router-dom";
 import { getJwt, verifyData } from "../Auth/jwt";
 import CreateModal from "../modals/CreateModal";
 
 const HomePage = () => {
-    const [recentProjects, setRecentProjects] = useState([]);
-    const workspace = useContext(workspaceContext);
-    const navigate = useNavigate();
+  const [recentProjects, setRecentProjects] = useState([]);
+  const [isModalOpen, setModalOpen] = useState(false);
+  const context = useContext(userContext);
+  const { workspaces } = context || {};
+  const navigate = useNavigate();
 
   useEffect(() => {
     handleGetRecent();
@@ -25,39 +27,13 @@ const HomePage = () => {
           authorization: jwt,
         },
         body: JSON.stringify({
-          workspace_id: workspace,
+          workspace_id: workspaces,
         }),
       });
 
-            // checks only for jwt errors. if there are errors, navigate to sign in
-            // if no error, gets data
-            const { success, data } = await verifyData(res, navigate);
-    
-            if (success) {
-                setRecentProjects(data);
-            }
-
-        } catch (err) {
-            console.log(err);
-        }
-    }
-
-    const recentElems = recentProjects.map(project => {
-        return (
-            <button key={project.project_id} 
-                className="flex flex-col items-center justify-center m-[10px] max-w-sm min-w-[200px] min-h-[150px] bg-white border border-white-200 rounded-lg shadow hover:bg-white-100 dark:bg-white-800 dark:border-white-700 dark:hover:bg-violet-100">
-                    <h5 className="mb-2  font-bold text-black-900 dark:text-black">
-                        
-                    </h5>
-                    <p className="font-bold text-white-700 dark:text-white-400">{project.project_name}</p>
-                </button> 
-        )
-    })
       // checks only for jwt errors. if there are errors, navigate to sign in
       // if no error, gets data
       const { success, data } = await verifyData(res, navigate);
-
-      console.log(data);
 
       if (success) {
         setRecentProjects(data);
