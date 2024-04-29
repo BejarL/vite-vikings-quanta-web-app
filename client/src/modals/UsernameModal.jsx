@@ -1,14 +1,21 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { getJwt } from "../Auth/jwt";
 
 const UsernameModal = ({ isOpen, onClose }) => {
   const [newUsername, setNewUsername] = useState("");
   const [error, setError] = useState(""); // Added error state
+  const [usernameUpdated, setUsernameUpdated] = useState(false)
+
+  useEffect(() => {
+    if(usernameUpdated) {
+      setUsernameUpdated(false)
+    };
+  }, [usernameUpdated]);
 
   const createNewUsername = async () => {
     const jwt = getJwt();
     try {
-      const response = await fetch("http://localhost:3000/user/username", {
+      const response = await fetch("http://localhost:3000/user/change-username", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -19,9 +26,13 @@ const UsernameModal = ({ isOpen, onClose }) => {
       if (!response.ok) {
         throw new Error("Failed to update username");
       }
+      
+      const data = await response.json(); 
+
       setNewUsername("");
       setError("");
       onClose();
+      setUsernameUpdated(true)
     } catch (error) {
       setError(error.message);
     }
@@ -29,6 +40,7 @@ const UsernameModal = ({ isOpen, onClose }) => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
+
     createNewUsername();
   };
 
