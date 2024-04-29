@@ -450,7 +450,7 @@ const Layout = () => {
           {/* Changed the value so the key is undefined instead of the whole context */}
           { !loading ? 
             <userContext.Provider value={{
-              workspace: currentWorkspace ? currentWorkspace.workspace_id : undefined,
+              workspace: currentWorkspace ? currentWorkspace : undefined,
               user: user
             }}>
               <Outlet />

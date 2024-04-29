@@ -1,7 +1,6 @@
 //gets all recent entries for a user
 const getAllEntries = async (req, res) => {
     try {
-
         const { user_id } = req.user
 
         const [entries] = await req.db.query(`SELECT entry_id, start_time, end_time, entry_desc, tag, project_id,
@@ -10,9 +9,9 @@ const getAllEntries = async (req, res) => {
                                               WHERE user_id = :user_id AND deleted_flag = 0
                                               ORDER BY end_time DESC`, {
             user_id
-        })
+        });
 
-        res.json({ success: true, data: entries });
+        res.json({ success: true, entries: entries });
 
     } catch (err) {
         console.log(err);
@@ -22,11 +21,9 @@ const getAllEntries = async (req, res) => {
 
 // create new entry
 const createEntry = async (req, res) => {
-    console.log("/create entry hit")
     try {
-
+        //get variables to be used
         const { user_id } = req.user;
-
         const { start_time,
             end_time,
             entry_desc,
@@ -35,17 +32,26 @@ const createEntry = async (req, res) => {
             workspace_id
         } = req.body;
 
+        //check if all the data needed is entered
+        if (!start_time || !end_time || !entry_desc || !project_id || !workspace_id) {
+            res.json({success: false, err: "Missing information"});
+            return;
+        }
+
+        //create date objects for mysql with dates from query
         let insertStartDate = new Date(start_time);
         let insertEndDate = new Date(end_time);
 
         //begin transaction to ensure both queries both pass or both fail
         await req.db.beginTransaction();
 
+        //insert the entry
         await req.db.query(`INSERT INTO Entries (start_time, end_time, entry_desc, tag, project_id, user_id)
                             VALUES (:insertStartDate, :insertEndDate, :entry_desc, :tag, :project_id,:user_id)`, {
             insertStartDate, insertEndDate, entry_desc, tag, project_id, user_id,
         })
 
+        //add to the change log
         await req.db.query(`INSERT INTO Change_Log (edit_desc, edit_timestamp, user_id, workspace_id, project_id)
                             VALUES ("Created an Entry", NOW(), :user_id, :workspace_id, :project_id)`, {
             user_id, workspace_id, project_id

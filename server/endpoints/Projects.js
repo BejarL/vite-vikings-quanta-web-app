@@ -5,7 +5,7 @@ const getRecentProjects = async (req, res) => {
     if (!workspace_id) {
       res.json({ success: false, err: "missing workspace id" });
       return;
-    }
+    } 
 
     const [recent] = await req.db.query(`SELECT DISTINCT Projects.project_id, project_name 
                                              FROM Projects 
