@@ -3,12 +3,12 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 
 //endpoints
-const { signUp, signIn, getUserInfo, changePassword, sendResetPassword } = require('./endpoints/UserRegistration');
+const { signUp, signIn, getUserInfo, changePassword, sendResetPassword, changeUsername, changeEmail, profileChangePassword } = require('./endpoints/UserRegistration');
 const { getRecentProjects,
-        getAllProjects,                    
-        getProjectInfo,
-        addNewProject,
-        deleteProject } = require('./endpoints/Projects');
+  getAllProjects,
+  getProjectInfo,
+  addNewProject,
+  deleteProject } = require('./endpoints/Projects');
 const { getWorkspaceUsers, changeLastWorkspace, deleteWorkspace, createWorkspace, joinWorkspace, leaveWorkspace, inviteUser } = require('./endpoints/Workspace');
 const { getAllEntries, deleteEntry, updateEntry, createEntry } = require('./endpoints/TimeTracker');
 
@@ -24,7 +24,7 @@ const corsOptions = {
   "access-control-allow-credentials": true,
   optionSuccessStatus: 200,
 };
- 
+
 app.use(cors(corsOptions));
 
 // Makes Express parse the JSON body of any requests and adds the body to the req object
@@ -37,7 +37,7 @@ app.use((req, res, next) => dbConnect(req, res, next));
 *
 * User Registration - /endpoints/UserRegistration.js
 *
-*/ 
+*/
 app.put('/signup', (req, res) => signUp(req, res));
 
 app.post('/signin', (req, res) => signIn(req, res));
@@ -50,7 +50,16 @@ app.post((req, res) => deleteAccount(req, res))
 
 app.post('/resetpassword/confirm', (req, res) => changePassword(req, res));
 
+app.put('/user/change-username', (req, res) => changeUsername(req, res));
+
+app.put('/user/change-email', (req, res) => changeEmail(req, res));
+
+app.put('/user/change-password', (req, res) => profileChangePassword(req, res));
+
 app.get('/user', (req, res) => getUserInfo(req, res));
+
+
+
 
 
 /* 
@@ -68,7 +77,7 @@ app.post('/workspace/leave', (req, res) => leaveWorkspace(req, res));
 
 app.post('/workspace/invite', (req, res) => inviteUser(req, res));
 
-app.post('/workspace/delete', (req,res) => deleteWorkspace(req, res));
+app.post('/workspace/delete', (req, res) => deleteWorkspace(req, res));
 
 app.post('/workspace/update-last', (req, res) => changeLastWorkspace(req, res));
 
@@ -80,13 +89,13 @@ app.post('/workspace/update-last', (req, res) => changeLastWorkspace(req, res));
 */
 app.post('/projects/recent', (req, res) => getRecentProjects(req, res));
 
-app.post('/projects/all', (req, res) => getAllProjects(req,res));
+app.post('/projects/all', (req, res) => getAllProjects(req, res));
 
 app.post('/project/:project_id', (req, res) => getProjectInfo(req, res));
 
 app.put('/projects/new', (req, res) => addNewProject(req, res));
 
-app.post('/projects/delete/:project_id', (req, res) => deleteProject(req, res));
+app.delete('/projects/delete/:project_id', (req, res) => deleteProject(req, res));
 
 /* 
 *

@@ -37,6 +37,13 @@ const LoginPage = () => {
       return;
     }
 
+    //validate email
+    const emailCheck = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailCheck.test(email)) {
+      window.alert("Invalid Email");
+      return;
+    }
+
     //check the passwords
     if (password !== confirm) {
       window.alert("passwords do not match");
@@ -127,9 +134,9 @@ const LoginPage = () => {
 
         {/* Login Page */}
         <div className="z-[1] h-[100%] flex items-center justify-center md:w-[100%]">
-          <div className="relative bg-white p-9 rounded-lg shadow-md w-[400px]  min-w-md min-w-[350px] pt-1 h-[100%] md:flex md:flex-col md:items-center md:h-[90%] md:w-[70%]">
+          <div className="relative bg-white p-9 rounded-lg shadow-md w-[400px] min-w-lg min-w-[350px] pt-1 h-[100%] md:flex md:flex-col md:items-center md:h-[90%] md:w-[70%]">
             {/* Toggle Button */}
-            <div className="self-center mt-4 bg-lightpurple-login rounded-3xl flex justify-evenly mb-4 md:flex md:w-[80%] md:mb-[100px]">
+            <div className="self-center mt-5 bg-lightpurple-login rounded-3xl flex justify-evenly mb-4 md:flex md:w-[80%] md:mb-[100px]">
               <button
                 className={`py-2 px-4 my-1  rounded-3xl font-bold mb:min-w-[110px] ${
                   isLogin ? "text-white bg-darkpurple " : "text-gray-700"
@@ -286,7 +293,7 @@ const LoginPage = () => {
             )}
             <div>
               {isLogin ? (
-                <p className="absolute bottom-[0px] left-0 w-[100%] text-center md:bottom-[10px]">
+                <p className="absolute bottom-[0px] left-0 w-[100%] text-center md:bottom-[300px]">
                   <Link to="/forgot-password" className="text-sky-600">
                     Forgot your password?
                   </Link>

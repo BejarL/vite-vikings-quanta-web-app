@@ -4,7 +4,7 @@ import { clearJwt, getJwt, verifyData } from "../Auth/jwt";
 import LetteredAvatar from "../components/LetteredAvatar";
 import CreateModal from "../modals/CreateModal";
 
-export const workspaceContext = createContext(null);
+export const userContext = createContext(null);
 
 const Layout = () => {
   const [showOffCanvas, setShowOffCanvas] = useState(false);
@@ -155,7 +155,9 @@ const Layout = () => {
               ></path>
             </svg>
           </button>
+          <Link to="/quanta/timetracker">
           <p className="ml-2 text-3xl text-darkpurple">Quanta</p>
+          </Link>
           {/* dropdown button desktop view */}
           <button
             className="hidden ml-[70px] items-center md:flex"
@@ -526,10 +528,14 @@ const Layout = () => {
             </button>
           </div>
           <div className="bg-lightpurple-body w-[100%]">
-            { !loading ? 
-            <workspaceContext.Provider value={currentWorkspace ? {workspace_id: currentWorkspace.workspace_id, user: user } : null}>
+          {/* Changed the value so the key is undefined instead of the whole context */}
+          { !loading ? 
+            <userContext.Provider value={{
+              workspace: currentWorkspace ? currentWorkspace : undefined,
+              user: user
+            }}>
               <Outlet />
-            </workspaceContext.Provider>
+            </userContext.Provider>
             : null
             }
           </div>

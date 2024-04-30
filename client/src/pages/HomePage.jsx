@@ -1,21 +1,22 @@
 import { useState, useEffect, useContext } from "react";
-import { workspaceContext } from "./Layout";
+import { userContext } from "./Layout";
 import { useNavigate } from "react-router-dom";
 import { getJwt, verifyData } from "../Auth/jwt";
 import CreateModal from "../modals/CreateModal";
 
 const HomePage = () => {
-    const [recentProjects, setRecentProjects] = useState([]);
-    const [isModalOpen, setModalOpen] = useState(false)
-    const { workspace } = useContext(workspaceContext);
-    const navigate = useNavigate();
+  const [recentProjects, setRecentProjects] = useState([]);
+  const [isModalOpen, setModalOpen] = useState(false);
+  const context = useContext(userContext);
+  const { workspaces } = context || {};
+  const navigate = useNavigate();
 
-    useEffect(() => {
-      handleGetRecent();
-    }, []);
+  useEffect(() => {
+    handleGetRecent();
+  }, []);
 
-    //fetches the recent projects
-    const handleGetRecent = async () => {
+  //fetches the recent projects
+  const handleGetRecent = async () => {
     const jwt = getJwt();
 
     try {
@@ -26,22 +27,21 @@ const HomePage = () => {
           authorization: jwt,
         },
         body: JSON.stringify({
-          workspace_id: workspace,
+          workspace_id: workspaces,
         }),
       });
 
-        // checks only for jwt errors. if there are errors, navigate to sign in
-        // if no error, gets data
-        const { success, data } = await verifyData(res, navigate);
+      // checks only for jwt errors. if there are errors, navigate to sign in
+      // if no error, gets data
+      const { success, data } = await verifyData(res, navigate);
 
-        if (success) {
-            setRecentProjects(data);
-        }
-
-        } catch (err) {
-            console.log(err);
-        }
-    }  
+      if (success) {
+        setRecentProjects(data);
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
   const recentElems = recentProjects.map((project) => {
     return (

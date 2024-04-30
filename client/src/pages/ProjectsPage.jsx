@@ -1,6 +1,6 @@
 import { useState, useContext, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { workspaceContext } from "./Layout";
+import { userContext } from "./Layout";
 import { getJwt, verifyData } from "../Auth/jwt.js";
 import ProjectModal from "../modals/ProjectModal.jsx";
 
@@ -10,11 +10,13 @@ const ProjectsPage = () => {
   const [searchProject, setSearchProject] = useState("");
 
   const navigate = useNavigate();
-  const { workspace_id } = useContext(workspaceContext);
+  const { workspace } = useContext(userContext);
+
+
 
   useEffect(() => {
     getProjects();
-  }, [workspace_id]); // Added dependency on workspace_id
+  }, []); // Added dependency on workspace_id
 
   const getProjects = async () => {
     const jwt = getJwt();
@@ -26,7 +28,7 @@ const ProjectsPage = () => {
           "Content-Type": "application/json",
           authorization: jwt,
         },
-        body: JSON.stringify({ workspace_id }),
+        body: JSON.stringify({workspace_id: workspace.workspace_id}),
       });
 
       const { success, data } = await verifyData(response, navigate);
@@ -116,7 +118,7 @@ const ProjectsPage = () => {
         <ProjectModal
           isOpen={isModalOpen}
           onClose={handleModalClose}
-          workspace_id={workspace_id}
+          workspace_id={workspace.workspace_id}
           getProjects={getProjects}
         />
       </div>
