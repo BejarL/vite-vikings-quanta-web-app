@@ -70,7 +70,7 @@ const deleteWorkspace = async (req, res) => {
     res.json({ success: false, error: error })
   }
 }
-
+ 
 // create a workspace
 const createWorkspace = async (req, res) => {
   try {

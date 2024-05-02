@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { getJwt } from "../Auth/jwt";
 
-const CreateModal = ({ isOpen, onClose }) => {
+const CreateModal = ({ isOpen, onClose, getUserData }) => {
   const [workspaceName, setWorkspaceName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -13,19 +13,28 @@ const CreateModal = ({ isOpen, onClose }) => {
     setError("");
 
     try {
-      const response = await fetch("/api/workspaces", {
+      const response = await fetch("http://localhost:3000/workspace/new", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           authorization: jwt,
         },
-        body: JSON.stringify({ name: workspaceName }),
+        body: JSON.stringify({ workspace_name: workspaceName }),
       });
+
       if (!response.ok) {
         throw new Error("Failed to create workspace");
       }
       
-      const result = await response.json();
+      const {success, err } = await response.json();
+
+      console.log(getUserData);
+
+      if (success) {
+        getUserData();
+      } else {
+        window.alert("Error Creating workspace")
+      }
 
       onClose();
       alert("Workspace created successfully");

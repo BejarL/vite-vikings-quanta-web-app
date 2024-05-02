@@ -328,6 +328,7 @@ const Layout = () => {
               <CreateModal
             isOpen={isModalOpen}
             onClose={() => setModalOpen(false)}
+            getUserData={() => getUserData()}
           />
            <button  
           className =" flex flex-wrap items-center text-3xl mt-[10px] py-2 px-[10px]">
@@ -489,8 +490,9 @@ const Layout = () => {
               <p className="pl-[10px]">Create</p> 
               </button>
               <CreateModal
-            isOpen={isModalOpen}
-            onClose={() => setModalOpen(false)}
+              isOpen={isModalOpen}
+              onClose={() => setModalOpen(false)}
+              getUserData={() => getUserData()}
           />
            <button  
           className =" flex flex-wrap items-center text-2xl py-2 px-[10px] hover:bg-lightpurple-selected w-[100%]">
