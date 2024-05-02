@@ -148,7 +148,7 @@ const deleteAccount = async (req, res) => {
                         WHERE user_id = :user_id`, {
       user_id
     });
-
+ 
     res.json({ success: true, message: "account successfully deleted" });
 
 
@@ -303,6 +303,17 @@ const changeUsername = async (req, res) => {
     const { username } = req.body;
     const { user_id } = req.user;
 
+    const [[validateUsername]] = await req.db.query(`SELECT username 
+                                                     FROM Users
+                                                     WHERE username = :username AND deleted_flag=0`, {
+                                                      username
+                                                     });
+
+    if (validateUsername) {
+      res.json({success: false, err: "Username already taken"});
+      return;
+    }
+
     await req.db.query(`UPDATE Users SET username = :username WHERE user_id = :user_id`,{
                         user_id, username
                       })
@@ -320,8 +331,8 @@ const changeEmail = async (req, res) => {
     const { user_id } = req.user;
 
     const [[validateEmail]] = await req.db.query(`SELECT email 
-                                                      FROM Users 
-                                                      WHERE email = :email AND deleted_flag=0`,
+                                                  FROM Users 
+                                                  WHERE email = :email AND deleted_flag=0`,
       { email }
     );
 

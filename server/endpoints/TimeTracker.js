@@ -17,7 +17,7 @@ const getAllEntries = async (req, res) => {
         console.log(err);
         res.json({ success: false, err: "Internal server error" })
     }
-}
+} 
 
 // create new entry
 const createEntry = async (req, res) => {
@@ -68,11 +68,15 @@ const createEntry = async (req, res) => {
 }
 
 const updateEntry = async (req, res) => {
+    console.log("update hit");
     try {
 
         const { user_id } = req.user
 
         const { entry_id, start_time, end_time, entry_desc, project_id, workspace_id } = req.body
+
+        const startTime = new Date(start_time);
+        const endTime = new Date(end_time);
 
         //need to figure out what to change, so we build a string below.
         //we start with nothing, then check each value sent. if there is data, then we add onto the update variable to insert into the query
@@ -83,13 +87,13 @@ const updateEntry = async (req, res) => {
             if (update.length != 0) {
                 update += `,`
             }
-            update += `start_time = :start_time `
+            update += `start_time = :startTime `
         }
         if (end_time) {
             if (update.length != 0) {
                 update += `,`
             }
-            update += `end_time = :end_time `
+            update += `end_time = :endTime `
         }
         if (entry_desc) {
             if (update.length != 0) {
@@ -110,33 +114,34 @@ const updateEntry = async (req, res) => {
         await req.db.query(`UPDATE Entries 
                             SET ${update}
                             WHERE entry_id = :entry_id`, {
-            entry_id, start_time, end_time, entry_desc, project_id
+            entry_id, startTime, endTime, entry_desc, project_id
         });
 
         await req.db.query(`INSERT INTO Change_Log (edit_desc, edit_timestamp, user_id, workspace_id, project_id)
                         VALUES ("Edited an Entry", NOW(), :user_id, :workspace_id, :project_id)`, {
             user_id, workspace_id, project_id
         });
-
+ 
         //start transaction
         await req.db.commit();
 
-        res.json({ sucess: true });
+        res.json({ success: true });
 
     } catch (err) {
         console.log(err);
         res.json({ success: false, err: "Internal Server Error" });
     }
 }
-
+ 
 const deleteEntry = async (req, res) => {
     try {
+        const { user_id } = req.user
         const { entry_id, workspace_id, project_id } = req.body;
 
         //begin transaction, so both queries happen or both dont
         await req.db.beginTransaction()
 
-        const query = await req.db.query(`UPDATE Entries 
+        await req.db.query(`UPDATE Entries 
                             SET deleted_flag = 1
                             WHERE entry_id = :entry_id`, {
             entry_id
@@ -150,8 +155,8 @@ const deleteEntry = async (req, res) => {
         //start the transaction
         await req.db.commit();
 
-        res.json({ success: true, query: query })
-
+        res.json({ success: true, message: "Entry Successfully Deleted" })
+ 
     } catch (err) {
         console.log(err);
         res.json({ success: false, err: "Internal Server Error" })
