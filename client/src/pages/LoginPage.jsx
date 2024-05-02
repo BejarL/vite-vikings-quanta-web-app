@@ -16,6 +16,8 @@ const LoginPage = () => {
 
   const navigate = useNavigate();
 
+  const apiUrl = import.meta.env.VITE_API_URL;
+
   const toggleForm = () => {
     setIsLogin((prev) => !prev);
     setUsername("");
@@ -52,7 +54,7 @@ const LoginPage = () => {
 
     //try and hit the endpoint on the server for signing up to create a user
     try {
-      const res = await fetch("http://localhost:3000/signup", {
+      const res = await fetch(`${apiUrl}/signup`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -89,7 +91,7 @@ const LoginPage = () => {
 
     //try and hit the endpoint the endpoint to sign in
     try {
-      const res = await fetch("http://localhost:3000/signin", {
+      const res = await fetch(`${apiUrl}/signin`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

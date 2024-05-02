@@ -2,19 +2,22 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getJwt, verifyData } from "../Auth/jwt";
 
+
 const ProjectDetails = () => {
   const [project, setProject] = useState([]);
   const [totalTime, setTotalTime] = useState(0);
   const { projectId } = useParams();
   const navigate = useNavigate();
-
+  
+  const apiUrl = import.meta.env.VITE_API_URL;
+  
   // Fetch project data on component mount and when projectId changes
   useEffect(() => {
     const fetchProjectData = async () => {
+      const jwt = getJwt();
       try {
-        const jwt = getJwt();
         const response = await fetch(
-          `http://localhost:3000/project/${projectId}`,
+          `${apiUrl}/project/${projectId}`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json", authorization: jwt },

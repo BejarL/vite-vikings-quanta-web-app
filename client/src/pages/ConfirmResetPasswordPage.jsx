@@ -5,6 +5,8 @@ const ConfirmResetPasswordPage = () => {
   const [newPassword, setNewPassword] = useState("");
   const [confirm, setConfirm] = useState("");
 
+  const apiUrl = import.meta.env.VITE_API_URL;
+
   const navigate = useNavigate();
 
   const { jwt } = useParams();
@@ -25,7 +27,7 @@ const ConfirmResetPasswordPage = () => {
     }
 
     try {
-      const res = await fetch("http://localhost:3000/resetpassword/confirm", {
+      const res = await fetch(`${apiUrl}/resetpassword/confirm`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useContext } from "react";
+import { useEffect, useRef, useState, useContext } from "react";
 import { getJwt, verifyData } from "../Auth/jwt";
 import { useNavigate } from "react-router-dom";
 import { userContext } from "./Layout";
@@ -13,6 +13,8 @@ const TimeTrackerPage = () => {
   const [showButton, setShowButton] = useState(true);
   const [entryDesc, setEntryDesc] = useState("");
   const [selectedProject, setSelectedProject] = useState();
+
+  const apiUrl = import.meta.env.VITE_API_URL;
 
   console.log(entries);
 
@@ -67,7 +69,7 @@ const TimeTrackerPage = () => {
     try {
       const jwt = getJwt();
 
-      const response = await fetch("http://localhost:3000/projects/all", {
+      const response = await fetch(`${apiUrl}/projects/all`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -99,15 +101,15 @@ const TimeTrackerPage = () => {
     try {
       const jwt = getJwt();
 
-      const response = await fetch("http://localhost:3000/entries/all", {
+      const response = await fetch(`${apiUrl}/entries/all`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          authorization: jwt
+          authorization: jwt,
         },
-      })
+      });
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (data.success) {
         formatEntries(data.entries);
@@ -115,17 +117,16 @@ const TimeTrackerPage = () => {
         window.alert("Error getting entries");
         console.log(data.err);
       }
-
     } catch (err) {
-      console.log(err)
+      console.log(err);
     }
-  }
+  };
 
   const formatEntries = (entries) => {
     let storageArray = [[]];
     let groupIndex = 0;
     let day = entries[0].end_time.slice(0, 10);
-    
+
     for (let i = 0; i < entries.length; i++) {
       if (entries[i].end_time.startsWith(day)) {
         storageArray[groupIndex].push(entries[i]);
@@ -133,7 +134,7 @@ const TimeTrackerPage = () => {
         //update the 'day'
         day = entries[i].end_time.slice(0, 10);
         // increment the group index
-        groupIndex +=1;
+        groupIndex += 1;
         //push a new empty array onto the storageArray, then push the entry into that array
         storageArray.push([]);
         storageArray[groupIndex].push(entries[i]);
@@ -141,13 +142,13 @@ const TimeTrackerPage = () => {
     }
 
     setEntries(storageArray);
-  }
+  };
 
   const createEntry = async () => {
     try {
       const jwt = getJwt();
 
-      const response = await fetch("http://localhost:3000/entries/new", {
+      const response = await fetch(`${apiUrl}/entries/new`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -198,10 +199,6 @@ const TimeTrackerPage = () => {
                 value={selectedProject}
                 onChange={handleSelectedProject}
               >
-                {/* <option value="">Project</option>
-                            <option value="">Project 1</option>
-                            <option value="">Project 2</option>
-                            <option value="">Project 3</option> */}
                 {projectElems}
               </select>
 

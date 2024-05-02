@@ -15,6 +15,9 @@ const Layout = () => {
   const [user, setUser] = useState("");
   const [isModalOpen, setModalOpen] = useState(false);
 
+  const apiUrl = import.meta.env.VITE_API_URL;
+
+
   const navigate = useNavigate();
   const role = currentWorkspace?.workspace_role;
 
@@ -39,7 +42,7 @@ const Layout = () => {
 
     //try to hit the endpoint to get the users data
     try {
-      const res = await fetch("http://localhost:3000/user", {
+      const res = await fetch(`${apiUrl}/user`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -78,7 +81,7 @@ const Layout = () => {
       setLoading(false);
 
     } catch(err) {
-      console.log(err);
+      console.error(err);
     }
   };
 
@@ -97,7 +100,7 @@ const Layout = () => {
     try {
       const jwt = getJwt();
 
-      await fetch("http://localhost:3000/workspace/update-last", {
+      await fetch(`${apiUrl}/workspace/update-last`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -106,7 +109,7 @@ const Layout = () => {
         body: JSON.stringify({ workspace_id }),
       });
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   };
 

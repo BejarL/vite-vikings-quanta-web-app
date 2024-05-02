@@ -150,10 +150,8 @@ const deleteAccount = async (req, res) => {
     });
 
     res.json({ success: true, message: "account successfully deleted" });
-
-
   } catch (err) {
-    console.log(err);
+    console.error(err);
     res.json({ success: false, err: "Internal Server Error" });
   }
 }
@@ -221,14 +219,14 @@ const changePassword = async (req, res) => {
 const profileChangePassword = async (req, res) => {
   try {
     const { user_id } = req.user
-    const {oldPassword, newPassword } = req.body;
+    const { oldPassword, newPassword } = req.body;
 
     //check new password matches
     const [[userData]] = await req.db.query(`SELECT user_id, password 
                                              FROM Users
                                              WHERE user_id = :user_id AND deleted_flag = 0`, {
-                                              user_id
-                                             });
+      user_id
+    });
     //if the user is found and data is retrieved,
     if (userData) {
       //compare old password to password in db
@@ -242,7 +240,7 @@ const profileChangePassword = async (req, res) => {
       if (passwordMatches) {
         const newHashedPassword = await bcrypt.hash(newPassword, 10);
 
-      //query the database and update the users password
+        //query the database and update the users password
         await req.db.query(
           `UPDATE Users SET password = :newHashedPassword WHERE user_id = :user_id`,
           {
@@ -251,18 +249,18 @@ const profileChangePassword = async (req, res) => {
           }
         );
         res.json({ success: true, message: "Password successfully updated" });
-      //if password does not match, respond false
+        //if password does not match, respond false
       } else {
-        res.json({success: false, err: "Invalid Credentials"});
+        res.json({ success: false, err: "Invalid Credentials" });
       }
 
     } else {
-      res.json({success: false, err: "User not found"});
+      res.json({ success: false, err: "User not found" });
       return;
     }
 
   } catch (err) {
-    res.json({success: false, err: "Internal Server Error"});
+    res.json({ success: false, err: "Internal Server Error" });
     console.log(err);
   }
 }
@@ -303,14 +301,14 @@ const changeUsername = async (req, res) => {
     const { username } = req.body;
     const { user_id } = req.user;
 
-    await req.db.query(`UPDATE Users SET username = :username WHERE user_id = :user_id`,{
-                        user_id, username
-                      })
+    await req.db.query(`UPDATE Users SET username = :username WHERE user_id = :user_id`, {
+      user_id, username
+    })
 
-    res.json({success: true, message: 'Username updated successfully'})
+    res.json({ success: true, message: 'Username updated successfully' })
   } catch (err) {
     console.log(err)
-    res.json({success: false, err: 'Internal server error'})
+    res.json({ success: false, err: 'Internal server error' })
   }
 }
 
@@ -326,20 +324,20 @@ const changeEmail = async (req, res) => {
     );
 
     if (validateEmail) {
-      res.json({success: false, err: "Email already in use."});
+      res.json({ success: false, err: "Email already in use." });
       return;
     }
 
     //query for email
 
-    await req.db.query(`UPDATE Users SET email = :email WHERE user_id = :user_id`,{
-                        user_id, email
-                      })
+    await req.db.query(`UPDATE Users SET email = :email WHERE user_id = :user_id`, {
+      user_id, email
+    })
 
-    res.json({success: true, message: 'email updated successfully'})
+    res.json({ success: true, message: 'email updated successfully' })
   } catch (err) {
     console.log(err)
-    res.json({success: false, err: 'Internal server error'})
+    res.json({ success: false, err: 'Internal server error' })
   }
 }
 
