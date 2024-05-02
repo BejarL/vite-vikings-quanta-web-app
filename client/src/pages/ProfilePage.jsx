@@ -6,7 +6,6 @@ import PasswordModal from "../modals/PasswordModal";
 import EmailModal from "../modals/EmailModal";
 import DeleteAccountModal from "../modals/DeleteAccountModal";
 
-
 const UserProfile = () => {
   const { user } = useContext(userContext);
   const [isUsernameModalOpen, setUsernameModalOpen] = useState(false);
@@ -56,6 +55,15 @@ const UserProfile = () => {
         </div>
 
         {/* Need to add the handle account deletion */}
+        <div className="flex items-center justify-between mb-4">
+          <button onClick={setDeleteModalOpen} className="inline-flex justify-center rounded-md border border-transparent px-4 py-2 text-sm font-medium text-red-700 bg-red-200 hover:bg-red-400 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2">
+            Delete Account
+          </button>
+          <DeleteAccountModal
+            isOpen={isDeleteModalOpen}
+            onClose={() => setDeleteModalOpen(false)}
+          />
+        </div>
         <div className="flex items-center justify-between mb-4">
           <button onClick={setDeleteModalOpen} className="inline-flex justify-center rounded-md border border-transparent px-4 py-2 text-sm font-medium text-red-700 bg-red-200 hover:bg-red-400 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2">
             Delete Account

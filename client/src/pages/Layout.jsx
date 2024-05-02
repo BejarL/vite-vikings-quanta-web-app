@@ -2,6 +2,7 @@ import { useState, useEffect, createContext } from "react";
 import { Outlet, Link, useNavigate } from "react-router-dom";
 import { clearJwt, getJwt, verifyData } from "../Auth/jwt";
 import LetteredAvatar from "../components/LetteredAvatar";
+import CreateModal from "../modals/CreateModal";
 
 export const userContext = createContext(null);
 
@@ -12,6 +13,7 @@ const Layout = () => {
   const [workspaces, setWorkspaces] = useState([]);
   const [loading, setLoading ] = useState(true);
   const [user, setUser] = useState("");
+  const [isModalOpen, setModalOpen] = useState(false);
 
   const navigate = useNavigate();
   const role = currentWorkspace?.workspace_role;
@@ -161,7 +163,7 @@ const Layout = () => {
             className="hidden ml-[70px] items-center md:flex"
             onClick={toggleDropdown}
           >
-            <p className="text-2xl">
+            <p className="text-3xl">
               {currentWorkspace ? currentWorkspace.workspace_name : null}
             </p>
             <svg
@@ -181,7 +183,7 @@ const Layout = () => {
           <div
             className={`${
               !showDropdown ? "" : "md:flex"
-            } hidden w-auto max-h-[200px] px-[20px] border absolute left-[185px] top-[45px] bg-white flex-col`}
+            } hidden w-auto max-h-[200px] px-[20px]  border absolute left-[185px] top-[45px] bg-white flex-col`}
           >
             {workspaceElems}
           </div>
@@ -197,7 +199,7 @@ const Layout = () => {
         <div
           className={`${
             showOffCanvas ? "left-0" : "left-[-250px]"
-          } transition-all absolute w-[250px] bg-lightpurple-login h-[100%] flex flex-col justify-between md:hidden pl-[10px] py-[10px]`}
+          } transition-all absolute w-[250px]  bg-lightpurple-login h-[100%] flex flex-col justify-between md:hidden pl-[10px] py-[10px] z-50`}
         >
           <div>
             {/* drop down for workspace selection mobile view*/}
@@ -284,7 +286,7 @@ const Layout = () => {
               </svg>
               <p className="pl-[10px]">Projects</p>
             </Link>
-            {role === "member" || role === "admin" || role === "Creator" ? (
+            {/* {role === "member" || role === "admin" || role === "Creator" ? ( */}
               <Link
                 className="flex items-center text-3xl mt-[20px] pl-[10px]"
                 to="/quanta/users"
@@ -302,11 +304,51 @@ const Layout = () => {
                 </svg>
                 <p className="pl-[10px]">Users</p>
               </Link>
-            ) : null}
-          </div>
+            {/* ) : null} */}
+          
+          
+          <p className="text-3xl border-b-2 border-slate-100 py-2 mt-5 mr-[10px] pl-[10px]">Workspaces</p>
+          <button  
+          onClick={() => setModalOpen(true)}
+          className =" flex  items-center text-3xl mt-[20px]  px-[10px] ">
+            <svg
+                className="svg2"
+                xmlns="http://www.w3.org/2000/svg"
+                width="1em"
+                height="1em"
+                viewBox="0 0 1200 1200"
+              >
+                <path
+                  fill="black"
+                  d="M600 0C268.629 0 0 268.629 0 600s268.629 600 600 600s600-268.629 600-600S931.371 0 600 0m-95.801 261.841h191.602v242.358h242.358v191.602H695.801v242.358H504.199V695.801H261.841V504.199h242.358z"
+                />
+              </svg>
+              <p className="pl-[10px]">Create</p> 
+              </button>
+              <CreateModal
+            isOpen={isModalOpen}
+            onClose={() => setModalOpen(false)}
+          />
+           <button  
+          className =" flex flex-wrap items-center text-3xl mt-[10px] py-2 px-[10px]">
+            <svg
+                className="svg2"
+                xmlns="http://www.w3.org/2000/svg"
+                width="1.1em"
+                height="1.2em"
+                viewBox="0 0 64 64"
+              >
+                <path
+                  fill="currentColor"
+                  d="M32 2C15.432 2 2 15.432 2 32c0 16.568 13.432 30 30 30s30-13.432 30-30C62 15.432 48.568 2 32 2m1.693 46V37.428H15V27.143h18.693V16L49 32z"
+                />
+              </svg> 
+              <p className=" pl-[10px] ">Join</p>
+              </button>
+              </div>
           <button
             onClick={handleSignout}
-            className="flex items-center text-3xl mt-[20px] pl-[10px]"
+            className="flex items-center text-3xl mt-[20px] pl-[10px] p-2 "
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -321,6 +363,7 @@ const Layout = () => {
             </svg>
             <p className="pl-[10px]">Logout</p>
           </button>
+          
         </div>
         <div className="flex min-h-[100%]">
           {/* sidebar - desktop view*/}
@@ -328,7 +371,7 @@ const Layout = () => {
             <div id="link-menu">
               <Link
                 className={` ${page === "" ? "bg-lightpurple-selected" : null}
-                                        flex items-center text-3xl mt-[20px] p-[10px] hover:bg-lightpurple-selected`}
+                                        flex items-center text-2xl p-[10px] hover:bg-lightpurple-selected`}
                 to="/quanta/"
               >
                 <svg
@@ -348,7 +391,7 @@ const Layout = () => {
                 className={` ${
                   page === "timetracker" ? "bg-lightpurple-selected" : null
                 }
-                                        flex items-center text-3xl mt-[20px] p-[10px] hover:bg-lightpurple-selected`}
+                                        flex items-center text-2xl p-[10px] hover:bg-lightpurple-selected`}
                 to="/quanta/timetracker"
               >
                 <svg
@@ -368,7 +411,7 @@ const Layout = () => {
                 className={` ${
                   page === "projects" ? "bg-lightpurple-selected" : null
                 }
-                                        flex items-center text-3xl mt-[20px] p-[10px] hover:bg-lightpurple-selected`}
+                                        flex items-center text-2xl p-[10px] hover:bg-lightpurple-selected`}
                 to="/quanta/projects"
               >
                 <svg
@@ -389,7 +432,7 @@ const Layout = () => {
                   className={` ${
                     page === "users" ? "bg-lightpurple-selected" : null
                   }
-                                        flex items-center text-3xl mt-[20px] p-[10px] hover:bg-lightpurple-selected`}
+                                        flex items-center text-2xl  p-[10px] hover:bg-lightpurple-selected`}
                   to="/quanta/users"
                 >
                   <svg
@@ -406,11 +449,11 @@ const Layout = () => {
                   <p className="pl-[10px]">Users</p>
                 </Link>
               ) : null}
-              {role === "admin" || role === "Creator" ? (
+              {/* {role === "admin" || role === "Creator" ? ( */}
                 <Link
                   className={` ${
                     page === "audit-log" ? "bg-lightpurple-selected" : null
-                  } flex items-center text-3xl mt-[20px] p-[10px] hover:bg-lightpurple-selected`}
+                  } flex items-center text-2xl p-[10px] hover:bg-lightpurple-selected`}
                   to="/quanta/audit-log"
                 >
                   <svg
@@ -424,13 +467,52 @@ const Layout = () => {
                       d="m213.66 82.34l-56-56A8 8 0 0 0 152 24H56a16 16 0 0 0-16 16v176a16 16 0 0 0 16 16h144a16 16 0 0 0 16-16V88a8 8 0 0 0-2.34-5.66M160 51.31L188.69 80H160ZM200 216H56V40h88v48a8 8 0 0 0 8 8h48zm-45.54-48.85a36.05 36.05 0 1 0-11.31 11.31l11.19 11.2a8 8 0 0 0 11.32-11.32ZM104 148a20 20 0 1 1 20 20a20 20 0 0 1-20-20"
                     ></path>
                   </svg>
-                  <p className="pl-[10px] text-3xl">Audit</p>
+                  <p className="pl-[10px] text-2xl">Audit</p>
                 </Link>
-              ) : null}
+              {/* ) : null} */}
+              <p className="text-2xl border-b-2 border-lightpurple-login py-2 mt-5 mx-[10px] pl-[5px]">Workspaces</p>
+          <button  
+          onClick={() => setModalOpen(true)}
+          className =" flex  items-center text-2xl py-2 px-[10px] hover:bg-lightpurple-selected w-[100%]">
+            <svg
+                className="svg2"
+                xmlns="http://www.w3.org/2000/svg"
+                width="1em"
+                height="1em"
+                viewBox="0 0 1200 1200"
+              >
+                <path
+                  fill="black"
+                  d="M600 0C268.629 0 0 268.629 0 600s268.629 600 600 600s600-268.629 600-600S931.371 0 600 0m-95.801 261.841h191.602v242.358h242.358v191.602H695.801v242.358H504.199V695.801H261.841V504.199h242.358z"
+                />
+              </svg>
+              <p className="pl-[10px]">Create</p> 
+              </button>
+              <CreateModal
+            isOpen={isModalOpen}
+            onClose={() => setModalOpen(false)}
+          />
+           <button  
+          className =" flex flex-wrap items-center text-2xl py-2 px-[10px] hover:bg-lightpurple-selected w-[100%]">
+            <svg
+                className="svg2"
+                xmlns="http://www.w3.org/2000/svg"
+                width="1.1em"
+                height="1.2em"
+                viewBox="0 0 64 64"
+              >
+                <path
+                  fill="currentColor"
+                  d="M32 2C15.432 2 2 15.432 2 32c0 16.568 13.432 30 30 30s30-13.432 30-30C62 15.432 48.568 2 32 2m1.693 46V37.428H15V27.143h18.693V16L49 32z"
+                />
+              </svg> 
+              <p className=" pl-[10px] ">Join</p>
+              </button>
             </div>
+            
             <button
               onClick={handleSignout}
-              className="flex items-center text-3xl mt-[20px] pl-[10px]"
+              className="flex items-center text-3xl pl-[10px] hover:text-red-600 hover:fill-red-600"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -439,7 +521,6 @@ const Layout = () => {
                 viewBox="0 0 24 24"
               >
                 <path
-                  fill="black"
                   d="M5 21q-.825 0-1.412-.587T3 19V5q0-.825.588-1.412T5 3h7v2H5v14h7v2zm11-4l-1.375-1.45l2.55-2.55H9v-2h8.175l-2.55-2.55L16 7l5 5z"
                 ></path>
               </svg>

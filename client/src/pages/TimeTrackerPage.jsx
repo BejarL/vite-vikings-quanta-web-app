@@ -5,6 +5,7 @@ import { userContext } from "./Layout";
 import TimeTrackerDay from "../components/TimeTrackerDay";
 import TimeEntry from "../components/TimeEntry"
 import DatePicker from "react-datepicker";
+import ManualEntryModal from "../modals/ManualEntryModal";
 import "react-datepicker/dist/react-datepicker.css";
 
 export const projectsContext = createContext(null);
@@ -15,7 +16,10 @@ const TimeTrackerPage = () => {
   const [time, setTime] = useState({ hr: 0, min: 0, sec: 0 });
   const [showButton, setShowButton] = useState(true);
   const [entryDesc, setEntryDesc] = useState("");
-  const [selectedProject, setSelectedProject] = useState(-1);
+  const [selectedProject, setSelectedProject] = useState();
+  const [isModalOpen, setModalOpen] = useState(false);
+
+  console.log(entries);
 
   const navigate = useNavigate();
   const { workspace } = useContext(userContext);
@@ -221,7 +225,7 @@ const TimeTrackerPage = () => {
               </select>
 
               {/* add button */}
-              <button className="bg-white text-black p-1 py-2 rounded-md flex items-center md:order-last ">
+              <button className="bg-white text-black p-1 py-2 rounded-md flex items-center md:order-last " onClick={() => setModalOpen(true)}>
                 <svg
                   width="24px"
                   height="24px"
@@ -233,6 +237,10 @@ const TimeTrackerPage = () => {
                   <path d="M7.5 1V14M1 7.5H14" stroke="#000000" />
                 </svg>
               </button>
+              <ManualEntryModal
+              isOpen={isModalOpen}
+              onClose={() => setModalOpen(false)}
+              />
 
               {/* Timer */}
               <div className="border border-gray p-4 py-2 w-3/4 min-w-[201px] rounded-md mr-2 my-2 md:w-1/4 lg:w-1/5 lg:mr-auto">
