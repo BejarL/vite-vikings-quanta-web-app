@@ -37,6 +37,13 @@ const LoginPage = () => {
       return;
     }
 
+    //validate email
+    const emailCheck = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailCheck.test(email)) {
+      window.alert("Invalid Email");
+      return;
+    }
+
     //check the passwords
     if (password !== confirm) {
       window.alert("passwords do not match");

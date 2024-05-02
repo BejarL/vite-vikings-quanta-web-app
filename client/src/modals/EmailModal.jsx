@@ -1,15 +1,22 @@
 import { useState } from "react";
 import { getJwt } from "../Auth/jwt";
 
-const EmailModal = ({ isOpen, onClose }) => {
+const EmailModal = ({ isOpen, onClose, setEmail }) => {
   const [newEmail, setNewEmail] = useState("");
   const [error, setError] = useState("");
 
   const updateEmail = async () => {
+
     const jwt = getJwt();
 
+    const emailCheck = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailCheck.test(newEmail)) {
+      setError("Invalid Email");
+      return;
+    }
+
     try {
-      const response = await fetch("http://localhost:3000/user", {
+      const response = await fetch("http://localhost:3000/user/change-email", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -17,16 +24,21 @@ const EmailModal = ({ isOpen, onClose }) => {
         },
         body: JSON.stringify({ email: newEmail }),
       });
+      
       if (!response.ok) {
         throw new Error("Failed to update email");
       }
-      const data = await response.json();
-      if (data.success) {
+
+      const {success, err} = await response.json();
+
+      if (success) {
+        setEmail(newEmail);
         alert("Email updated successfully");
         onClose();
         setNewEmail("");
+        setError("")
       } else {
-        throw new Error(data.message || "Unknown error occurred");
+        throw new Error(err || "Unknown error occurred");
       }
     } catch (err) {
       setError(err.message);

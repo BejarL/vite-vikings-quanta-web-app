@@ -10,7 +10,7 @@ const PasswordModal = ({ isOpen, onClose }) => {
     const jwt = getJwt();
 
     try {
-      const response = await fetch("http://localhost:3000/user", {
+      const response = await fetch("http://localhost:3000/user/change-password", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -21,12 +21,14 @@ const PasswordModal = ({ isOpen, onClose }) => {
       if (!response.ok) {
         throw new Error("Failed to update password");
       }
-      const data = await response.json();
-      if (data.success) {
+      const {success, err } = await response.json();
+      if (success) {
         alert("Password updated successfully");
+        setNewPassword("");
+        setOldPassword("");
         onClose();
       } else {
-        setError(data.error || "Unknown error occurred");
+        setError(err || "Unknown error occurred");
       }
     } catch (err) {
       setError(err.message);

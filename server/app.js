@@ -3,7 +3,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 
 //endpoints
-const { signUp, signIn, getUserInfo, changePassword, sendResetPassword, changeUsername } = require('./endpoints/UserRegistration');
+const { signUp, signIn, getUserInfo, changePassword, sendResetPassword, changeUsername, changeEmail, profileChangePassword } = require('./endpoints/UserRegistration');
 const { getRecentProjects,
   getAllProjects,
   getProjectInfo,
@@ -31,7 +31,7 @@ app.use(cors(corsOptions));
 app.use(bodyParser.json());
 
 //adds database connection to req.db
-app.use((req, res, next) => dbConnect(req, res, next));
+app.use((req, res, next) => dbConnect(req, res, next));  
 
 /*
 *
@@ -50,7 +50,11 @@ app.post((req, res) => deleteAccount(req, res))
 
 app.post('/resetpassword/confirm', (req, res) => changePassword(req, res));
 
-app.put('/user/change-username', (req, res) => changeUsername(req, res))
+app.put('/user/change-username', (req, res) => changeUsername(req, res));
+
+app.put('/user/change-email', (req, res) => changeEmail(req, res));
+
+app.put('/user/change-password', (req, res) => profileChangePassword(req, res));
 
 app.get('/user', (req, res) => getUserInfo(req, res));
 

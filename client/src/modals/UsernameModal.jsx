@@ -1,16 +1,9 @@
 import { useState, useEffect } from "react";
 import { getJwt } from "../Auth/jwt";
 
-const UsernameModal = ({ isOpen, onClose }) => {
+const UsernameModal = ({ isOpen, onClose, setName }) => {
   const [newUsername, setNewUsername] = useState("");
   const [error, setError] = useState(""); // Added error state
-  const [usernameUpdated, setUsernameUpdated] = useState(false)
-
-  useEffect(() => {
-    if(usernameUpdated) {
-      setUsernameUpdated(false)
-    };
-  }, [usernameUpdated]);
 
   const createNewUsername = async () => {
     const jwt = getJwt();
@@ -27,12 +20,16 @@ const UsernameModal = ({ isOpen, onClose }) => {
         throw new Error("Failed to update username");
       }
       
-      const data = await response.json(); 
+      const { success, err } = await response.json(); 
 
-      setNewUsername("");
-      setError("");
-      onClose();
-      setUsernameUpdated(true)
+      if (success) {
+        setName(newUsername);
+        setNewUsername("");
+        setError("");
+        onClose();
+      } else {
+        setError(err);
+      }
     } catch (error) {
       setError(error.message);
     }
@@ -40,7 +37,6 @@ const UsernameModal = ({ isOpen, onClose }) => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-
     createNewUsername();
   };
 

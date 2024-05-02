@@ -9,6 +9,7 @@ import "react-datepicker/dist/react-datepicker.css";
 
 const TimeTrackerPage = () => {
   const [projects, setProjects] = useState([]);
+  const [entries, setEntries] = useState([]);
   const [startDate, setStartDate] = useState(new Date());
   const [time, setTime] = useState({ hr: 0, min: 0, sec: 0 });
   const [showButton, setShowButton] = useState(true);
@@ -16,13 +17,16 @@ const TimeTrackerPage = () => {
   const [selectedProject, setSelectedProject] = useState();
   const [isModalOpen, setModalOpen] = useState(false);
 
+  console.log(entries);
+
   const navigate = useNavigate();
-  const { workspace_id } = useContext(userContext);
+  const { workspace } = useContext(userContext);
   let id = useRef();
 
   //clears our handleTime function
   useEffect(() => {
     getProjects();
+    getEntries();
     return () => clearInterval(id.current);
   }, []);
 
@@ -72,7 +76,7 @@ const TimeTrackerPage = () => {
           "Content-Type": "application/json",
           authorization: jwt,
         },
-        body: JSON.stringify({ workspace_id }),
+        body: JSON.stringify({ workspace_id: workspace.workspace_id }),
       });
 
       //check if the request was successful, if not do an early return
@@ -94,6 +98,54 @@ const TimeTrackerPage = () => {
     }
   };
 
+  const getEntries = async () => {
+    try {
+      const jwt = getJwt();
+
+      const response = await fetch("http://localhost:3000/entries/all", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          authorization: jwt
+        },
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        formatEntries(data.entries);
+      } else {
+        window.alert("Error getting entries");
+        console.log(data.err);
+      }
+
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
+  const formatEntries = (entries) => {
+    let storageArray = [[]];
+    let groupIndex = 0;
+    let day = entries[0].end_time.slice(0, 10);
+    
+    for (let i = 0; i < entries.length; i++) {
+      if (entries[i].end_time.startsWith(day)) {
+        storageArray[groupIndex].push(entries[i]);
+      } else {
+        //update the 'day'
+        day = entries[i].end_time.slice(0, 10);
+        // increment the group index
+        groupIndex +=1;
+        //push a new empty array onto the storageArray, then push the entry into that array
+        storageArray.push([]);
+        storageArray[groupIndex].push(entries[i]);
+      }
+    }
+
+    setEntries(storageArray);
+  }
+
   const createEntry = async () => {
     try {
       const jwt = getJwt();
@@ -110,7 +162,7 @@ const TimeTrackerPage = () => {
           entry_desc: entryDesc,
           tag: null,
           project_id: selectedProject,
-          workspace_id,
+          workspace_id: workspace.workspace_id,
         }),
       });
 

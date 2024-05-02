@@ -188,7 +188,6 @@ const getUserInfo = async (req, res) => {
 
 //is used to reset a users password
 const changePassword = async (req, res) => {
-
   try {
     //get password from the request and user id
     const { password } = req.body;
@@ -216,6 +215,55 @@ const changePassword = async (req, res) => {
   } catch (err) {
     res.json({ success: false, err: "Internal server error" });
     console.log("error changing password: " + err);
+  }
+}
+
+const profileChangePassword = async (req, res) => {
+  try {
+    const { user_id } = req.user
+    const {oldPassword, newPassword } = req.body;
+
+    //check new password matches
+    const [[userData]] = await req.db.query(`SELECT user_id, password 
+                                             FROM Users
+                                             WHERE user_id = :user_id AND deleted_flag = 0`, {
+                                              user_id
+                                             });
+    //if the user is found and data is retrieved,
+    if (userData) {
+      //compare old password to password in db
+      const hashedOldPassword = `${userData.password}`;
+      const passwordMatches = await bcrypt.compare(
+        oldPassword,
+        hashedOldPassword
+      );
+
+      //if password matches, set the new one
+      if (passwordMatches) {
+        const newHashedPassword = await bcrypt.hash(newPassword, 10);
+
+      //query the database and update the users password
+        await req.db.query(
+          `UPDATE Users SET password = :newHashedPassword WHERE user_id = :user_id`,
+          {
+            user_id,
+            newHashedPassword
+          }
+        );
+        res.json({ success: true, message: "Password successfully updated" });
+      //if password does not match, respond false
+      } else {
+        res.json({success: false, err: "Invalid Credentials"});
+      }
+
+    } else {
+      res.json({success: false, err: "User not found"});
+      return;
+    }
+
+  } catch (err) {
+    res.json({success: false, err: "Internal Server Error"});
+    console.log(err);
   }
 }
 
@@ -266,10 +314,41 @@ const changeUsername = async (req, res) => {
   }
 }
 
+const changeEmail = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const { user_id } = req.user;
+
+    const [[validateEmail]] = await req.db.query(`SELECT email 
+                                                      FROM Users 
+                                                      WHERE email = :email AND deleted_flag=0`,
+      { email }
+    );
+
+    if (validateEmail) {
+      res.json({success: false, err: "Email already in use."});
+      return;
+    }
+
+    //query for email
+
+    await req.db.query(`UPDATE Users SET email = :email WHERE user_id = :user_id`,{
+                        user_id, email
+                      })
+
+    res.json({success: true, message: 'email updated successfully'})
+  } catch (err) {
+    console.log(err)
+    res.json({success: false, err: 'Internal server error'})
+  }
+}
+
 exports.signUp = signUp
 exports.signIn = signIn;
 exports.getUserInfo = getUserInfo;
 exports.sendResetPassword = sendResetPassword;
 exports.deleteAccount = deleteAccount;
 exports.changePassword = changePassword;
+exports.profileChangePassword = profileChangePassword;
 exports.changeUsername = changeUsername;
+exports.changeEmail = changeEmail;
