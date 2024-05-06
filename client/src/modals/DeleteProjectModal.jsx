@@ -1,65 +1,59 @@
 import { useState } from "react";
-import { getJwt, verifyData } from "../Auth/jwt.js";
+import { getJwt } from "../Auth/jwt";
+import { useNavigate } from "react-router-dom";
 
-const ProjectModal = ({ isOpen, onClose, workspace_id, getProjects }) => {
-  const [newProjectName, setNewProjectName] = useState("");
+const DeleteProjectModal = ({ isOpen, onClose }) => {
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
   const apiUrl = import.meta.env.VITE_API_URL;
 
-  const createNewProject = async () => {
+  const deleteAccount = async () => {
+    const jwt = getJwt();
+    setIsLoading(true);
     try {
-      const jwt = getJwt();
-      const response = await fetch(`${apiUrl}/projects/new`, {
-        method: "PUT",
+      const response = await fetch(`${apiUrl}/delete-account`, {
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
           authorization: jwt,
         },
-        body: JSON.stringify({
-          workspace_id,
-          project_name: newProjectName,
-        }),
       });
-
-      const { success, err } = await verifyData(response);
-
-      if (success) {
-        onClose();
-        getProjects();
-      } else {
-        window.alert(err);
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.err || "Failed to delete account");
       }
-    } catch (err) {
-      window.alert(err);
+
+      if (data.success) {
+        onClose();
+        navigate("/");
+      }
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    createNewProject();
+    deleteAccount();
   };
 
-  if (!isOpen) {
-    return null;
-  }
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-center">
       <div className="bg-white rounded-lg overflow-hidden shadow-xl transform transition-all sm:max-w-lg sm:w-full p-4">
         <div className="text-center p-5">
-          <h3 className="text-lg leading-6 font-medium text-gray-900">
-            Create New Project
+          <h3 className="text-2xl leading-6 font-medium text-gray-900">
+            Delete Account
           </h3>
-          <form onSubmit={handleSubmit} className="mt-8 space-y-6">
-            <input
-              type="text"
-              name="project-name"
-              className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-              placeholder="Project name..."
-              value={newProjectName}
-              onChange={(e) => setNewProjectName(e.target.value)}
-              required
-            />
+          <p className="text-lg pt-3 leading-6 font-medium text-gray-900">
+            Are you sure you want to permanently delete your account?
+          </p>
+          <form onSubmit={handleSubmit} className="mt-3 space-y-2">
             <div className="flex justify-center space-x-4 pt-3">
               <button
                 type="button"
@@ -70,11 +64,13 @@ const ProjectModal = ({ isOpen, onClose, workspace_id, getProjects }) => {
               </button>
               <button
                 type="submit"
+                disabled={isLoading}
                 className="inline-flex justify-center rounded-md border border-transparent px-4 py-2 text-sm font-medium text-purple-700 bg-purple-100 hover:bg-purple-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2"
               >
-                Create
+                {isLoading ? "Deleting..." : "Confirm"}
               </button>
             </div>
+            {error && <div className="text-red-500 text-sm">{error}</div>}
           </form>
         </div>
       </div>
@@ -82,4 +78,4 @@ const ProjectModal = ({ isOpen, onClose, workspace_id, getProjects }) => {
   );
 };
 
-export default ProjectModal;
+export default DeleteProjectModal;

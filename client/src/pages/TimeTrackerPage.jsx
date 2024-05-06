@@ -1,23 +1,23 @@
-import React, { useEffect, useRef, useState, useContext, createContext } from "react";
+import { useEffect, useRef, useState, useContext } from "react";
 import { getJwt, verifyData } from "../Auth/jwt";
 import { useNavigate } from "react-router-dom";
 import { userContext } from "./Layout";
-import TimeTrackerDay from "../components/TimeTrackerDay";
-import TimeEntry from "../components/TimeEntry"
 import DatePicker from "react-datepicker";
 import ManualEntryModal from "../modals/ManualEntryModal";
 import "react-datepicker/dist/react-datepicker.css";
 
-export const projectsContext = createContext(null);
 
 const TimeTrackerPage = () => {
   const [projects, setProjects] = useState([]);
   const [entries, setEntries] = useState([]);
+  const [startDate, setStartDate] = useState(new Date());
   const [time, setTime] = useState({ hr: 0, min: 0, sec: 0 });
   const [showButton, setShowButton] = useState(true);
   const [entryDesc, setEntryDesc] = useState("");
   const [selectedProject, setSelectedProject] = useState();
   const [isModalOpen, setModalOpen] = useState(false);
+
+  const apiUrl = import.meta.env.VITE_API_URL;
 
   console.log(entries);
 
@@ -27,7 +27,6 @@ const TimeTrackerPage = () => {
 
   //clears our handleTime function
   useEffect(() => {
-
     getProjects();
     getEntries();
     return () => clearInterval(id.current);
@@ -54,15 +53,6 @@ const TimeTrackerPage = () => {
   };
 
   const handleStop = () => {
-    //if they dont have a desc or project Id, early return and force them to enter one
-    if (!entryDesc) {
-      window.alert("Enter a description");
-      return
-    } else if (selectedProject == -1) {
-      window.alert("Please Select a project");
-      return;
-    }
-
     id.endDate = new Date();
     clearInterval(id.current);
     setTime({ hr: 0, min: 0, sec: 0 });
@@ -82,7 +72,7 @@ const TimeTrackerPage = () => {
     try {
       const jwt = getJwt();
 
-      const response = await fetch("http://localhost:3000/projects/all", {
+      const response = await fetch(`${apiUrl}/projects/all`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -97,6 +87,9 @@ const TimeTrackerPage = () => {
         const { data } = await verifyData(response, navigate);
         setProjects(data);
         // Added a check to see if data has elements to avoid errors
+        if (data.length > 0) {
+          setSelectedProject(data[0].project_id);
+        }
       } else {
         console.error("Failed to fetch projects");
       }
@@ -111,15 +104,15 @@ const TimeTrackerPage = () => {
     try {
       const jwt = getJwt();
 
-      const response = await fetch("http://localhost:3000/entries/all", {
+      const response = await fetch(`${apiUrl}/entries/all`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          authorization: jwt
+          authorization: jwt,
         },
-      })
+      });
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (data.success) {
         formatEntries(data.entries);
@@ -127,17 +120,16 @@ const TimeTrackerPage = () => {
         window.alert("Error getting entries");
         console.log(data.err);
       }
-
     } catch (err) {
-      console.log(err)
+      console.log(err);
     }
-  }
+  };
 
   const formatEntries = (entries) => {
     let storageArray = [[]];
     let groupIndex = 0;
     let day = entries[0].end_time.slice(0, 10);
-    
+
     for (let i = 0; i < entries.length; i++) {
       if (entries[i].end_time.startsWith(day)) {
         storageArray[groupIndex].push(entries[i]);
@@ -145,7 +137,7 @@ const TimeTrackerPage = () => {
         //update the 'day'
         day = entries[i].end_time.slice(0, 10);
         // increment the group index
-        groupIndex +=1;
+        groupIndex += 1;
         //push a new empty array onto the storageArray, then push the entry into that array
         storageArray.push([]);
         storageArray[groupIndex].push(entries[i]);
@@ -153,13 +145,13 @@ const TimeTrackerPage = () => {
     }
 
     setEntries(storageArray);
-  }
+  };
 
   const createEntry = async () => {
     try {
       const jwt = getJwt();
 
-      const response = await fetch("http://localhost:3000/entries/new", {
+      const response = await fetch(`${apiUrl}/entries/new`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -175,13 +167,7 @@ const TimeTrackerPage = () => {
         }),
       });
 
-      const { success, err } = await response.json();
-
-      if (success) {
-        getEntries();
-      } else {
-        window.alert("Error creating entry, please try again")
-      }
+      console.log(response);
     } catch (err) {
       console.log(err);
     }
@@ -194,10 +180,6 @@ const TimeTrackerPage = () => {
       </option>
     );
   });
-
-  const entryElems = entries.map(entryGroup => {
-    return <TimeTrackerDay entryGroup = {entryGroup} key={entryGroup[0].entry_id}/>
-  })
 
   return (
     <>
@@ -220,7 +202,6 @@ const TimeTrackerPage = () => {
                 value={selectedProject}
                 onChange={handleSelectedProject}
               >
-                <option value={-1}>Select Project</option>
                 {projectElems}
               </select>
 
@@ -295,11 +276,70 @@ const TimeTrackerPage = () => {
               )}
             </div>
           </div>
-          {/* Entries go here */}
-          <div>
-            <projectsContext.Provider value={projects ? {projects: projects, getEntries: getEntries }: null}>
-              {entryElems}
-            </projectsContext.Provider>
+
+          {/* Title of Entry Table */}
+          <p className="p-4 text-xl">Recent</p>
+
+          {/* Entry Table */}
+          <div className="shadow-lg border bg-white border-gray-300 min-w-[320px] rounded-lg md:mb-4 grid grid-cols-2 md:grid-cols-1 place-items-center">
+            <div className="flex flex-wrap md:mb-4 grid-cols-4 col-span-2 ">
+              <div className="w-full bg-lightpurple-login p-2 pl-6 rounded-t-lg mb-0.5">
+                Today
+              </div>
+              <input
+                type="text"
+                placeholder="Description"
+                className="border bg-lightpurple w-1/2 placeholder-gray-950 border-gray300 ml-2 p-4 py-2 rounded-md mr-2 my-2 lg:w-1/4 "
+              />
+              <select className="border border-gray-300 px-4 py-2 rounded-md w-2/5 mr-2 my-2 lg:w-1/4">
+                <option value="">Project</option>
+                <option value="">Project 1</option>
+                <option value="">Project 2</option>
+                <option value="">Project 3</option>
+              </select>
+
+              {/* Start time */}
+              <input
+                type="text"
+                placeholder="3:00pm"
+                className="border border-gray p-4 ml-2 py-2 w-2/5  rounded-md mr-2 my-2 md:w-1/5 lg:w-[8%] "
+              />
+
+              {/* End time */}
+              <input
+                type="text"
+                placeholder="3:00pm"
+                className="border border-gray p-4 ml-2 py-2 w-2/5 rounded-md mr-2 my-2 md:w-1/5 lg:w-[8%] "
+              />
+
+              {/* Date */}
+              <div className="customDatePickerWidth w-[100px]">
+                <DatePicker
+                  selected={startDate}
+                  onChange={(date) => setStartDate(date)}
+                  className="border border-gray p-2 my-2 rounded w-5/6 lg:w-full static"
+                />
+              </div>
+              {/* Hours Tracked */}
+              <div className="border border-gray p-4 ml-2 py-2 w-2/6 rounded-md mr-2 my-2 md:w-1/6 lg:w-[8%] lg:mr-auto">
+                1.5hrs
+              </div>
+
+              {/* Delete button */}
+              <button className="bg-gray text-black p-2 py-2 rounded-md mr-1 md:order-3  ">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="2em"
+                  height="2em"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    fill="currentColor"
+                    d="M18 19a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3V7H4V4h4.5l1-1h4l1 1H19v3h-1zM6 7v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2-2V7zm12-1V5h-4l-1-1h-3L9 5H5v1zM8 9h1v10H8zm6 0h1v10h-1z"
+                  />
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
       </div>

@@ -11,6 +11,8 @@ const HomePage = () => {
   const { workspaces } = context || {};
   const navigate = useNavigate();
 
+  const apiUrl = import.meta.env.VITE_API_URL;
+
   useEffect(() => {
     handleGetRecent();
   }, []);
@@ -20,7 +22,7 @@ const HomePage = () => {
     const jwt = getJwt();
 
     try {
-      const res = await fetch("http://localhost:3000/projects/recent", {
+      const res = await fetch(`${apiUrl}/projects/recent`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

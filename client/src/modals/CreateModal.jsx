@@ -1,11 +1,14 @@
 import { useState } from "react";
-import { getJwt } from "../Auth/jwt";
+import { getJwt, verifyData } from "../Auth/jwt";
 
-const CreateModal = ({ isOpen, onClose, getUserData }) => {
+
+const CreateModal = ({ isOpen, onClose }) => {
   const [workspaceName, setWorkspaceName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-
+  
+  const apiUrl = import.meta.env.VITE_API_URL;
+  
   const createWorkspace = async () => {
     const jwt = getJwt();
 
@@ -13,31 +16,30 @@ const CreateModal = ({ isOpen, onClose, getUserData }) => {
     setError("");
 
     try {
-      const response = await fetch("http://localhost:3000/workspace/new", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          authorization: jwt,
-        },
-        body: JSON.stringify({ workspace_name: workspaceName }),
-      });
-
+      const response = await fetch(
+        `${apiUrl}/workspaces/new`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            authorization: jwt,
+          },
+          body: JSON.stringify({ name: workspaceName }),
+        }
+      );
       if (!response.ok) {
         throw new Error("Failed to create workspace");
       }
-      
-      const {success, err } = await response.json();
 
-      console.log(getUserData);
+      const { success, err } = await verifyData(response);
 
       if (success) {
-        getUserData();
+        onClose();
+        verifyData();
+        alert("Workspace created successfully");
       } else {
-        window.alert("Error Creating workspace")
+        window.alert(err);
       }
-
-      onClose();
-      alert("Workspace created successfully");
     } catch (err) {
       setError(err.message);
     } finally {
@@ -71,7 +73,7 @@ const CreateModal = ({ isOpen, onClose, getUserData }) => {
               required
             />
             {error && <p className="text-red-500">{error}</p>}
-            <div className="flex justify-end space-x-4">
+            <div className="flex justify-center space-x-4 pt-3">
               <button
                 type="button"
                 className="inline-flex justify-center rounded-md border border-transparent px-4 py-2 text-sm font-medium text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"

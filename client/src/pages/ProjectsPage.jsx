@@ -3,37 +3,37 @@ import { Link, useNavigate } from "react-router-dom";
 import { userContext } from "./Layout";
 import { getJwt, verifyData } from "../Auth/jwt.js";
 import ProjectModal from "../modals/ProjectModal.jsx";
+import DeleteProjectModal from "../modals/DeleteProjectModal.jsx";
 
 const ProjectsPage = () => {
   const [projects, setProjects] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchProject, setSearchProject] = useState("");
 
+  const apiUrl = import.meta.env.VITE_API_URL;
+
   const navigate = useNavigate();
   const { workspace } = useContext(userContext);
 
-
-
   useEffect(() => {
     getProjects();
-  }, []); // Added dependency on workspace_id
+  }, []); 
 
   const getProjects = async () => {
     const jwt = getJwt();
 
     try {
-      const response = await fetch("http://localhost:3000/projects/all", {
+      const response = await fetch(`${apiUrl}/projects/all`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           authorization: jwt,
         },
-        body: JSON.stringify({workspace_id: workspace.workspace_id}),
+        body: JSON.stringify({ workspace_id: workspace.workspace_id }),
       });
 
       const { success, data } = await verifyData(response, navigate);
       if (success) {
-        // The API should provide the 'total_time' as a part of each project's data
         setProjects(data);
       } else {
         window.alert("Error getting data");
@@ -52,13 +52,13 @@ const ProjectsPage = () => {
   );
 
   const deleteProject = async (projectId) => {
-    try {
-      const jwt = getJwt();
+    const jwt = getJwt();
 
+    try {
       const response = await fetch(
-        `http://localhost:3000/projects/delete/${projectId}`,
+        `${apiUrl}/projects/delete/${projectId}`,
         {
-          method: "DELETE",
+          method: "POST",
           headers: {
             "Content-Type": "application/json",
             authorization: jwt,
@@ -66,7 +66,7 @@ const ProjectsPage = () => {
         }
       );
 
-      //verify the data, make sure the error isnt jwt related then return the json res object
+      // verify the data, make sure the error isnt jwt related then return the json res object
       const { success, err } = await verifyData(response);
 
       if (success) {
@@ -110,7 +110,7 @@ const ProjectsPage = () => {
       <div>
         <button
           className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded"
-          onClick={() => setIsModalOpen(true)} // Open the modal to create a new project
+          onClick={() => setIsModalOpen(true)}
           aria-label="Open modal to add new project"
         >
           New Project +
