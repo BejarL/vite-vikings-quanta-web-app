@@ -6,8 +6,8 @@ import DatePicker from "react-datepicker";
 
 const TimeEntry = ({ entry }) => {
     const [entryDesc, setEntryDesc] = useState(entry.entry_desc);
-    const [startTime, setStartTime] = useState("");
-    const [endTime, setEndTime] = useState("");
+    const [startTime, setStartTime] = useState(entry.start_time.slice(11,16));
+    const [endTime, setEndTime] = useState(entry.end_time.slice(11,16));
     const [timeDay, setTimeDay] = useState(entry.end_time);
     const [projectId, setProjectId] = useState(entry.project_id); 
     
@@ -15,15 +15,8 @@ const TimeEntry = ({ entry }) => {
     const { workspace } = useContext(userContext);
 
     const initial = useRef(true);
-    const time = useRef();
 
-    //use effect to set time variables 
-    useEffect(() => {
-      handleUpdateTime();
-      time.start = entry.startTime;
-      time.end = entry.endTime;
-    }, [])
-
+   
     //debouncing to reduce api calls when updating entries
     useEffect(() => {
       if (initial.current) {
@@ -34,24 +27,7 @@ const TimeEntry = ({ entry }) => {
         }, 2000);
         return () => clearTimeout(interval);
       }
-    }, [entryDesc, time.start, time.end, projectId]);
-
-    const handleUpdateTime = () => {
-      const start = updateTime(entry.start_time);
-      const end = updateTime(entry.end_time);
-      setStartTime(start);
-      setEndTime(end);
-    }
-
-    const updateTime = (dateString) => {
-        const date = new Date(dateString);
-        const hours = date.getHours();
-        const minutes = date.getMinutes();
-        const ampm = hours >= 12 ? 'PM' : 'AM';
-        const formattedHours = hours % 12 === 0 ? 12 : hours % 12;
-        const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
-        return `${formattedHours}:${formattedMinutes}${ampm}`;
-    }
+    }, [entryDesc, projectId]);
 
     const handleProjectId = (e) => {
         setProjectId(e.target.value);
@@ -62,23 +38,12 @@ const TimeEntry = ({ entry }) => {
     }
 
     const handleStartTime = (e) => {
+      console.log(typeof e.target.value);
       setStartTime(e.target.value);
     }
 
     const handleEndTime = (e) => {
       setEndTime(e.target.value);
-    }
-    
-    //two different states per time 
-    // one for the input field 
-    // one for the actual date object - maybe store in a useRef
-    const handleStartTimeBlur = () => {
-      //function to auto fill
-      
-    }
-
-    const handleEndTimeBlur = () => {
-      //function to autofill
     }
 
     //is used to delete an entry
@@ -114,7 +79,6 @@ const TimeEntry = ({ entry }) => {
     }
 
     const updateEntry = async () => {
-        console.log("here");
         try {
             const jwt = getJwt();
 
@@ -176,21 +140,21 @@ const TimeEntry = ({ entry }) => {
                 <div>
                   
                 </div>
-                <input 
-                  type="text" 
-                  placeholder="3:00pm" 
-                  className="border border-gray p-4 ml-2 py-2 w-2/5 rounded-md mr-2 my-2 md:w-1/5 lg:w-[8%]" 
+                <input
+                  type="time"
                   value={startTime}
                   onChange={handleStartTime}
-                  onBlur={handleStartTimeBlur}/>
+                  className="relative appearance-none rounded-none pl-[40px] m-5 w-[120px] py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                  placeholder="0:00"
+                />
                 {/* End time */}
-                <input 
-                  type="text" 
-                  placeholder="3:00pm" 
-                  className="border border-gray p-4 ml-2 py-2 w-2/5 rounded-md mr-2 my-2 md:w-1/5 lg:w-[8%]" 
+                <input
+                  type="time"
                   value={endTime}
                   onChange={handleEndTime}
-                  onBlur={handleEndTimeBlur}/>
+                  className="relative appearance-none rounded-none pl-[40px] m-5 w-[120px] py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                  placeholder="0:00"
+                />
                 {/* Date */}
                 <div className="customDatePickerWidth w-[100px]">
                         <DatePicker
