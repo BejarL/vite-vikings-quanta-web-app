@@ -3,8 +3,6 @@ import TimeEntry from './TimeEntry'
 const TimeTrackerDay = ({ entryGroup }) => {
 
     const formatDay = (end_time) => {
-        console.log(end_time)
-
         if (!end_time) {
             return "";
         }

@@ -131,17 +131,29 @@ const TimeTrackerPage = () => {
     }
   }
 
+  //is a helper function when sorting entries, formats based on local time
+  const formatDay = (dateObj) => {
+    const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    let formattedDate = new Date(dateObj);
+    formattedDate.toLocaleString('en-US', { timeZone: userTimeZone });
+    return formattedDate.toString().slice(0, 10);
+  }
+
+  //sorts entries into a two dimensional array based on the entries end time
   const formatEntries = (entries) => {
     let storageArray = [[]];
     let groupIndex = 0;
-    let day = entries[0].end_time.slice(0, 10);
+    let day = formatDay(entries[0].end_time);
     
     for (let i = 0; i < entries.length; i++) {
-      if (entries[i].end_time.startsWith(day)) {
+      const endTime = formatDay(entries[i].end_time)
+      
+      if (endTime.startsWith(day)) {
         storageArray[groupIndex].push(entries[i]);
       } else {
+        
         //update the 'day'
-        day = entries[i].end_time.slice(0, 10);
+        day = formatDay(entries[i].end_time)
         // increment the group index
         groupIndex +=1;
         //push a new empty array onto the storageArray, then push the entry into that array
@@ -149,7 +161,6 @@ const TimeTrackerPage = () => {
         storageArray[groupIndex].push(entries[i]);
       }
     }
-
     setEntries(storageArray);
   }
 
