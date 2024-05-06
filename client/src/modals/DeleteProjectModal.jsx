@@ -1,33 +1,34 @@
 import { useState } from "react";
 import { getJwt } from "../Auth/jwt";
-import { useNavigate } from "react-router-dom";
 
-const DeleteProjectModal = ({ isOpen, onClose }) => {
+const DeleteProjectModal = ({ isOpen, onClose, projectId, onProjectDelete }) => {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
 
   const apiUrl = import.meta.env.VITE_API_URL;
 
-  const deleteAccount = async () => {
+  const deleteProject = async (projectId) => {
     const jwt = getJwt();
     setIsLoading(true);
     try {
-      const response = await fetch(`${apiUrl}/delete-account`, {
-        method: "POST",
+      const response = await fetch(`${apiUrl}/projects/delete/${projectId}`, {
+        method: "DELETE",
         headers: {
           "Content-Type": "application/json",
           authorization: jwt,
         },
       });
+
+      // verify the data, make sure the error isnt jwt related then return the json res object
       const data = await response.json();
       if (!response.ok) {
-        throw new Error(data.err || "Failed to delete account");
+        throw new Error(data.err || "Failed to delete project");
       }
 
       if (data.success) {
+        console.log(`Delete successful for project ID: ${projectId}`);
         onClose();
-        navigate("/");
+        onProjectDelete(projectId);
       }
     } catch (error) {
       setError(error.message);
@@ -38,7 +39,7 @@ const DeleteProjectModal = ({ isOpen, onClose }) => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    deleteAccount();
+    deleteProject(projectId);
   };
 
   if (!isOpen) return null;
@@ -48,10 +49,10 @@ const DeleteProjectModal = ({ isOpen, onClose }) => {
       <div className="bg-white rounded-lg overflow-hidden shadow-xl transform transition-all sm:max-w-lg sm:w-full p-4">
         <div className="text-center p-5">
           <h3 className="text-2xl leading-6 font-medium text-gray-900">
-            Delete Account
+            Delete Project
           </h3>
           <p className="text-lg pt-3 leading-6 font-medium text-gray-900">
-            Are you sure you want to permanently delete your account?
+            Are you sure you want to permanently delete this project?
           </p>
           <form onSubmit={handleSubmit} className="mt-3 space-y-2">
             <div className="flex justify-center space-x-4 pt-3">

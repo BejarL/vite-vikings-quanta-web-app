@@ -1,14 +1,13 @@
 import { useState } from "react";
 import { getJwt, verifyData } from "../Auth/jwt";
 
-
 const CreateModal = ({ isOpen, onClose }) => {
   const [workspaceName, setWorkspaceName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  
+
   const apiUrl = import.meta.env.VITE_API_URL;
-  
+
   const createWorkspace = async () => {
     const jwt = getJwt();
 
@@ -16,26 +15,22 @@ const CreateModal = ({ isOpen, onClose }) => {
     setError("");
 
     try {
-      const response = await fetch(
-        `${apiUrl}/workspaces/new`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            authorization: jwt,
-          },
-          body: JSON.stringify({ name: workspaceName }),
-        }
-      );
+      const response = await fetch(`${apiUrl}/workspace/new`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          authorization: jwt,
+        },
+        body: JSON.stringify({ workspace_name: workspaceName }),
+      });
+
+      const { success, err } = await verifyData(response);
       if (!response.ok) {
         throw new Error("Failed to create workspace");
       }
 
-      const { success, err } = await verifyData(response);
-
       if (success) {
         onClose();
-        verifyData();
         alert("Workspace created successfully");
       } else {
         window.alert(err);

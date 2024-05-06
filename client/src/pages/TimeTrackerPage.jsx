@@ -158,7 +158,7 @@ const TimeTrackerPage = () => {
         groupIndex +=1;
         //push a new empty array onto the storageArray, then push the entry into that array
         storageArray.push([]);
-        storageArray[groupIndex].push(entries[i]);
+        storageArray[groupIndex].push(element);
       }
     }
     setEntries(storageArray);
@@ -234,7 +234,10 @@ const TimeTrackerPage = () => {
               </select>
 
               {/* add button */}
-              <button className="bg-white text-black p-1 py-2 rounded-md flex items-center md:order-last " onClick={() => setModalOpen(true)}>
+              <button
+                className="bg-white text-black p-1 py-2 rounded-md flex items-center md:order-last "
+                onClick={() => setModalOpen(true)}
+              >
                 <svg
                   width="24px"
                   height="24px"
@@ -247,8 +250,8 @@ const TimeTrackerPage = () => {
                 </svg>
               </button>
               <ManualEntryModal
-              isOpen={isModalOpen}
-              onClose={() => setModalOpen(false)}
+                isOpen={isModalOpen}
+                onClose={() => setModalOpen(false)}
               />
 
               {/* Timer */}
