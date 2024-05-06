@@ -7,7 +7,9 @@ import DeleteProjectModal from "../modals/DeleteProjectModal.jsx";
 
 const ProjectsPage = () => {
   const [projects, setProjects] = useState([]);
+  const [currentProjectId, setCurrentProjectId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [searchProject, setSearchProject] = useState("");
 
   const apiUrl = import.meta.env.VITE_API_URL;
@@ -17,7 +19,7 @@ const ProjectsPage = () => {
 
   useEffect(() => {
     getProjects();
-  }, []); 
+  }, []);
 
   const getProjects = async () => {
     const jwt = getJwt();
@@ -51,34 +53,6 @@ const ProjectsPage = () => {
     project.project_name.toLowerCase().includes(searchProject.toLowerCase())
   );
 
-  const deleteProject = async (projectId) => {
-    const jwt = getJwt();
-
-    try {
-      const response = await fetch(
-        `${apiUrl}/projects/delete/${projectId}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            authorization: jwt,
-          },
-        }
-      );
-
-      // verify the data, make sure the error isnt jwt related then return the json res object
-      const { success, err } = await verifyData(response);
-
-      if (success) {
-        getProjects();
-      } else {
-        window.alert(err);
-      }
-    } catch (err) {
-      window.alert(err);
-    }
-  };
-
   const handleModalClose = () => {
     setIsModalOpen(false);
     getProjects();
@@ -89,6 +63,11 @@ const ProjectsPage = () => {
     const [hours, minutes] = timeString.split(":");
     return `${hours}h ${minutes}m`;
   };
+
+  const handleProjectDelete = (projectId) => {
+  const updatedProjects = projects.filter(project => project.project_id !== projectId);
+  setProjects(updatedProjects);
+};
 
   return (
     <div className="container mx-auto p-4 ">
@@ -146,7 +125,10 @@ const ProjectsPage = () => {
                 </td>
                 <td className="py-4 px-6 border-b border-gray-200 text-end">
                   <button
-                    onClick={() => deleteProject(project.project_id)}
+                    onClick={() => {
+                      setCurrentProjectId(project.project_id);
+                      setIsDeleteModalOpen(true);
+                    }}
                     className="text-white p-1 rounded-full inline-flex items-center justify-center"
                     aria-label="Delete project"
                   >
@@ -177,6 +159,12 @@ const ProjectsPage = () => {
                       ></path>
                     </svg>
                   </button>
+                  <DeleteProjectModal
+                    isOpen={isDeleteModalOpen}
+                    onClose={() => setIsDeleteModalOpen(false)}
+                    projectId={currentProjectId}
+                    onProjectDelete={handleProjectDelete}
+                  />
                 </td>
               </tr>
             ))}

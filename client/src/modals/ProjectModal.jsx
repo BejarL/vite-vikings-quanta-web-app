@@ -34,8 +34,7 @@ const ProjectModal = ({ isOpen, onClose, workspace_id, getProjects }) => {
     }
   };
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
+  const handleSubmit = () => {
     createNewProject();
   };
 

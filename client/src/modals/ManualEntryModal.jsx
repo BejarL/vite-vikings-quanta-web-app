@@ -10,8 +10,6 @@ const ManualEntryModal = ({ isOpen, onClose }) => {
   const [error, setError] = useState("");
   const [startDate, setStartDate] = useState(new Date());
 
- 
-
   const handleSubmit = (event) => {
     event.preventDefault();
   };

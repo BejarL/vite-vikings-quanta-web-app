@@ -9,7 +9,6 @@ const DeleteAccountModal = ({ isOpen, onClose }) => {
 
   const apiUrl = import.meta.env.VITE_API_URL;
 
-
   const deleteAccount = async () => {
     const jwt = getJwt();
     setIsLoading(true);

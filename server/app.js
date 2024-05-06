@@ -31,7 +31,7 @@ app.use(cors(corsOptions));
 app.use(bodyParser.json());
 
 //adds database connection to req.db
-app.use((req, res, next) => dbConnect(req, res, next));  
+app.use((req, res, next) => dbConnect(req, res, next));
 
 /*
 *

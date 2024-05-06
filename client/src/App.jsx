@@ -29,7 +29,7 @@ const App = () => {
           <Route
             path="/quanta/projects/:projectId"
             element={<ProjectDetails />}
-          />
+          />    
           <Route path="profile" element={<ProfilePage />} />
           <Route path="audit-log" element={<ProfilePage />} />
         </Route>

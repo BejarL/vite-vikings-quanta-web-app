@@ -6,7 +6,6 @@ import DatePicker from "react-datepicker";
 import ManualEntryModal from "../modals/ManualEntryModal";
 import "react-datepicker/dist/react-datepicker.css";
 
-
 const TimeTrackerPage = () => {
   const [projects, setProjects] = useState([]);
   const [entries, setEntries] = useState([]);
@@ -130,17 +129,17 @@ const TimeTrackerPage = () => {
     let groupIndex = 0;
     let day = entries[0].end_time.slice(0, 10);
 
-    for (let i = 0; i < entries.length; i++) {
-      if (entries[i].end_time.startsWith(day)) {
-        storageArray[groupIndex].push(entries[i]);
+    for (const element of entries) {
+      if (element.end_time.startsWith(day)) {
+        storageArray[groupIndex].push(element);
       } else {
         //update the 'day'
-        day = entries[i].end_time.slice(0, 10);
+        day = element.end_time.slice(0, 10);
         // increment the group index
         groupIndex += 1;
         //push a new empty array onto the storageArray, then push the entry into that array
         storageArray.push([]);
-        storageArray[groupIndex].push(entries[i]);
+        storageArray[groupIndex].push(element);
       }
     }
 
@@ -206,7 +205,10 @@ const TimeTrackerPage = () => {
               </select>
 
               {/* add button */}
-              <button className="bg-white text-black p-1 py-2 rounded-md flex items-center md:order-last " onClick={() => setModalOpen(true)}>
+              <button
+                className="bg-white text-black p-1 py-2 rounded-md flex items-center md:order-last "
+                onClick={() => setModalOpen(true)}
+              >
                 <svg
                   width="24px"
                   height="24px"
@@ -219,8 +221,8 @@ const TimeTrackerPage = () => {
                 </svg>
               </button>
               <ManualEntryModal
-              isOpen={isModalOpen}
-              onClose={() => setModalOpen(false)}
+                isOpen={isModalOpen}
+                onClose={() => setModalOpen(false)}
               />
 
               {/* Timer */}
