@@ -5,19 +5,20 @@ import { getJwt } from '../Auth/jwt';
 import DatePicker from "react-datepicker";
 
 const TimeEntry = ({ entry }) => {
-    const [entryDesc, setEntryDesc] = useState(entry.entry_desc);
-    const [startTime, setStartTime] = useState(entry.start_time.slice(11,16));
-    const [endTime, setEndTime] = useState(entry.end_time.slice(11,16));
-    const [timeDay, setTimeDay] = useState(entry.end_time);
-    const [projectId, setProjectId] = useState(entry.project_id); 
-    
-    const { projects: projectsInfo, getEntries } = useContext(projectsContext);
-    const { workspace } = useContext(userContext);
+  const [entryDesc, setEntryDesc] = useState(entry.entry_desc);
+  const [startTime, setStartTime] = useState(entry.start_time.slice(11,16));
+  const [endTime, setEndTime] = useState(entry.end_time.slice(11,16));
+  const [timeDay, setTimeDay] = useState(entry.end_time);
+  const [projectId, setProjectId] = useState(entry.project_id); 
+  
+  const { projects: projectsInfo, getEntries } = useContext(projectsContext);
+  const { workspace } = useContext(userContext);
+  
+  const initial = useRef(true);
 
-    const initial = useRef(true);
+  
 
-   
-    //debouncing to reduce api calls when updating entries
+    //debouncing ;to reduce api calls when updating entries
     useEffect(() => {
       if (initial.current) {
         initial.current = false;
@@ -27,7 +28,7 @@ const TimeEntry = ({ entry }) => {
         }, 2000);
         return () => clearTimeout(interval);
       }
-    }, [entryDesc, projectId]);
+    }, [entryDesc, startTime, endTime, projectId]);
 
     const handleProjectId = (e) => {
         setProjectId(e.target.value);
@@ -79,8 +80,11 @@ const TimeEntry = ({ entry }) => {
     }
 
     const updateEntry = async () => {
-        try {
+          try {
             const jwt = getJwt();
+
+            const startingTime = getNewTime(entry.start_time, startTime);
+            const endingTime = getNewTime(entry.end_time, endTime);
 
             const response = await fetch("http://localhost:3000/entries/update", {
               method: "POST",
@@ -90,8 +94,8 @@ const TimeEntry = ({ entry }) => {
               },
               body: JSON.stringify({
                 entry_id: entry.entry_id, 
-                start_time: time.start,
-                end_time: time.end,
+                start_time: startingTime,
+                end_time: endingTime,
                 entry_desc: entryDesc,
                 project_id: projectId,
                 workspace_id: workspace.workspace_id
@@ -102,6 +106,7 @@ const TimeEntry = ({ entry }) => {
 
             if (success) {
               getEntries();
+              console.log("successfully updated")
             } else {
               window.alert("Error updating entry: " + err);
             }
@@ -116,6 +121,16 @@ const TimeEntry = ({ entry }) => {
         }
     }
 
+    //updates new time to reflect changes in state
+    const getNewTime = (initialDate, time) => {
+      const startDate = new Date(initialDate);
+      console.log(typeof startDate)
+      const timeValues = time.split(":");
+      startDate.setHours(timeValues[0]);
+      startDate.setMinutes(timeValues[1]);
+      return startDate;
+    }
+
     const projectElems = projectsInfo.map((item) => {
         return (
           <option value={item.project_id} key={item.project_id}>
@@ -125,26 +140,25 @@ const TimeEntry = ({ entry }) => {
       });
 
     return (
-        <div className="shadow-lg border bg-white border-gray-300 min-w-[320px] rounded-lg md:mb-4 grid grid-cols-2 md:grid-cols-1">
-            <div className="flex flex-wrap md:mb-4 grid-cols-4 col-span-2">
+        <div className="shadow-lg border bg-white border-gray-300 min-w-[320px]  rounded-lg md:mb-4 grid grid-cols-2 md:grid-cols-1">
+            <div className="flex flex-wrap md:mb-4 grid-cols-4 col-span-2 place-items-center">
+                {/* Entry Description time */}
                 <input className="border bg-lightpurple w-1/2 placeholder-gray-950 border-gray300 ml-2 p-4 py-2 rounded-md mr-2 my-2 lg:w-1/4" 
                     placeholder="Description"
                     type="text"
                     value={entryDesc}
                     onChange={handleEntryDesc}
                 />
+                {/* projects select */}
                 <select className="border border-gray-300 px-4 py-2 rounded-md w-2/5 mr-2 my-2 lg:w-1/4 " value={projectId} onChange={handleProjectId}>
                     {projectElems}
                 </select>
-                {/* Start time */}
-                <div>
-                  
-                </div>
+                
                 <input
                   type="time"
                   value={startTime}
                   onChange={handleStartTime}
-                  className="relative appearance-none rounded-none pl-[40px] m-5 w-[120px] py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                  className="relative appearance-none rounded-none pl-[40px] h-[40px] w-[120px] border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
                   placeholder="0:00"
                 />
                 {/* End time */}
@@ -152,7 +166,7 @@ const TimeEntry = ({ entry }) => {
                   type="time"
                   value={endTime}
                   onChange={handleEndTime}
-                  className="relative appearance-none rounded-none pl-[40px] m-5 w-[120px] py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                  className="relative appearance-none rounded-none pl-[40px] h-[40px] w-[120px] py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
                   placeholder="0:00"
                 />
                 {/* Date */}
