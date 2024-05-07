@@ -108,7 +108,7 @@ app.put('/entries/new', (req, res) => createEntry(req, res));
 
 app.post(`/entries/update`, (req, res) => updateEntry(req, res));
 
-app.post('/entries/delete', (req, res) => deleteEntry(req, res));
+app.delete('/entries/delete', (req, res) => deleteEntry(req, res));
 
 app.listen(port, () => {
   console.log(`server started at http://localhost:${port}`);

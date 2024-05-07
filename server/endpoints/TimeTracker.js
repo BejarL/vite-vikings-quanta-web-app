@@ -34,7 +34,7 @@ const createEntry = async (req, res) => {
 
         //check if all the data needed is entered
         if (!start_time || !end_time || !entry_desc || !project_id || !workspace_id) {
-            res.json({success: false, err: "Missing information"});
+            res.json({ success: false, err: "Missing information" });
             return;
         }
 
@@ -134,7 +134,7 @@ const updateEntry = async (req, res) => {
 
 const deleteEntry = async (req, res) => {
     try {
-        const { entry_id, workspace_id, project_id } = req.body;
+        const { entry_id, workspace_id, project_id, user_id } = req.body;
 
         //begin transaction, so both queries happen or both dont
         await req.db.beginTransaction()

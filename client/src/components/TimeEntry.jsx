@@ -3,13 +3,14 @@ import { projectsContext } from "../pages/TimeTrackerPage";
 import { userContext } from "../pages/Layout";
 import { getJwt } from "../Auth/jwt";
 import DatePicker from "react-datepicker";
+import DeleteEntryModal from "../modals/DeleteEntryModal";
 
 const formatTime = (dateObj) => {
-    const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    let formattedDate = new Date(dateObj);
-    formattedDate.toLocaleString('en-US', { timeZone: userTimeZone });
-    return formattedDate.toString().slice(16, 21);
-}
+  const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  let formattedDate = new Date(dateObj);
+  formattedDate.toLocaleString("en-US", { timeZone: userTimeZone });
+  return formattedDate.toString().slice(16, 21);
+};
 
 const TimeEntry = ({ entry }) => {
   const [entryDesc, setEntryDesc] = useState(entry.entry_desc);
@@ -17,7 +18,10 @@ const TimeEntry = ({ entry }) => {
   const [endTime, setEndTime] = useState(formatTime(entry.end_time));
   const [timeDay, setTimeDay] = useState(entry.end_time);
   const [projectId, setProjectId] = useState(entry.project_id);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
+
+  const apiUrl = import.meta.env.VITE_API_URL;
   const { projects: projectsInfo, getEntries } = useContext(projectsContext);
   const { workspace } = useContext(userContext);
 
@@ -26,7 +30,6 @@ const TimeEntry = ({ entry }) => {
   //debouncing to reduce api calls when updating entries
   useEffect(() => {
     if (initial.current) {
-      
       initial.current = false;
     } else {
       const interval = setTimeout(() => {
@@ -37,103 +40,69 @@ const TimeEntry = ({ entry }) => {
   }, [entryDesc, startTime, endTime, timeDay, projectId]);
 
   const handleProjectId = (e) => {
-      setProjectId(e.target.value);
-    };
+    setProjectId(e.target.value);
+  };
 
   const handleEntryDesc = (e) => {
-      setEntryDesc(e.target.value);
-  }
+    setEntryDesc(e.target.value);
+  };
 
   const handleStartTime = (e) => {
     setStartTime(e.target.value);
-  }
+  };
 
   const handleEndTime = (e) => {
     setEndTime(e.target.value);
-  }
-
-  //is used to delete an entry
-  const deleteEntry = async () => {
-    try {
-        const jwt = getJwt();
-  
-        const response = await fetch("http://localhost:3000/entries/delete", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            authorization: jwt,
-          },
-          body: JSON.stringify({
-            project_id: projectId,
-            workspace_id: workspace.workspace_id,
-            entry_id: entry.entry_id
-          }),
-        });
-  
-        const { success } = await response.json();
-
-        //if request is succesful and the entry was deleted, call getEntries from TimeTrackerPage to 'reload' the page.
-        if (success) {
-            getEntries();
-        } else {
-            window.alert("Error deleting entry, please try again");
-        }
-        
-      } catch (err) {
-        console.log(err);
-      }
-    }
+  };
 
   const updateEntry = async () => {
-        try {
-          const jwt = getJwt();
+    try {
+      const jwt = getJwt();
 
-          const startingTime = getNewTime(timeDay, startTime);
-          const endingTime = getNewTime(timeDay, endTime);
+      const startingTime = getNewTime(timeDay, startTime);
+      const endingTime = getNewTime(timeDay, endTime);
 
-          const response = await fetch("http://localhost:3000/entries/update", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              authorization: jwt,
-            },
-            body: JSON.stringify({
-              entry_id: entry.entry_id, 
-              start_time: startingTime,
-              end_time: endingTime,
-              entry_desc: entryDesc,
-              project_id: projectId,
-              workspace_id: workspace.workspace_id
-            }),
-          });
+      const response = await fetch(`${apiUrl}/entries/update`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          authorization: jwt,
+        },
+        body: JSON.stringify({
+          entry_id: entry.entry_id,
+          start_time: startingTime,
+          end_time: endingTime,
+          entry_desc: entryDesc,
+          project_id: projectId,
+          workspace_id: workspace.workspace_id,
+        }),
+      });
 
-          const { success, err } = await response.json();
+      const { success, err } = await response.json();
 
-          if (success) {
-            getEntries();
-            console.log("update successful");
-          } else {
-            window.alert("Error updating entry: " + err);
-          }
-          
-
-          // if the update was successfull, call getEntries again and set the update ref back to empty
-          // have to call get Entries again in case they change the date of an entry and it needs to be 
-          // put in a different day
-          
-      } catch (err) {
-          console.log(err);
+      if (success) {
+        getEntries();
+        console.log("update successful");
+      } else {
+        window.alert("Error updating entry: " + err);
       }
-    }
 
-    //updates new time to reflect changes in state
-    const getNewTime = (initialDate, time) => {
-      const startDate = new Date(initialDate);
-      const timeValues = time.split(":");
-      startDate.setHours(timeValues[0]);
-      startDate.setMinutes(timeValues[1]);
-      return startDate;
+      // if the update was successfull, call getEntries again and set the update ref back to empty
+      // have to call get Entries again in case they change the date of an entry and it needs to be
+      // put in a different day
+    } catch (err) {
+      console.log(err);
     }
+  };
+
+  //updates new time to reflect changes in state
+  const getNewTime = (initialDate, time) => {
+    const startDate = new Date(initialDate);
+    const timeValues = time.split(":");
+    startDate.setHours(timeValues[0]);
+    startDate.setMinutes(timeValues[1]);
+    return startDate;
+  };
 
   const projectElems = projectsInfo.map((item) => {
     return (
@@ -144,8 +113,8 @@ const TimeEntry = ({ entry }) => {
   });
 
   return (
-    <div className="shadow-lg  bg-white border-gray-300 min-w-[320px] rounded-lg md:mb-4 grid grid-cols-2 md:grid-cols-1">
-      <div className="flex flex-wrap md:mb-4 grid-cols-4 col-span-2 place-items-center">
+    <div className="border-b min-w-[320px] grid grid-cols-2 md:grid-cols-1">
+      <div className="flex flex-wrap md:m-2 grid-cols-4 col-span-2 place-items-center">
         {/* Entry Description time */}
         <input
           className=" bg-lightpurple w-1/2 placeholder-gray-950 ml-2 p-4 py-2 rounded-md mr-2 my-2 lg:w-1/4"
@@ -156,18 +125,17 @@ const TimeEntry = ({ entry }) => {
         />
         {/* projects select */}
         <select
-          className="px-4 py-2 rounded-md w-2/5 mr-2 my-2 lg:w-1/4 "
+          className="px-4 py-2 cursor-pointer rounded-md w-2/5 mr-2 my-2 lg:w-1/4 "
           value={projectId}
           onChange={handleProjectId}
         >
           {projectElems}
         </select>
-
         <input
           type="time"
           value={startTime}
           onChange={handleStartTime}
-          className="relative appearance-none rounded-none pl-[40px] h-[40px] w-[120px] border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+          className="relative appearance-none rounded-none pl-[40px] h-[40px] w-[120px] placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
           placeholder="0:00"
         />
         {/* End time */}
@@ -175,7 +143,7 @@ const TimeEntry = ({ entry }) => {
           type="time"
           value={endTime}
           onChange={handleEndTime}
-          className="relative appearance-none rounded-none pl-[40px] h-[40px] w-[120px] py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+          className="relative appearance-none rounded-none pl-[40px] h-[40px] w-[120px] py-2 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
           placeholder="0:00"
         />
         {/* Date */}
@@ -183,18 +151,19 @@ const TimeEntry = ({ entry }) => {
           <DatePicker
             selected={timeDay}
             onChange={(date) => setTimeDay(date)}
-            className="border border-gray p-2 my-2 rounded w-5/6 lg:w-full"
+            className="p-2 my-2 rounded w-5/6 lg:w-full "
           />
         </div>
         {/* Hours Tracked */}
-        <div className="border border-gray p-4 ml-2 py-2 w-2/6 rounded-md mr-2 my-2 md:w-1/6 lg:w-[8%] lg:mr-auto">
+        <div className="p-4 ml-2 py-2 w-2/6 rounded-md mr-2 my-2 md:w-1/6 lg:w-[8%] lg:mr-auto">
           {entry.total_time}
         </div>
-
         {/* Delete button */}
         <button
           className="bg-gray text-black p-2 py-2 rounded-md mr-1 md:order-3"
-          onClick={deleteEntry}
+          onClick={() => {
+            setIsModalOpen(true);
+          }}
         >
           <svg className="w-10 h-10" viewBox="0 0 100 100">
             <path
@@ -223,6 +192,13 @@ const TimeEntry = ({ entry }) => {
             ></path>
           </svg>
         </button>
+        <DeleteEntryModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          projectId={projectId} 
+          getEntries={getEntries} 
+          entry={entry} 
+        />
       </div>
     </div>
   );

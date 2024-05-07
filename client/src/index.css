@@ -23,6 +23,7 @@ input[type='time']::-webkit-calendar-picker-indicator {
   opacity: 50%;
   position: absolute;
   width: 100%;
-  height: 80%;
-  left: -7px;
+  height: 60%;
+  left: -1px;
+  cursor: pointer;
 }
