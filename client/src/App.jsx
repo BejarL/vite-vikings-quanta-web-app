@@ -22,8 +22,7 @@ const App = () => {
           element={<ConfirmResetPasswordPage />}
         />
         <Route path="/quanta" element={<Layout />}>
-          <Route path="" element={<HomePage />} />
-          <Route path="timetracker" element={<TimeTrackerPage />} />
+          <Route path="" element={<TimeTrackerPage />} />
           <Route path="users" element={<UsersPage />} />
           <Route path="projects" element={<ProjectsPage />} />
           <Route

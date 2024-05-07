@@ -246,23 +246,6 @@ const Layout = () => {
                 xmlns="http://www.w3.org/2000/svg"
                 width="1em"
                 height="1em"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  fill="black"
-                  d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1"
-                ></path>
-              </svg>
-              <p className="pl-[10px]">Home</p>
-            </Link>
-            <Link
-              className="flex items-center text-3xl mt-[20px] pl-[10px]"
-              to="/quanta/timetracker"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="1em"
-                height="1em"
                 viewBox="0 0 8 8"
               >
                 <path
@@ -373,29 +356,11 @@ const Layout = () => {
           <div className="hidden min-w-[180px] min-h-[100%] py-[20px] flex-col justify-between md:flex">
             <div id="link-menu">
               <Link
-                className={` ${page === "" ? "bg-lightpurple-selected" : null}
-                                        flex items-center text-2xl p-[10px] hover:bg-lightpurple-selected`}
-                to="/quanta/"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="1em"
-                  height="1em"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    fill="black"
-                    d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1"
-                  ></path>
-                </svg>
-                <p className="pl-[10px]">Home</p>
-              </Link>
-              <Link
                 className={` ${
-                  page === "timetracker" ? "bg-lightpurple-selected" : null
+                  page === "" ? "bg-lightpurple-selected" : null
                 }
                                         flex items-center text-2xl p-[10px] hover:bg-lightpurple-selected`}
-                to="/quanta/timetracker"
+                to="/quanta/"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
