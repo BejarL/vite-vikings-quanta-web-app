@@ -1,7 +1,7 @@
 const { sendEmail } = require('./Mailer');
 
 //gets all users from a workspace
-const getWorkspaceUsers = async (req, res) => {
+const getWorkspaceUsers = async (req, res) => { 
   try {
 
     const { workspace_id } = req.body
@@ -184,15 +184,30 @@ const leaveWorkspace = async (req, res) => {
 //is used to invite users to a workspace
 const inviteUser = async (req, res) => {
   try {
-    const { user_email, workspace_id } = req.body;
+    const { username } = req.user;
+    const { user_email, workspace_id, role } = req.body;
 
     const subject = `Invitation To Workspace`;
 
     const html = `
         <div>
-            <h4>You have been added to a workspace by ${user_name}</h4>
+            <h4>You have been added to a workspace by ${username}</h4>
             <h6>Check it out <a href="http://localhost:5173/Quanta">here</a></h6>
         </div>`
+
+    //check if the user is already added 
+    const [[added]] = await req.db.query(`SELECT Users.user_id
+                                          FROM Workspace_Users
+                                          LEFT JOIN Users ON Workspace_Users.user_id = Users.user_id
+                                          WHERE Users.email = :user_email AND Workspace_Users.workspace_id=:workspace_id AND Workspace_Users.deleted_flag = 0`, {
+                                            user_email, workspace_id
+                                          });
+
+    if (added) {
+      res.json({success: false, err: "User Already Added"});
+      return;
+    }
+    
 
     //need to make sure the email is associated with a user
     const [[query]] = await req.db.query(`SELECT user_id, username 
@@ -203,15 +218,15 @@ const inviteUser = async (req, res) => {
 
     //if the user is found, add them to the workspace
     if (query) {
-
+ 
       const { user_id, username } = query;
 
       //start transaction to ensure 
       await req.db.beginTransaction();
 
       await req.db.query(`INSERT INTO Workspace_Users (user_id, workspace_id, workspace_role)
-                            VALUES (:user_id, :workspace_id, "member")`, {
-        user_id, workspace_id
+                            VALUES (:user_id, :workspace_id, :role)`, {
+        user_id, workspace_id, role
       });
 
       const log_desc = `Added user ${username}`;
@@ -226,7 +241,7 @@ const inviteUser = async (req, res) => {
 
       //send email to the user to let them know they have been invited
       sendEmail(user_email, html, subject)
-      res.json({ success: true, msg: "Email sent" });
+      res.json({ success: true, msg: "User Added" });
     } else {
       res.json({ success: false, err: `User with Email: ${user_email} not Found` });
     }

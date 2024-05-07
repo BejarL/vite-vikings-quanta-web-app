@@ -1,13 +1,58 @@
-import { useState} from "react"
+import { useState, useContext, useEffect} from "react"
+import InviteToWorkspace from "../modals/InviteToWorkspace"
+import { userContext } from "./Layout";
+import { getJwt } from "../Auth/jwt";
 
 const UsersPage = () => {
-  console.log("UsersPage rendered");
   const [searchQuery, setSearchQuery] = useState("");
   const [filter, setFilter] = useState("all");
+  const [users, setUsers] = useState([]);
+  const [isOpen, setIsOpen] = useState(false);
 
-  const users = [
-    { id: 1, email: "user1@example.com", username: "User1", role: "Admin", status: "Active" },
-  ];
+  const apiUrl = import.meta.env.VITE_API_URL;
+
+  const { workspace } = useContext(userContext);
+  
+  useEffect(() => {
+    verifyAccess();
+    getUsers();
+  }, [])
+
+  const toggleModal = () => {
+    setIsOpen(prev => !prev);
+  }
+
+  //ensures the user should have access to the page. if they are a member, navigate to the time tracker page.
+  const verifyAccess = () => {
+    if (workspace.workspace_role === "member") {
+      Navigate("/");
+    }
+  }
+
+  const getUsers = async () => {
+    try {
+      const jwt = getJwt();
+
+      const res = await fetch(`${apiUrl}/workspace/users`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+            authorization: jwt,
+        },
+        body: JSON.stringify({workspace_id: workspace.workspace_id})
+      });
+
+      const {success, data, err} = await res.json();
+
+      if (success) {
+        setUsers(data);
+      }
+
+
+    } catch (err){
+      window.alert("Error loading users");
+    } 
+  }
 
   const filteredUsers = users.filter((user) => user.email.toLowerCase().includes(searchQuery.toLowerCase()));
 
@@ -17,9 +62,16 @@ const UsersPage = () => {
 
   return (
     <div className="Container mx-auto p-4">
+      <InviteToWorkspace 
+        isOpen={isOpen}
+        toggleModal={toggleModal}
+        workspace_id={workspace.workspace_id}
+      />
       <div className="flex justify-between items-center mb-4">
       <h1 className="text-2xl font-bold mb-4">WorkSpace Users</h1>
-      <button className="bg-purple-300 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4">
+      <button className="bg-purple-300 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4"
+              onClick={toggleModal}
+      >
         INVITE
       </button>
       </div>
@@ -55,10 +107,10 @@ const UsersPage = () => {
             </thead>
             <tbody>
               {filteredUsers.map((user) => (
-                <tr key={user.id}>
+                <tr key={user.user_id}>
                 <td className="border-t border-gray-300 border-dashed p-2">{user.email}</td>
                 <td className="border-t border-gray-300 border-dashed p-2">{user.username}</td>
-                <td className="border-t border-gray-300 border-dashed p-2">{user.role}</td>
+                <td className="border-t border-gray-300 border-dashed p-2">{user.workspace_role}</td>
                 <td className="border-t border-gray-300 border-dashed p-2">{user.status}</td>
                 </tr>
               ))}
