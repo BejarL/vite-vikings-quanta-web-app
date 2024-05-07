@@ -1,6 +1,5 @@
 //gets all recent entries for a user
 const getAllEntries = async (req, res) => {
-    console.log("hit")
     try {
         const { user_id } = req.user
 
@@ -73,11 +72,7 @@ const updateEntry = async (req, res) => {
 
         const { user_id } = req.user
 
-        const { entry_id, start_time, end_time, entry_desc, project_id, workspace_id } = req.body;
-        const newStartTime = new Date(start_time)
-        const newEndTime = new Date(end_time)
-
-        console.log(newStartTime);
+        const { entry_id, start_time, end_time, entry_desc, project_id, workspace_id } = req.body
 
         //need to figure out what to change, so we build a string below.
         //we start with nothing, then check each value sent. if there is data, then we add onto the update variable to insert into the query
@@ -88,13 +83,13 @@ const updateEntry = async (req, res) => {
             if (update.length != 0) {
                 update += `,`
             }
-            update += `start_time = :newStartTime `
+            update += `start_time = :start_time `
         }
         if (end_time) {
             if (update.length != 0) {
                 update += `,`
             }
-            update += `end_time = :newEndTime `
+            update += `end_time = :end_time `
         }
         if (entry_desc) {
             if (update.length != 0) {
@@ -115,7 +110,7 @@ const updateEntry = async (req, res) => {
         await req.db.query(`UPDATE Entries 
                             SET ${update}
                             WHERE entry_id = :entry_id`, {
-            entry_id, newStartTime, newEndTime, entry_desc, project_id
+            entry_id, start_time, end_time, entry_desc, project_id
         });
 
         await req.db.query(`INSERT INTO Change_Log (edit_desc, edit_timestamp, user_id, workspace_id, project_id)
@@ -126,7 +121,7 @@ const updateEntry = async (req, res) => {
         //start transaction
         await req.db.commit();
 
-        res.json({ success: true });
+        res.json({ sucess: true });
 
     } catch (err) {
         console.log(err);

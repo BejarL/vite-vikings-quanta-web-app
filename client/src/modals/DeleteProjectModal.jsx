@@ -1,7 +1,12 @@
 import { useState } from "react";
 import { getJwt } from "../Auth/jwt";
 
-const DeleteProjectModal = ({ isOpen, onClose, projectId, onProjectDelete }) => {
+const DeleteProjectModal = ({
+  isOpen,
+  onClose,
+  projectId,
+  onProjectDelete,
+}) => {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -18,8 +23,6 @@ const DeleteProjectModal = ({ isOpen, onClose, projectId, onProjectDelete }) => 
           authorization: jwt,
         },
       });
-
-      // verify the data, make sure the error isnt jwt related then return the json res object
       const data = await response.json();
       if (!response.ok) {
         throw new Error(data.err || "Failed to delete project");
@@ -49,7 +52,7 @@ const DeleteProjectModal = ({ isOpen, onClose, projectId, onProjectDelete }) => 
       <div className="bg-white rounded-lg overflow-hidden shadow-xl transform transition-all sm:max-w-lg sm:w-full p-4">
         <div className="text-center p-5">
           <h3 className="text-2xl leading-6 font-medium text-gray-900">
-            Delete Project
+            Delete Account
           </h3>
           <p className="text-lg pt-3 leading-6 font-medium text-gray-900">
             Are you sure you want to permanently delete this project?

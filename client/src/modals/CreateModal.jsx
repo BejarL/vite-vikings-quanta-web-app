@@ -25,12 +25,10 @@ const CreateModal = ({ isOpen, onClose }) => {
       });
 
       const { success, err } = await verifyData(response);
-      if (!response.ok) {
-        throw new Error("Failed to create workspace");
-      }
 
       if (success) {
         onClose();
+        verifyData();
         alert("Workspace created successfully");
       } else {
         window.alert(err);

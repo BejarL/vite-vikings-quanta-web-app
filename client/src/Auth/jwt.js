@@ -21,8 +21,8 @@ export const getJwt = () => {
 export const verifyData = async (res, navigate) => {
   const data = await res.json();
 
-  if (data.err === "Invalid authorization, no authorization headers" ||
-    data.err === "Invalid authorization, invalid authorization scheme") {
+  if (data.err === "Invalid authorization, no authorization headers" || 
+      data.err === "Invalid authorization, invalid authorization scheme") {
     navigate("/");
   } else {
     return data;

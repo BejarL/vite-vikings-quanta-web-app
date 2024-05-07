@@ -58,16 +58,18 @@ const ProjectsPage = () => {
     getProjects();
   };
 
+  const handleProjectDelete = (projectId) => {
+    const updatedProjects = projects.filter(
+      (project) => project.project_id !== projectId
+    );
+    setProjects(updatedProjects);
+  };
+
   const formatTime = (timeString) => {
     if (!timeString) return "00:00";
     const [hours, minutes] = timeString.split(":");
     return `${hours}h ${minutes}m`;
   };
-
-  const handleProjectDelete = (projectId) => {
-  const updatedProjects = projects.filter(project => project.project_id !== projectId);
-  setProjects(updatedProjects);
-};
 
   return (
     <div className="container mx-auto p-4 ">

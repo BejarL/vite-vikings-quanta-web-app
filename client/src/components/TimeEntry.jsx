@@ -4,10 +4,17 @@ import { userContext } from "../pages/Layout";
 import { getJwt } from "../Auth/jwt";
 import DatePicker from "react-datepicker";
 
+const formatTime = (dateObj) => {
+    const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    let formattedDate = new Date(dateObj);
+    formattedDate.toLocaleString('en-US', { timeZone: userTimeZone });
+    return formattedDate.toString().slice(16, 21);
+}
+
 const TimeEntry = ({ entry }) => {
   const [entryDesc, setEntryDesc] = useState(entry.entry_desc);
-  const [startTime, setStartTime] = useState(entry.start_time.slice(11, 16));
-  const [endTime, setEndTime] = useState(entry.end_time.slice(11, 16));
+  const [startTime, setStartTime] = useState(formatTime(entry.start_time));
+  const [endTime, setEndTime] = useState(formatTime(entry.end_time));
   const [timeDay, setTimeDay] = useState(entry.end_time);
   const [projectId, setProjectId] = useState(entry.project_id);
 
@@ -16,9 +23,10 @@ const TimeEntry = ({ entry }) => {
 
   const initial = useRef(true);
 
-  //debouncing ;to reduce api calls when updating entries
+  //debouncing to reduce api calls when updating entries
   useEffect(() => {
     if (initial.current) {
+      
       initial.current = false;
     } else {
       const interval = setTimeout(() => {
@@ -26,62 +34,62 @@ const TimeEntry = ({ entry }) => {
       }, 2000);
       return () => clearTimeout(interval);
     }
-  }, [entryDesc, startTime, endTime, projectId]);
+  }, [entryDesc, startTime, endTime, timeDay, projectId]);
 
   const handleProjectId = (e) => {
-    setProjectId(e.target.value);
-  };
+      setProjectId(e.target.value);
+    };
 
   const handleEntryDesc = (e) => {
-    setEntryDesc(e.target.value);
-  };
+      setEntryDesc(e.target.value);
+  }
 
   const handleStartTime = (e) => {
-    console.log(typeof e.target.value);
     setStartTime(e.target.value);
-  };
+  }
 
   const handleEndTime = (e) => {
     setEndTime(e.target.value);
-  };
+  }
 
   //is used to delete an entry
   const deleteEntry = async () => {
     try {
-      const jwt = getJwt();
+        const jwt = getJwt();
+  
+        const response = await fetch("http://localhost:3000/entries/delete", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            authorization: jwt,
+          },
+          body: JSON.stringify({
+            project_id: projectId,
+            workspace_id: workspace.workspace_id,
+            entry_id: entry.entry_id
+          }),
+        });
+  
+        const { success } = await response.json();
 
-      const response = await fetch("http://localhost:3000/entries/delete", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          authorization: jwt,
-        },
-        body: JSON.stringify({
-          project_id: projectId,
-          workspace_id: workspace.workspace_id,
-          entry_id: entry.entry_id,
-        }),
-      });
-
-      const { success } = await response.json();
-
-      //if request is succesful and the entry was deleted, call getEntries from TimeTrackerPage to 'reload' the page.
-      if (success) {
-        getEntries();
-      } else {
-        window.alert("Error deleting entry, please try again");
+        //if request is succesful and the entry was deleted, call getEntries from TimeTrackerPage to 'reload' the page.
+        if (success) {
+            getEntries();
+        } else {
+            window.alert("Error deleting entry, please try again");
+        }
+        
+      } catch (err) {
+        console.log(err);
       }
-    } catch (err) {
-      console.log(err);
     }
-  };
 
   const updateEntry = async () => {
     try {
       const jwt = getJwt();
 
-      const startingTime = getNewTime(entry.start_time, startTime);
-      const endingTime = getNewTime(entry.end_time, endTime);
+            const startingTime = getNewTime(timeDay, startTime);
+            const endingTime = getNewTime(timeDay, endTime);
 
       const response = await fetch("http://localhost:3000/entries/update", {
         method: "POST",
@@ -101,12 +109,13 @@ const TimeEntry = ({ entry }) => {
 
       const { success, err } = await response.json();
 
-      if (success) {
-        getEntries();
-        console.log("successfully updated");
-      } else {
-        window.alert("Error updating entry: " + err);
-      }
+            if (success) {
+              getEntries();
+              console.log("update successful");
+            } else {
+              window.alert("Error updating entry: " + err);
+            }
+            
 
       // if the update was successfull, call getEntries again and set the update ref back to empty
       // have to call get Entries again in case they change the date of an entry and it needs to be
@@ -116,15 +125,14 @@ const TimeEntry = ({ entry }) => {
     }
   };
 
-  //updates new time to reflect changes in state
-  const getNewTime = (initialDate, time) => {
-    const startDate = new Date(initialDate);
-    console.log(typeof startDate);
-    const timeValues = time.split(":");
-    startDate.setHours(timeValues[0]);
-    startDate.setMinutes(timeValues[1]);
-    return startDate;
-  };
+    //updates new time to reflect changes in state
+    const getNewTime = (initialDate, time) => {
+      const startDate = new Date(initialDate);
+      const timeValues = time.split(":");
+      startDate.setHours(timeValues[0]);
+      startDate.setMinutes(timeValues[1]);
+      return startDate;
+    }
 
   const projectElems = projectsInfo.map((item) => {
     return (
