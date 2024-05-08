@@ -101,7 +101,7 @@ const Layout = () => {
       const jwt = getJwt();
 
       await fetch(`${apiUrl}/workspace/update-last`, {
-        method: "POST",
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
           authorization: jwt,

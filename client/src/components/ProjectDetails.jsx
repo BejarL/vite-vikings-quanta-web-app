@@ -19,7 +19,7 @@ const ProjectDetails = () => {
         const response = await fetch(
           `${apiUrl}/project/${projectId}`,
           {
-            method: "POST",
+            method: "GET",
             headers: { "Content-Type": "application/json", authorization: jwt },
           }
         );

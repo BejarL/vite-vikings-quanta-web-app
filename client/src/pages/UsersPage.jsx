@@ -33,13 +33,12 @@ const UsersPage = () => {
     try {
       const jwt = getJwt();
 
-      const res = await fetch(`${apiUrl}/workspace/users`, {
-        method: "POST",
+      const res = await fetch(`${apiUrl}/workspace/users/${workspace.workspace_id}`, {
+        method: "GET",
         headers: {
           "Content-Type": "application/json",
             authorization: jwt,
-        },
-        body: JSON.stringify({workspace_id: workspace.workspace_id})
+        }
       });
 
       const {success, data, err} = await res.json();

@@ -23,6 +23,8 @@ const TimeTrackerPage = () => {
   const { workspace } = useContext(userContext);
   let id = useRef();
 
+  const apiUrl = import.meta.env.VITE_API_URL;
+
   //clears our handleTime function
   useEffect(() => {
     getProjects();
@@ -76,13 +78,12 @@ const TimeTrackerPage = () => {
   const getProjects = async () => {
     try {
       const jwt = getJwt();
-      const response = await fetch("http://localhost:3000/projects/all", {
-        method: "POST",
+      const response = await fetch(`${apiUrl}/projects/all/${workspace.workspace_id}`, {
+        method: "GET",
         headers: {
           "Content-Type": "application/json",
           authorization: jwt,
-        },
-        body: JSON.stringify({ workspace_id: workspace.workspace_id }),
+        }
       });
       //check if the request was successful, if not do an early return
       if (response.ok) {
@@ -102,13 +103,14 @@ const TimeTrackerPage = () => {
   const getEntries = async () => {
     try {
       const jwt = getJwt();
-      const response = await fetch("http://localhost:3000/entries/all", {
+      const response = await fetch(`${apiUrl}/entries/all/${workspace.workspace_id}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
           authorization: jwt
-        },
-      })
+        }
+      });
+
       const data = await response.json()
       if (data.success) {
         formatEntries(data.entries);
@@ -158,7 +160,7 @@ const TimeTrackerPage = () => {
     try {
       const jwt = getJwt();
       const response = await fetch("http://localhost:3000/entries/new", {
-        method: "PUT",
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
           authorization: jwt,

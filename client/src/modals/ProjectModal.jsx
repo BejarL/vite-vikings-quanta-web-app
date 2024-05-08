@@ -10,7 +10,7 @@ const ProjectModal = ({ isOpen, onClose, workspace_id, getProjects }) => {
     try {
       const jwt = getJwt();
       const response = await fetch(`${apiUrl}/projects/new`, {
-        method: "PUT",
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
           authorization: jwt,
