@@ -11,9 +11,11 @@ const Layout = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [currentWorkspace, setCurrentWorkspace] = useState({});
   const [workspaces, setWorkspaces] = useState([]);
-  const [loading, setLoading ] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [user, setUser] = useState("");
   const [isModalOpen, setModalOpen] = useState(false);
+
+  const apiUrl = import.meta.env.VITE_API_URL;
 
   const navigate = useNavigate();
   const role = currentWorkspace?.workspace_role;
@@ -39,7 +41,7 @@ const Layout = () => {
 
     //try to hit the endpoint to get the users data
     try {
-      const res = await fetch("http://localhost:3000/user", {
+      const res = await fetch(`${apiUrl}/user`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -76,9 +78,8 @@ const Layout = () => {
       }
 
       setLoading(false);
-
-    } catch(err) {
-      console.log(err);
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -97,7 +98,7 @@ const Layout = () => {
     try {
       const jwt = getJwt();
 
-      await fetch("http://localhost:3000/workspace/update-last", {
+      await fetch(`${apiUrl}/workspace/update-last`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -106,7 +107,7 @@ const Layout = () => {
         body: JSON.stringify({ workspace_id }),
       });
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   };
 
@@ -156,7 +157,7 @@ const Layout = () => {
             </svg>
           </button>
           <Link to="/quanta/timetracker">
-          <p className="ml-2 text-3xl text-darkpurple">Quanta</p>
+            <p className="ml-2 text-3xl text-darkpurple">Quanta</p>
           </Link>
           {/* dropdown button desktop view */}
           <button
@@ -287,23 +288,23 @@ const Layout = () => {
               <p className="pl-[10px]">Projects</p>
             </Link>
             {/* {role === "member" || role === "admin" || role === "Creator" ? ( */}
-              <Link
-                className="flex items-center text-3xl mt-[20px] pl-[10px]"
-                to="/quanta/users"
+            <Link
+              className="flex items-center text-3xl mt-[20px] pl-[10px]"
+              to="/quanta/users"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="1em"
+                height="1em"
+                viewBox="0 0 256 256"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="1em"
-                  height="1em"
-                  viewBox="0 0 256 256"
-                >
-                  <path
-                    fill="currentColor"
-                    d="M117.25 157.92a60 60 0 1 0-66.5 0a95.83 95.83 0 0 0-47.22 37.71a8 8 0 1 0 13.4 8.74a80 80 0 0 1 134.14 0a8 8 0 0 0 13.4-8.74a95.83 95.83 0 0 0-47.22-37.71M40 108a44 44 0 1 1 44 44a44.05 44.05 0 0 1-44-44m210.14 98.7a8 8 0 0 1-11.07-2.33A79.83 79.83 0 0 0 172 168a8 8 0 0 1 0-16a44 44 0 1 0-16.34-84.87a8 8 0 1 1-5.94-14.85a60 60 0 0 1 55.53 105.64a95.83 95.83 0 0 1 47.22 37.71a8 8 0 0 1-2.33 11.07"
-                  />
-                </svg>
-                <p className="pl-[10px]">Users</p>
-              </Link>
+                <path
+                  fill="currentColor"
+                  d="M117.25 157.92a60 60 0 1 0-66.5 0a95.83 95.83 0 0 0-47.22 37.71a8 8 0 1 0 13.4 8.74a80 80 0 0 1 134.14 0a8 8 0 0 0 13.4-8.74a95.83 95.83 0 0 0-47.22-37.71M40 108a44 44 0 1 1 44 44a44.05 44.05 0 0 1-44-44m210.14 98.7a8 8 0 0 1-11.07-2.33A79.83 79.83 0 0 0 172 168a8 8 0 0 1 0-16a44 44 0 1 0-16.34-84.87a8 8 0 1 1-5.94-14.85a60 60 0 0 1 55.53 105.64a95.83 95.83 0 0 1 47.22 37.71a8 8 0 0 1-2.33 11.07"
+                />
+              </svg>
+              <p className="pl-[10px]">Users</p>
+            </Link>
             {/* ) : null} */}
           
           {/* WorkSpaces on the Mobile View  */}
@@ -312,6 +313,15 @@ const Layout = () => {
           onClick={() => setModalOpen(true)}
           className =" flex  items-center text-3xl mt-[20px]  px-[10px] ">
             <svg
+
+            <p className="text-3xl border-b-2 border-slate-100 py-2 mt-5 mr-[10px] pl-[10px]">
+              Workspaces
+            </p>
+            <button
+              onClick={() => setModalOpen(true)}
+              className=" flex  items-center text-3xl mt-[20px]  px-[10px] "
+            >
+              <svg
                 className="svg2"
                 xmlns="http://www.w3.org/2000/svg"
                 width="1em"
@@ -323,15 +333,14 @@ const Layout = () => {
                   d="M600 0C268.629 0 0 268.629 0 600s268.629 600 600 600s600-268.629 600-600S931.371 0 600 0m-95.801 261.841h191.602v242.358h242.358v191.602H695.801v242.358H504.199V695.801H261.841V504.199h242.358z"
                 />
               </svg>
-              <p className="pl-[10px]">Create</p> 
-              </button>
-              <CreateModal
-            isOpen={isModalOpen}
-            onClose={() => setModalOpen(false)}
-          />
-           <button  
-          className =" flex flex-wrap items-center text-3xl mt-[10px] py-2 px-[10px]">
-            <svg
+              <p className="pl-[10px]">Create</p>
+            </button>
+            <CreateModal
+              isOpen={isModalOpen}
+              onClose={() => setModalOpen(false)}
+            />
+            <button className=" flex flex-wrap items-center text-3xl mt-[10px] py-2 px-[10px]">
+              <svg
                 className="svg2"
                 xmlns="http://www.w3.org/2000/svg"
                 width="1.1em"
@@ -342,10 +351,10 @@ const Layout = () => {
                   fill="currentColor"
                   d="M32 2C15.432 2 2 15.432 2 32c0 16.568 13.432 30 30 30s30-13.432 30-30C62 15.432 48.568 2 32 2m1.693 46V37.428H15V27.143h18.693V16L49 32z"
                 />
-              </svg> 
+              </svg>
               <p className=" pl-[10px] ">Join</p>
-              </button>
-              </div>
+            </button>
+          </div>
           <button
             onClick={handleSignout}
             className="flex items-center text-3xl mt-[20px] pl-[10px] p-2 "
@@ -363,7 +372,6 @@ const Layout = () => {
             </svg>
             <p className="pl-[10px]">Logout</p>
           </button>
-          
         </div>
         <div className="flex min-h-[100%]">
           {/* sidebar - desktop view*/}
@@ -450,29 +458,26 @@ const Layout = () => {
                 </Link>
               ) : null}
               {/* {role === "admin" || role === "Creator" ? ( */}
-                <Link
-                  className={` ${
-                    page === "audit-log" ? "bg-lightpurple-selected" : null
-                  } flex items-center text-2xl p-[10px] hover:bg-lightpurple-selected`}
-                  to="/quanta/audit-log"
+              <Link
+                className={` ${
+                  page === "audit-log" ? "bg-lightpurple-selected" : null
+                } flex items-center text-2xl p-[10px] hover:bg-lightpurple-selected`}
+                to="/quanta/audit-log"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="1em"
+                  height="1em"
+                  viewBox="0 0 256 256"
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="1em"
-                    height="1em"
-                    viewBox="0 0 256 256"
-                  >
-                    <path
-                      fill="currentColor"
-                      d="m213.66 82.34l-56-56A8 8 0 0 0 152 24H56a16 16 0 0 0-16 16v176a16 16 0 0 0 16 16h144a16 16 0 0 0 16-16V88a8 8 0 0 0-2.34-5.66M160 51.31L188.69 80H160ZM200 216H56V40h88v48a8 8 0 0 0 8 8h48zm-45.54-48.85a36.05 36.05 0 1 0-11.31 11.31l11.19 11.2a8 8 0 0 0 11.32-11.32ZM104 148a20 20 0 1 1 20 20a20 20 0 0 1-20-20"
-                    ></path>
-                  </svg>
-                  <p className="pl-[10px] text-2xl">Audit</p>
-                </Link>
+                  <path
+                    fill="currentColor"
+                    d="m213.66 82.34l-56-56A8 8 0 0 0 152 24H56a16 16 0 0 0-16 16v176a16 16 0 0 0 16 16h144a16 16 0 0 0 16-16V88a8 8 0 0 0-2.34-5.66M160 51.31L188.69 80H160ZM200 216H56V40h88v48a8 8 0 0 0 8 8h48zm-45.54-48.85a36.05 36.05 0 1 0-11.31 11.31l11.19 11.2a8 8 0 0 0 11.32-11.32ZM104 148a20 20 0 1 1 20 20a20 20 0 0 1-20-20"
+                  ></path>
+                </svg>
+                <p className="pl-[10px] text-2xl">Audit</p>
+              </Link>
               {/* ) : null} */}
-
-
-              {/* WorkSpaces on the Desktop View */}
               <p className="text-2xl border-b-2 border-lightpurple-login py-2 mt-5 mx-[10px] pl-[5px]">Workspaces</p>
           <button  
           onClick={() => setModalOpen(true)}
@@ -492,27 +497,26 @@ const Layout = () => {
               <p className="pl-[10px]">Create</p> 
               </button>
               <CreateModal
-            isOpen={isModalOpen}
-            onClose={() => setModalOpen(false)}
-          />
-           <button  
-          className =" flex flex-wrap items-center text-2xl py-2 px-[10px] hover:bg-lightpurple-selected w-[100%]">
-            <svg
-                className="svg2"
-                xmlns="http://www.w3.org/2000/svg"
-                width="1.1em"
-                height="1.2em"
-                viewBox="0 0 64 64"
-              >
-                <path
-                  fill="currentColor"
-                  d="M32 2C15.432 2 2 15.432 2 32c0 16.568 13.432 30 30 30s30-13.432 30-30C62 15.432 48.568 2 32 2m1.693 46V37.428H15V27.143h18.693V16L49 32z"
-                />
-              </svg> 
-              <p className=" pl-[10px] ">Join</p>
+                isOpen={isModalOpen}
+                onClose={() => setModalOpen(false)}
+              />
+              <button className=" flex flex-wrap items-center text-2xl py-2 px-[10px] hover:bg-lightpurple-selected w-[100%]">
+                <svg
+                  className="svg2"
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="1.1em"
+                  height="1.2em"
+                  viewBox="0 0 64 64"
+                >
+                  <path
+                    fill="currentColor"
+                    d="M32 2C15.432 2 2 15.432 2 32c0 16.568 13.432 30 30 30s30-13.432 30-30C62 15.432 48.568 2 32 2m1.693 46V37.428H15V27.143h18.693V16L49 32z"
+                  />
+                </svg>
+                <p className=" pl-[10px] ">Join</p>
               </button>
             </div>
-            
+
             <button
               onClick={handleSignout}
               className="flex items-center text-3xl pl-[10px] hover:text-red-600 hover:fill-red-600"
@@ -523,24 +527,23 @@ const Layout = () => {
                 height="1em"
                 viewBox="0 0 24 24"
               >
-                <path
-                  d="M5 21q-.825 0-1.412-.587T3 19V5q0-.825.588-1.412T5 3h7v2H5v14h7v2zm11-4l-1.375-1.45l2.55-2.55H9v-2h8.175l-2.55-2.55L16 7l5 5z"
-                ></path>
+                <path d="M5 21q-.825 0-1.412-.587T3 19V5q0-.825.588-1.412T5 3h7v2H5v14h7v2zm11-4l-1.375-1.45l2.55-2.55H9v-2h8.175l-2.55-2.55L16 7l5 5z"></path>
               </svg>
               <p className="pl-[10px]">Logout</p>
             </button>
           </div>
           <div className="bg-lightpurple-body w-[100%]">
-          {/* Changed the value so the key is undefined instead of the whole context */}
-          { !loading ? 
-            <userContext.Provider value={{
-              workspace: currentWorkspace ? currentWorkspace : undefined,
-              user: user
-            }}>
-              <Outlet />
-            </userContext.Provider>
-            : null
-            }
+            {/* Changed the value so the key is undefined instead of the whole context */}
+            {!loading ? (
+              <userContext.Provider
+                value={{
+                  workspace: currentWorkspace ? currentWorkspace : undefined,
+                  user: user,
+                }}
+              >
+                <Outlet />
+              </userContext.Provider>
+            ) : null}
           </div>
         </div>
       </div>

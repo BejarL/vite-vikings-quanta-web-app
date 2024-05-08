@@ -3,37 +3,39 @@ import { Link, useNavigate } from "react-router-dom";
 import { userContext } from "./Layout";
 import { getJwt, verifyData } from "../Auth/jwt.js";
 import ProjectModal from "../modals/ProjectModal.jsx";
+import DeleteProjectModal from "../modals/DeleteProjectModal.jsx";
 
 const ProjectsPage = () => {
   const [projects, setProjects] = useState([]);
+  const [currentProjectId, setCurrentProjectId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [searchProject, setSearchProject] = useState("");
+
+  const apiUrl = import.meta.env.VITE_API_URL;
 
   const navigate = useNavigate();
   const { workspace } = useContext(userContext);
 
-
-
   useEffect(() => {
     getProjects();
-  }, []); // Added dependency on workspace_id
+  }, []);
 
   const getProjects = async () => {
     const jwt = getJwt();
 
     try {
-      const response = await fetch("http://localhost:3000/projects/all", {
+      const response = await fetch(`${apiUrl}/projects/all`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           authorization: jwt,
         },
-        body: JSON.stringify({workspace_id: workspace.workspace_id}),
+        body: JSON.stringify({ workspace_id: workspace.workspace_id }),
       });
 
       const { success, data } = await verifyData(response, navigate);
       if (success) {
-        // The API should provide the 'total_time' as a part of each project's data
         setProjects(data);
       } else {
         window.alert("Error getting data");
@@ -51,37 +53,16 @@ const ProjectsPage = () => {
     project.project_name.toLowerCase().includes(searchProject.toLowerCase())
   );
 
-  const deleteProject = async (projectId) => {
-    try {
-      const jwt = getJwt();
-
-      const response = await fetch(
-        `http://localhost:3000/projects/delete/${projectId}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            authorization: jwt,
-          },
-        }
-      );
-
-      //verify the data, make sure the error isnt jwt related then return the json res object
-      const { success, err } = await verifyData(response);
-
-      if (success) {
-        getProjects();
-      } else {
-        window.alert(err);
-      }
-    } catch (err) {
-      window.alert(err);
-    }
-  };
-
   const handleModalClose = () => {
     setIsModalOpen(false);
     getProjects();
+  };
+
+  const handleProjectDelete = (projectId) => {
+    const updatedProjects = projects.filter(
+      (project) => project.project_id !== projectId
+    );
+    setProjects(updatedProjects);
   };
 
   const formatTime = (timeString) => {
@@ -110,7 +91,7 @@ const ProjectsPage = () => {
       <div>
         <button
           className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded"
-          onClick={() => setIsModalOpen(true)} // Open the modal to create a new project
+          onClick={() => setIsModalOpen(true)}
           aria-label="Open modal to add new project"
         >
           New Project +
@@ -146,7 +127,10 @@ const ProjectsPage = () => {
                 </td>
                 <td className="py-4 px-6 border-b border-gray-200 text-end">
                   <button
-                    onClick={() => deleteProject(project.project_id)}
+                    onClick={() => {
+                      setCurrentProjectId(project.project_id);
+                      setIsDeleteModalOpen(true);
+                    }}
                     className="text-white p-1 rounded-full inline-flex items-center justify-center"
                     aria-label="Delete project"
                   >
@@ -177,6 +161,12 @@ const ProjectsPage = () => {
                       ></path>
                     </svg>
                   </button>
+                  <DeleteProjectModal
+                    isOpen={isDeleteModalOpen}
+                    onClose={() => setIsDeleteModalOpen(false)}
+                    projectId={currentProjectId}
+                    onProjectDelete={handleProjectDelete}
+                  />
                 </td>
               </tr>
             ))}

@@ -5,9 +5,11 @@ const ResetPasswordPage = () => {
   const [email, setEmail] = useState("");
   const navigate = useNavigate();
 
+  const apiUrl = import.meta.env.VITE_API_URL;
+
   const handleResetPassword = async () => {
     try {
-      const res = await fetch("http://localhost:3000/resetpassword/send", {
+      const res = await fetch(`${apiUrl}/resetpassword/send`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

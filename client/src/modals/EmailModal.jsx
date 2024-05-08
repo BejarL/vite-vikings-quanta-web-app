@@ -5,8 +5,9 @@ const EmailModal = ({ isOpen, onClose, setEmail }) => {
   const [newEmail, setNewEmail] = useState("");
   const [error, setError] = useState("");
 
-  const updateEmail = async () => {
+  const apiUrl = import.meta.env.VITE_API_URL;
 
+  const updateEmail = async () => {
     const jwt = getJwt();
 
     const emailCheck = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -16,7 +17,7 @@ const EmailModal = ({ isOpen, onClose, setEmail }) => {
     }
 
     try {
-      const response = await fetch("http://localhost:3000/user/change-email", {
+      const response = await fetch(`${apiUrl}/user/change-email`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -24,19 +25,19 @@ const EmailModal = ({ isOpen, onClose, setEmail }) => {
         },
         body: JSON.stringify({ email: newEmail }),
       });
-      
+
       if (!response.ok) {
         throw new Error("Failed to update email");
       }
 
-      const {success, err} = await response.json();
+      const { success, err } = await response.json();
 
       if (success) {
         setEmail(newEmail);
         alert("Email updated successfully");
         onClose();
         setNewEmail("");
-        setError("")
+        setError("");
       } else {
         throw new Error(err || "Unknown error occurred");
       }
@@ -72,7 +73,7 @@ const EmailModal = ({ isOpen, onClose, setEmail }) => {
               onChange={(e) => setNewEmail(e.target.value)}
               required
             />
-            <div className="flex justify-end space-x-4">
+            <div className="flex justify-center space-x-4 pt-3">
               <button
                 type="button"
                 className="inline-flex justify-center rounded-md border border-transparent px-4 py-2 text-sm font-medium text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"

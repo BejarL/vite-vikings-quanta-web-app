@@ -1,26 +1,31 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { getJwt } from "../Auth/jwt";
 
 const UsernameModal = ({ isOpen, onClose, setName }) => {
   const [newUsername, setNewUsername] = useState("");
-  const [error, setError] = useState(""); // Added error state
+  const [error, setError] = useState(""); 
+
+  const apiUrl = import.meta.env.VITE_API_URL;
 
   const createNewUsername = async () => {
     const jwt = getJwt();
     try {
-      const response = await fetch("http://localhost:3000/user/change-username", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          authorization: jwt,
-        },
-        body: JSON.stringify({ username: newUsername }),
-      });
+      const response = await fetch(
+        `${apiUrl}/user/change-username`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            authorization: jwt,
+          },
+          body: JSON.stringify({ username: newUsername }),
+        }
+      );
       if (!response.ok) {
         throw new Error("Failed to update username");
       }
-      
-      const { success, err } = await response.json(); 
+
+      const { success, err } = await response.json();
 
       if (success) {
         setName(newUsername);
@@ -62,7 +67,7 @@ const UsernameModal = ({ isOpen, onClose, setName }) => {
               required
             />
             {error && <div className="text-red-500 text-sm">{error}</div>}{" "}
-            <div className="flex justify-end space-x-4">
+            <div className="flex justify-center space-x-4 pt-3">
               <button
                 type="button"
                 className="inline-flex justify-center rounded-md border border-transparent px-4 py-2 text-sm font-medium text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
