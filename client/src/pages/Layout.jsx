@@ -309,14 +309,7 @@ const Layout = () => {
           
           {/* WorkSpaces on the Mobile View  */}
           <p className="text-3xl border-b-2 border-slate-100 py-2 mt-5 mr-[10px] pl-[10px]">Workspaces</p>
-          <button  
-          onClick={() => setModalOpen(true)}
-          className =" flex  items-center text-3xl mt-[20px]  px-[10px] ">
-            <svg
-
-            <p className="text-3xl border-b-2 border-slate-100 py-2 mt-5 mr-[10px] pl-[10px]">
-              Workspaces
-            </p>
+        
             <button
               onClick={() => setModalOpen(true)}
               className=" flex  items-center text-3xl mt-[20px]  px-[10px] "

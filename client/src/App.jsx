@@ -9,6 +9,7 @@ import ProjectsPage from "./pages/ProjectsPage";
 import ProfilePage from "./pages/ProfilePage";
 import HomePage from "./pages/HomePage";
 import ProjectDetails from "./components/ProjectDetails";
+import AuditPage from "./pages/AuditPage";
 // import AuditLog from "./pages/AuditLog"
 
 const App = () => {
@@ -31,7 +32,7 @@ const App = () => {
             element={<ProjectDetails />}
           />
           <Route path="profile" element={<ProfilePage />} />
-          <Route path="audit-log" element={<ProfilePage />} />
+          <Route path="audit-log" element={<AuditPage />} />
         </Route>
       </Routes>
     </BrowserRouter>
