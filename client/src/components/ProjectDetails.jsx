@@ -16,9 +16,7 @@ const ProjectDetails = () => {
     const fetchProjectData = async () => {
       const jwt = getJwt();
       try {
-        const response = await fetch(
-          `${apiUrl}/project/${projectId}`,
-          {
+        const response = await fetch(`${apiUrl}/project/${projectId}`, {
             method: "GET",
             headers: { "Content-Type": "application/json", authorization: jwt },
           }
