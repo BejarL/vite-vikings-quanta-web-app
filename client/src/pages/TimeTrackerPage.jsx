@@ -23,8 +23,6 @@ const TimeTrackerPage = () => {
   const { workspace } = useContext(userContext);
   let id = useRef();
 
-  const apiUrl = import.meta.env.VITE_API_URL;
-
   //clears our handleTime function
   useEffect(() => {
     getProjects();
