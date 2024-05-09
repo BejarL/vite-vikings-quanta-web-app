@@ -1,20 +1,19 @@
 const { sendEmail } = require('./Mailer');
 
 //gets all users from a workspace
-const getWorkspaceUsers = async (req, res) => {
+const getWorkspaceUsers = async (req, res) => { 
   try {
 
-    const { workspace_id } = req.body
+    const { workspace_id } = req.params
 
     // get all rows from Users table
     const [rows] = await req.db.query(`SELECT Users.user_id, username, email, Workspace_Users.workspace_role
-                                         FROM Workspace_Users
-                                         INNER JOIN Users ON Workspace_Users.user_id = Users.user_id
-                                         WHERE workspace_id = :workspace_id
-                                         ORDER BY username`, {
+                                       FROM Workspace_Users
+                                       INNER JOIN Users ON Workspace_Users.user_id = Users.user_id
+                                       WHERE workspace_id = :workspace_id AND Workspace_Users.deleted_flag=0
+                                       ORDER BY username`, {
       workspace_id
-    }
-    );
+    });
 
     res.json({ success: true, data: rows });
   } catch (error) {
@@ -26,7 +25,7 @@ const getWorkspaceUsers = async (req, res) => {
 // deletes a workspace
 const deleteWorkspace = async (req, res) => {
   try {
-    const { workspace_id } = req.body
+    const { workspace_id } = req.params;
 
     //create transaction
     await req.db.beginTransaction();
@@ -63,11 +62,11 @@ const deleteWorkspace = async (req, res) => {
     await req.db.commit();
 
 
-    res.json({ success: true, message: 'Successfully deleted a workspace' })
+    res.json({ success: true, message: 'Successfully deleted a workspace' });
 
   } catch (error) {
-    console.log('Error deleting workspace')
-    res.json({ success: false, error: error })
+    console.log('Error deleting workspace');
+    res.json({ success: false, error: error });
   }
 }
 
@@ -80,19 +79,19 @@ const createWorkspace = async (req, res) => {
     await req.db.beginTransaction();
 
     const [query] = await req.db.query(`INSERT INTO Workspace (workspace_name)
-                        VALUES (:workspace_name)`, {
+                                        VALUES (:workspace_name)`, {
       workspace_name
     });
 
     const { insertId: workspace_id } = query;
 
     await req.db.query(`INSERT INTO Workspace_Users (user_id, workspace_role, workspace_id)
-                            VALUES (:user_id, "Creator", :workspace_id)`, {
+                        VALUES (:user_id, "Creator", :workspace_id)`, {
       user_id, workspace_id
     });
 
     await req.db.query(`INSERT INTO Change_Log (edit_desc, edit_timestamp, user_id, workspace_id)
-                            VALUES ("Created Workspace", NOW(), :user_id, :workspace_id)`, {
+                        VALUES ("Created Workspace", NOW(), :user_id, :workspace_id)`, {
       user_id, workspace_id
     });
 
@@ -108,45 +107,45 @@ const createWorkspace = async (req, res) => {
 }
 
 //join a user to a workspace
-const joinWorkspace = async (req, res) => {
-  try {
+// const joinWorkspace = async (req, res) => {
+//   try {
 
-    const { user_id } = req.user;
-    const { workspace_id } = req.body
+//     const { user_id } = req.user;
+//     const { workspace_id } = req.body;
 
-    await req.body.beginTransaction();
+//     await req.body.beginTransaction();
 
-    await req.db.query(`INSERT INTO Workspace_Users (user_id, workspace_role, workspace_id)
-                        VALUES (:user_id, "member", :workspace_id)`, {
-      user_id, workspace_id
-    });
+//     await req.db.query(`INSERT INTO Workspace_Users (user_id, workspace_role, workspace_id)
+//                         VALUES (:user_id, "member", :workspace_id)`, {
+//       user_id, workspace_id
+//     });
 
-    const [[query]] = await req.db.query(`SELECT username 
-                                          FROM Users
-                                          WHERE user_id = :user_id`, {
-      user_id
-    });
+//     const [[query]] = await req.db.query(`SELECT username 
+//                                           FROM Users
+//                                           WHERE user_id = :user_id`, {
+//       user_id
+//     });
 
-    const updateString = `${query.username} joined.`
+//     const updateString = `${query.username} joined.`
 
-    await req.db.query(`INSERT INTO Change_Log (edit_desc, edit_timestamp, user_id, workspace_id)
-                        VALUES (:updateString, NOW(), :user_id, :workspace_id)`, {
-      updateString, user_id, workspace_id
-    });
+//     await req.db.query(`INSERT INTO Change_Log (edit_desc, edit_timestamp, user_id, workspace_id)
+//                         VALUES (:updateString, NOW(), :user_id, :workspace_id)`, {
+//       updateString, user_id, workspace_id
+//     });
 
-    await req.db.commit();
+//     await req.db.commit();
 
-    res.json({ success: true, message: "Successfully Added to workspace" });
+//     res.json({ success: true, message: "Successfully Added to workspace" });
 
-  } catch (err) {
-    console.log(err);
-    res.json({ success: false, err: "Internal server error" })
-  }
-}
+//   } catch (err) {
+//     console.log(err);
+//     res.json({ success: false, err: "Internal server error" })
+//   }
+// }
 
 const leaveWorkspace = async (req, res) => {
   try {
-    const { user_id, workspace_id } = req.body
+    const { user_id, workspace_id } = req.body;
 
     //declares transaction
     await req.db.beginTransaction();
@@ -184,49 +183,64 @@ const leaveWorkspace = async (req, res) => {
 //is used to invite users to a workspace
 const inviteUser = async (req, res) => {
   try {
-    const { user_email, workspace_id } = req.body;
+    const { username: admin_username } = req.user;
+    const { user_email, user_name, workspace_id, role } = req.body;
 
     const subject = `Invitation To Workspace`;
 
     const html = `
         <div>
-            <h4>You have been added to a workspace by ${user_name}</h4>
+            <h4>You have been added to a workspace by ${admin_username}</h4>
             <h6>Check it out <a href="http://localhost:5173/Quanta">here</a></h6>
         </div>`
 
+    //check if the user is already added 
+    const [[added]] = await req.db.query(`SELECT Users.user_id
+                                          FROM Workspace_Users
+                                          LEFT JOIN Users ON Workspace_Users.user_id = Users.user_id
+                                          WHERE Users.email = :user_email AND Workspace_Users.workspace_id=:workspace_id AND Workspace_Users.deleted_flag = 0`, {
+                                            user_email, workspace_id
+                                          });
+
+    if (added) {
+      res.json({success: false, err: "User Already Added"});
+      return;
+    }
+    
+
     //need to make sure the email is associated with a user
     const [[query]] = await req.db.query(`SELECT user_id, username 
-                                            FROM Users
-                                            WHERE email = :user_email`, {
+                                          FROM Users
+                                          WHERE email = :user_email`, {
       user_email
     });
 
     //if the user is found, add them to the workspace
     if (query) {
-
+ 
       const { user_id, username } = query;
 
       //start transaction to ensure 
       await req.db.beginTransaction();
 
       await req.db.query(`INSERT INTO Workspace_Users (user_id, workspace_id, workspace_role)
-                            VALUES (:user_id, :workspace_id, "member")`, {
-        user_id, workspace_id
+                          VALUES (:user_id, :workspace_id, :role)`, {
+        user_id, workspace_id, role
       });
-
-      const log_desc = `Added user ${username}`;
+ 
+      const log_desc = `${admin_username} Added user ${username}`;
 
       await req.db.query(`INSERT INTO Change_Log (edit_desc, edit_timestamp, user_id, workspace_id)
-                            VALUES (:log_desc, NOW(), :user_id, :workspace_id)`, {
+                          VALUES (:log_desc, NOW(), :user_id, :workspace_id)`, {
         log_desc, user_id, workspace_id
       });
-
+ 
       //start transaction
       await req.db.commit();
 
       //send email to the user to let them know they have been invited
-      sendEmail(user_email, html, subject)
-      res.json({ success: true, msg: "Email sent" });
+      sendEmail(user_email, html, subject);
+      res.json({ success: true, msg: "User Added" });
     } else {
       res.json({ success: false, err: `User with Email: ${user_email} not Found` });
     }
@@ -250,17 +264,48 @@ const changeLastWorkspace = async (req, res) => {
       user_id, workspace_id
     });
 
-    res.json({ success: true, message: 'Successfully saved last workspace' })
+    res.json({ success: true, message: 'Successfully saved last workspace' });
   } catch (err) {
     console.log(err);
     res.json({ success: false, err: "Internal Server Error" });
   }
 }
 
+const updateRole = async (req, res) => {
+  try {
+    const { username: admin_username, user_id: admin_user_id } = req.user
+    const { user_id, username, workspace_id, role } = req.body;
+
+    await req.db.beginTransaction();
+
+    await req.db.query(`UPDATE Workspace_Users
+                        SET workspace_role = :role
+                        WHERE user_id = :user_id AND workspace_id = :workspace_id`, {
+      user_id, workspace_id, role
+    });
+
+    const log_desc = `${admin_username + " Changed " + username + "'s role"}`
+
+    await req.db.query(`INSERT INTO Change_Log (edit_desc, edit_timestamp, user_id, workspace_id)
+                        VALUES (:log_desc, NOW(), :admin_user_id, :workspace_id)`, {
+      log_desc, admin_user_id, workspace_id
+    });
+
+    await req.db.commit();
+
+    res.json({success: true, message: "Role Successfully Updated"});
+
+  } catch (err) {
+    console.log(err);
+    res.json({success: false, err: "Internal Server Error"});
+  }
+} 
+ 
+exports.updateRole = updateRole;
 exports.leaveWorkspace = leaveWorkspace;
 exports.changeLastWorkspace = changeLastWorkspace;
 exports.deleteWorkspace = deleteWorkspace;
 exports.inviteUser = inviteUser;
 exports.getWorkspaceUsers = getWorkspaceUsers;
 exports.createWorkspace = createWorkspace;
-exports.joinWorkspace = joinWorkspace;
+// exports.joinWorkspace = joinWorkspace;

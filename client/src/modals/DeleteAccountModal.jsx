@@ -14,7 +14,7 @@ const DeleteAccountModal = ({ isOpen, onClose }) => {
     setIsLoading(true);
     try {
       const response = await fetch(`${apiUrl}/delete-account`, {
-        method: "POST",
+        method: "DELETE",
         headers: {
           "Content-Type": "application/json",
           authorization: jwt,

@@ -53,47 +53,81 @@ const TimeEntry = ({ entry }) => {
 
   const handleEndTime = (e) => {
     setEndTime(e.target.value);
-  };
+  }
 
-  const updateEntry = async () => {
+  //is used to delete an entry
+  const deleteEntry = async () => {
     try {
-      const jwt = getJwt();
+        const jwt = getJwt();
+  
+        const response = await fetch("http://localhost:3000/entries/delete", {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            authorization: jwt,
+          },
+          body: JSON.stringify({
+            project_id: projectId,
+            workspace_id: workspace.workspace_id,
+            entry_id: entry.entry_id
+          }),
+        });
+  
+        const { success } = await response.json();
 
-      const startingTime = getNewTime(timeDay, startTime);
-      const endingTime = getNewTime(timeDay, endTime);
-
-      const response = await fetch(`${apiUrl}/entries/update`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          authorization: jwt,
-        },
-        body: JSON.stringify({
-          entry_id: entry.entry_id,
-          start_time: startingTime,
-          end_time: endingTime,
-          entry_desc: entryDesc,
-          project_id: projectId,
-          workspace_id: workspace.workspace_id,
-        }),
-      });
-
-      const { success, err } = await response.json();
-
-      if (success) {
-        getEntries();
-        console.log("update successful");
-      } else {
-        window.alert("Error updating entry: " + err);
+        //if request is succesful and the entry was deleted, call getEntries from TimeTrackerPage to 'reload' the page.
+        if (success) {
+            getEntries();
+        } else {
+            window.alert("Error deleting entry, please try again");
+        }
+        
+      } catch (err) {
+        console.log(err);
       }
-
-      // if the update was successfull, call getEntries again and set the update ref back to empty
-      // have to call get Entries again in case they change the date of an entry and it needs to be
-      // put in a different day
-    } catch (err) {
-      console.log(err);
     }
-  };
+
+    const updateEntry = async () => {
+      try {
+        const jwt = getJwt();
+
+        const startingTime = getNewTime(timeDay, startTime);
+        const endingTime = getNewTime(timeDay, endTime);
+
+        const response = await fetch("http://localhost:3000/entries/update", {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            authorization: jwt,
+          },
+          body: JSON.stringify({
+            entry_id: entry.entry_id, 
+            start_time: startingTime,
+            end_time: endingTime,
+            entry_desc: entryDesc,
+            project_id: projectId,
+            workspace_id: workspace.workspace_id
+          }),
+        });
+
+        const { success, err } = await response.json();
+
+        if (success) {
+          getEntries();
+          console.log("update successful");
+        } else {
+          window.alert("Error updating entry: " + err);
+        }
+        
+
+        // if the update was successfull, call getEntries again and set the update ref back to empty
+        // have to call get Entries again in case they change the date of an entry and it needs to be 
+        // put in a different day
+        
+    } catch (err) {
+        console.log(err);
+    }
+  }
 
   //updates new time to reflect changes in state
   const getNewTime = (initialDate, time) => {

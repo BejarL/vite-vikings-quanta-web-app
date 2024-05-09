@@ -3,14 +3,30 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 
 //endpoints
-const { signUp, signIn, getUserInfo, changePassword, sendResetPassword, changeUsername, changeEmail, profileChangePassword, deleteAccount } = require('./endpoints/UserRegistration');
-const { getRecentProjects,
-  getAllProjects,
-  getProjectInfo,
-  addNewProject,
-  deleteProject } = require('./endpoints/Projects');
-const { getWorkspaceUsers, changeLastWorkspace, deleteWorkspace, createWorkspace, joinWorkspace, leaveWorkspace, inviteUser } = require('./endpoints/Workspace');
-const { getAllEntries, deleteEntry, updateEntry, createEntry } = require('./endpoints/TimeTracker');
+const { signUp, 
+        signIn, 
+        getUserInfo, 
+        changePassword, 
+        sendResetPassword, 
+        changeUsername, 
+        changeEmail, 
+        profileChangePassword, 
+        deleteAccount } = require('./endpoints/UserRegistration');
+const { getRecentProjects, 
+        getAllProjects, 
+        getProjectInfo, 
+        addNewProject, 
+        deleteProject } = require('./endpoints/Projects');
+const { getWorkspaceUsers, 
+        changeLastWorkspace, 
+        deleteWorkspace, 
+        createWorkspace, 
+        leaveWorkspace, inviteUser, 
+        updateRole } = require('./endpoints/Workspace');
+const { getAllEntries, 
+        deleteEntry, 
+        updateEntry, 
+        createEntry } = require('./endpoints/TimeTracker');
 
 //middle ware
 const { dbConnect, verifyJwt } = require('./endpoints/Middleware')
@@ -38,7 +54,7 @@ app.use((req, res, next) => dbConnect(req, res, next));
 * User Registration - /endpoints/UserRegistration.js
 *
 */
-app.put('/signup', (req, res) => signUp(req, res));
+app.post('/signup', (req, res) => signUp(req, res));
 
 app.post('/signin', (req, res) => signIn(req, res));
 
@@ -46,7 +62,7 @@ app.post('/resetpassword/send', (req, res) => sendResetPassword(req, res));
 
 app.use((req, res, next) => verifyJwt(req, res, next)); // middleware after signing in
 
-app.post('/delete-account', (req, res) => deleteAccount(req, res))
+app.delete('/delete-account', (req, res) => deleteAccount(req, res));
 
 app.post('/resetpassword/confirm', (req, res) => changePassword(req, res));
 
@@ -60,26 +76,26 @@ app.get('/user', (req, res) => getUserInfo(req, res));
 
 
 
-
-
 /* 
 *
 *   Workspace endpoints - see /endpoints/Workspace.js
 *
 */
-app.post('/workspace/users', (req, res) => getWorkspaceUsers(req, res));
+app.get('/workspace/users/:workspace_id', (req, res) => getWorkspaceUsers(req, res));
 
 app.post('/workspace/new', (req, res) => createWorkspace(req, res));
 
-app.post(`/workspace/join`, (req, res) => joinWorkspace(req, res));
+// app.post(`/workspace/join`, (req, res) => joinWorkspace(req, res));
 
-app.post('/workspace/leave', (req, res) => leaveWorkspace(req, res));
+app.put('/workspace/leave', (req, res) => leaveWorkspace(req, res));
 
 app.post('/workspace/invite', (req, res) => inviteUser(req, res));
 
-app.post('/workspace/delete', (req, res) => deleteWorkspace(req, res));
+app.delete('/workspace/delete/:workspace_id', (req, res) => deleteWorkspace(req, res));
 
-app.post('/workspace/update-last', (req, res) => changeLastWorkspace(req, res));
+app.put('/workspace/update-last', (req, res) => changeLastWorkspace(req, res));
+
+app.put('/workspace/update-role', (req, res) => updateRole(req, res));
 
 
 /* 
@@ -87,13 +103,13 @@ app.post('/workspace/update-last', (req, res) => changeLastWorkspace(req, res));
 * Endpoints for Projects - see /endpoints/Projects.js
 *
 */
-app.post('/projects/recent', (req, res) => getRecentProjects(req, res));
+//app.get('/projects/recent/:workspace_id', (req, res) => getRecentProjects(req, res));
 
-app.post('/projects/all', (req, res) => getAllProjects(req, res));
+app.get('/projects/all/:workspace_id', (req, res) => getAllProjects(req, res));
 
-app.post('/project/:project_id', (req, res) => getProjectInfo(req, res));
+app.get('/project/:project_id', (req, res) => getProjectInfo(req, res));
 
-app.put('/projects/new', (req, res) => addNewProject(req, res));
+app.post('/projects/new', (req, res) => addNewProject(req, res));
 
 app.delete('/projects/delete/:project_id', (req, res) => deleteProject(req, res));
 
@@ -102,13 +118,14 @@ app.delete('/projects/delete/:project_id', (req, res) => deleteProject(req, res)
 * Endpoints for Timetracker 
 *
 */
-app.get('/entries/all', (req, res) => getAllEntries(req, res));
+app.get('/entries/all/:workspace_id', (req, res) => getAllEntries(req, res));
 
-app.put('/entries/new', (req, res) => createEntry(req, res));
+app.post('/entries/new', (req, res) => createEntry(req, res));
 
-app.post(`/entries/update`, (req, res) => updateEntry(req, res));
+app.put(`/entries/update`, (req, res) => updateEntry(req, res));
 
-app.delete('/entries/delete', (req, res) => deleteEntry(req, res));
+// uses put instead of delete since we're using req.body
+app.put('/entries/delete/', (req, res) => deleteEntry(req, res));
 
 app.listen(port, () => {
   console.log(`server started at http://localhost:${port}`);

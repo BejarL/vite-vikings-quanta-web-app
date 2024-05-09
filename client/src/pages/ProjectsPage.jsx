@@ -25,13 +25,12 @@ const ProjectsPage = () => {
     const jwt = getJwt();
 
     try {
-      const response = await fetch(`${apiUrl}/projects/all`, {
-        method: "POST",
+      const response = await fetch(`${apiUrl}/projects/all/${workspace.workspace_id}`, {
+        method: "GET",
         headers: {
           "Content-Type": "application/json",
           authorization: jwt,
-        },
-        body: JSON.stringify({ workspace_id: workspace.workspace_id }),
+        }
       });
 
       const { success, data } = await verifyData(response, navigate);
@@ -52,6 +51,34 @@ const ProjectsPage = () => {
   const filteredProjects = projects.filter((project) =>
     project.project_name.toLowerCase().includes(searchProject.toLowerCase())
   );
+
+  const deleteProject = async (projectId) => {
+    const jwt = getJwt();
+
+    try {
+      const response = await fetch(
+        `${apiUrl}/projects/delete/${projectId}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            authorization: jwt,
+          },
+        }
+      );
+
+      // verify the data, make sure the error isnt jwt related then return the json res object
+      const { success, err } = await verifyData(response);
+
+      if (success) {
+        getProjects();
+      } else {
+        window.alert(err);
+      }
+    } catch (err) {
+      window.alert(err);
+    }
+  };
 
   const handleModalClose = () => {
     setIsModalOpen(false);

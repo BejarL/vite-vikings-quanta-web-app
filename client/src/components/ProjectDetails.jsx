@@ -17,9 +17,10 @@ const ProjectDetails = () => {
       const jwt = getJwt();
       try {
         const response = await fetch(`${apiUrl}/project/${projectId}`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", authorization: jwt },
-        });
+            method: "GET",
+            headers: { "Content-Type": "application/json", authorization: jwt },
+          }
+        );
         const { success, data } = await verifyData(response, navigate);
         if (success) setProject(data);
       } catch (error) {

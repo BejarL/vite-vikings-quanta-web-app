@@ -55,7 +55,7 @@ const LoginPage = () => {
     //try and hit the endpoint on the server for signing up to create a user
     try {
       const res = await fetch(`${apiUrl}/signup`, {
-        method: "PUT",
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
         },

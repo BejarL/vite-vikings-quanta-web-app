@@ -11,16 +11,16 @@ const signUp = async (req, res) => {
 
     //check if the email or username is being used
     const [[validateEmail]] = await req.db.query(`SELECT email 
-                                                      FROM Users 
-                                                      WHERE email = :email AND deleted_flag=0`,
-      { email }
-    );
+                                                  FROM Users 
+                                                  WHERE email = :email AND deleted_flag=0`,{ 
+      email
+    });
 
     const [[validateUser]] = await req.db.query(`SELECT username 
-                                                    FROM Users 
-                                                    WHERE username = :username AND deleted_flag=0`,
-      { username }
-    );
+                                                 FROM Users 
+                                                 WHERE username = :username AND deleted_flag=0`, { 
+      username
+    });
 
     if (validateEmail) {
       res.json({ success: false, err: "Email already in use" });
@@ -34,7 +34,7 @@ const signUp = async (req, res) => {
       await req.db.beginTransaction();
       //attempt to insert the data into the database
       const [query] = await req.db.query(`INSERT INTO Users (username, email, password) 
-                                                    VALUES (:username, :email, :hashedPassword)`, {
+                                          VALUES (:username, :email, :hashedPassword)`, {
         username, email, hashedPassword
       });
 
@@ -53,19 +53,19 @@ const signUp = async (req, res) => {
       //create the users personal workspace
       const workspace_name = `${username}'s Personal`;
       const [workspace] = await req.db.query(`INSERT INTO Workspace (workspace_name)
-                                                                  VALUES (:workspace_name)`, {
+                                              VALUES (:workspace_name)`, {
         workspace_name
       });
 
       const { insertId: workspace_id } = workspace
       // add users access to their personal workspace
       await req.db.query(`INSERT INTO Workspace_Users (user_id, workspace_id, workspace_role)
-                                              VALUES (:user_id, :workspace_id, "personal")`, {
+                          VALUES (:user_id, :workspace_id, "Personal")`, {
         user_id, workspace_id
       });
 
       await req.db.query(`INSERT INTO Change_Log (edit_desc, edit_timestamp, user_id, workspace_id)
-                                              VALUES ("Create Workspace", NOW(), :user_id, :workspace_id)`, {
+                          VALUES ("Create Workspace", NOW(), :user_id, :workspace_id)`, {
         user_id, workspace_id
       });
 
@@ -91,15 +91,15 @@ const signIn = async (req, res) => {
 
     if (emailCheck.test(login)) {
       const [[userData]] = await req.db.query(`SELECT user_id, email, username, password 
-                                                  FROM Users 
-                                                  WHERE email = :login AND deleted_flag = 0`, {
+                                               FROM Users 
+                                               WHERE email = :login AND deleted_flag = 0`, {
         login
       });
       data = userData;
     } else {
       const [[userData]] = await req.db.query(`SELECT user_id, email, username, password 
-                                                   FROM Users 
-                                                   WHERE username = :login AND deleted_flag = 0`, {
+                                               FROM Users 
+                                               WHERE username = :login AND deleted_flag = 0`, {
         login
       });
       data = userData;
@@ -141,7 +141,7 @@ const signIn = async (req, res) => {
 
 const deleteAccount = async (req, res) => {
   try {
-    const { user_id } = req.user
+    const { user_id } = req.user;
 
     await req.db.query(`UPDATE Users
                         SET deleted_flag = 1
@@ -163,20 +163,22 @@ const getUserInfo = async (req, res) => {
     const { user_id } = req.user
 
     //get the users info, then query again for workspace id and name
-    const [[userData]] = await req.db.query(`SELECT username, email, profile_pic, last_workspace_id FROM Users WHERE user_id = :user_id`, {
+    const [[userData]] = await req.db.query(`SELECT username, email, profile_pic, last_workspace_id 
+                                             FROM Users 
+                                             WHERE user_id = :user_id`, {
       user_id
     })
 
     //table join to get the information for which workspace a user has access too 
     const [workspaceData] = await req.db.query(`SELECT Workspace_Users.workspace_id, workspace_name, workspace_role
-                                                    FROM Workspace_Users
-                                                    INNER JOIN Workspace ON Workspace_Users.workspace_id = Workspace.workspace_id
-                                                    WHERE user_id = :user_id AND Workspace_Users.deleted_flag = 0`, {
+                                                FROM Workspace_Users
+                                                INNER JOIN Workspace ON Workspace_Users.workspace_id = Workspace.workspace_id
+                                                WHERE user_id = :user_id AND Workspace_Users.deleted_flag = 0`, {
       user_id
     });
 
     //respond with success of true and the data that was just queried
-    res.json({ success: true, data: { user: userData, workspaces: workspaceData } })
+    res.json({ success: true, data: { user: userData, workspaces: workspaceData }});
 
   } catch (err) {
     console.log(err);
@@ -201,13 +203,11 @@ const changePassword = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     //query the database and update the users password
-    await req.db.query(
-      `UPDATE Users SET password = :hashedPassword WHERE email = :email`,
-      {
-        email,
-        hashedPassword,
-      }
-    );
+    await req.db.query(`UPDATE Users 
+                        SET password = :hashedPassword 
+                        WHERE email = :email`, {
+        email, hashedPassword
+    });
 
     res.json({ success: true });
   } catch (err) {
@@ -218,7 +218,7 @@ const changePassword = async (req, res) => {
 
 const profileChangePassword = async (req, res) => {
   try {
-    const { user_id } = req.user
+    const { user_id } = req.user;
     const { oldPassword, newPassword } = req.body;
 
     //check new password matches
@@ -241,13 +241,11 @@ const profileChangePassword = async (req, res) => {
         const newHashedPassword = await bcrypt.hash(newPassword, 10);
 
         //query the database and update the users password
-        await req.db.query(
-          `UPDATE Users SET password = :newHashedPassword WHERE user_id = :user_id`,
-          {
-            user_id,
-            newHashedPassword
-          }
-        );
+        await req.db.query(`UPDATE Users 
+                            SET password = :newHashedPassword 
+                            WHERE user_id = :user_id`, {
+          user_id, newHashedPassword
+        });
         res.json({ success: true, message: "Password successfully updated" });
         //if password does not match, respond false
       } else {
@@ -318,26 +316,24 @@ const changeEmail = async (req, res) => {
     const { user_id } = req.user;
 
     const [[validateEmail]] = await req.db.query(`SELECT email 
-                                                      FROM Users 
-                                                      WHERE email = :email AND deleted_flag=0`,
-      { email }
-    );
+                                                  FROM Users 
+                                                  WHERE email = :email AND deleted_flag=0`,{ 
+      email 
+    });
 
     if (validateEmail) {
       res.json({ success: false, err: "Email already in use." });
       return;
     }
 
-    //query for email
-
     await req.db.query(`UPDATE Users SET email = :email WHERE user_id = :user_id`, {
       user_id, email
-    })
+    });
 
-    res.json({ success: true, message: 'email updated successfully' })
+    res.json({ success: true, message: 'email updated successfully' });
   } catch (err) {
-    console.log(err)
-    res.json({ success: false, err: 'Internal server error' })
+    console.log(err);
+    res.json({ success: false, err: 'Internal server error' });
   }
 }
 

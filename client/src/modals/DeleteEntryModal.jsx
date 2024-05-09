@@ -21,7 +21,7 @@ const DeleteEntryModal = ({
     setIsLoading(true);
     try {
       const response = await fetch(`${apiUrl}/entries/delete/`, {
-        method: "DELETE",
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
           authorization: jwt,
@@ -38,7 +38,6 @@ const DeleteEntryModal = ({
       }
 
       if (data.success) {
-        console.log("Entry deleted successfully");
         getEntries();
       }
     } catch (error) {

@@ -77,13 +77,12 @@ const TimeTrackerPage = () => {
   const getProjects = async () => {
     try {
       const jwt = getJwt();
-      const response = await fetch(`${apiUrl}/projects/all`, {
-        method: "POST",
+      const response = await fetch(`${apiUrl}/projects/all/${workspace.workspace_id}`, {
+        method: "GET",
         headers: {
           "Content-Type": "application/json",
           authorization: jwt,
-        },
-        body: JSON.stringify({ workspace_id: workspace.workspace_id }),
+        }
       });
       //check if the request was successful, if not do an early return
       if (response.ok) {
@@ -103,14 +102,15 @@ const TimeTrackerPage = () => {
   const getEntries = async () => {
     try {
       const jwt = getJwt();
-      const response = await fetch(`${apiUrl}/entries/all`, {
+      const response = await fetch(`${apiUrl}/entries/all/${workspace.workspace_id}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          authorization: jwt,
-        },
+          authorization: jwt
+        }
       });
-      const data = await response.json();
+
+      const data = await response.json()
       if (data.success) {
         formatEntries(data.entries);
       } else {
@@ -158,8 +158,8 @@ const TimeTrackerPage = () => {
   const createEntry = async () => {
     try {
       const jwt = getJwt();
-      const response = await fetch(`${apiUrl}/entries/new`, {
-        method: "PUT",
+      const response = await fetch("http://localhost:3000/entries/new", {
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
           authorization: jwt,
