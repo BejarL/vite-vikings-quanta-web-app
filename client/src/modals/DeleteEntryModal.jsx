@@ -1,27 +1,36 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { getJwt } from "../Auth/jwt";
+import { userContext } from "../pages/Layout";
 
-const DeleteProjectModal = ({
+const DeleteEntryModal = ({
   isOpen,
   onClose,
   projectId,
-  onProjectDelete,
+  getEntries,
+  entry,
 }) => {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  const { workspace } = useContext(userContext);
+
   const apiUrl = import.meta.env.VITE_API_URL;
 
-  const deleteProject = async (projectId) => {
+  const deleteEntry = async () => {
     const jwt = getJwt();
     setIsLoading(true);
     try {
-      const response = await fetch(`${apiUrl}/projects/delete/${projectId}`, {
+      const response = await fetch(`${apiUrl}/entries/delete/`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
           authorization: jwt,
         },
+        body: JSON.stringify({
+          project_id: projectId,
+          workspace_id: workspace.workspace_id,
+          entry_id: entry.entry_id,
+        }),
       });
       const data = await response.json();
       if (!response.ok) {
@@ -29,9 +38,8 @@ const DeleteProjectModal = ({
       }
 
       if (data.success) {
-        console.log(`Delete successful for project ID: ${projectId}`);
-        onClose();
-        onProjectDelete(projectId);
+        console.log("Entry deleted successfully");
+        getEntries();
       }
     } catch (error) {
       setError(error.message);
@@ -40,9 +48,9 @@ const DeleteProjectModal = ({
     }
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    deleteProject(projectId);
+    await deleteEntry();
   };
 
   if (!isOpen) return null;
@@ -52,10 +60,10 @@ const DeleteProjectModal = ({
       <div className="bg-white rounded-lg overflow-hidden shadow-xl transform transition-all sm:max-w-lg sm:w-full p-4">
         <div className="text-center p-5">
           <h3 className="text-2xl leading-6 font-medium text-gray-900">
-            Delete Project
+            Delete Entry
           </h3>
           <p className="text-lg pt-3 leading-6 font-medium text-gray-900">
-            Are you sure you want to permanently delete this project?
+            Are you sure you want to permanently delete this entry?
           </p>
           <form onSubmit={handleSubmit} className="mt-3 space-y-2">
             <div className="flex justify-center space-x-4 pt-3">
@@ -82,4 +90,4 @@ const DeleteProjectModal = ({
   );
 };
 
-export default DeleteProjectModal;
+export default DeleteEntryModal;

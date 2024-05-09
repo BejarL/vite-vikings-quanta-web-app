@@ -7,7 +7,9 @@ import DeleteProjectModal from "../modals/DeleteProjectModal.jsx";
 
 const ProjectsPage = () => {
   const [projects, setProjects] = useState([]);
+  const [currentProjectId, setCurrentProjectId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [searchProject, setSearchProject] = useState("");
 
   const apiUrl = import.meta.env.VITE_API_URL;
@@ -17,7 +19,7 @@ const ProjectsPage = () => {
 
   useEffect(() => {
     getProjects();
-  }, []); 
+  }, []);
 
   const getProjects = async () => {
     const jwt = getJwt();
@@ -83,6 +85,13 @@ const ProjectsPage = () => {
     getProjects();
   };
 
+  const handleProjectDelete = (projectId) => {
+    const updatedProjects = projects.filter(
+      (project) => project.project_id !== projectId
+    );
+    setProjects(updatedProjects);
+  };
+
   const formatTime = (timeString) => {
     if (!timeString) return "00:00";
     const [hours, minutes] = timeString.split(":");
@@ -145,7 +154,10 @@ const ProjectsPage = () => {
                 </td>
                 <td className="py-4 px-6 border-b border-gray-200 text-end">
                   <button
-                    onClick={() => deleteProject(project.project_id)}
+                    onClick={() => {
+                      setCurrentProjectId(project.project_id);
+                      setIsDeleteModalOpen(true);
+                    }}
                     className="text-white p-1 rounded-full inline-flex items-center justify-center"
                     aria-label="Delete project"
                   >
@@ -176,6 +188,12 @@ const ProjectsPage = () => {
                       ></path>
                     </svg>
                   </button>
+                  <DeleteProjectModal
+                    isOpen={isDeleteModalOpen}
+                    onClose={() => setIsDeleteModalOpen(false)}
+                    projectId={currentProjectId}
+                    onProjectDelete={handleProjectDelete}
+                  />
                 </td>
               </tr>
             ))}

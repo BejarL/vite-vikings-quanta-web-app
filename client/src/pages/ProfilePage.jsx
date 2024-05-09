@@ -16,7 +16,7 @@ const UserProfile = () => {
   const [isEmailModalOpen, setEmailModalOpen] = useState(false);
 
   return (
-    <div className="flex justify-center items-center mt-5">
+    <div className="flex flex-col justify-center items-center mt-5">
       <div className="flex flex-col items-center p-6 w-full max-w-lg rounded-lg shadow-lg bg-lightpurple">
         <LetteredAvatar name={username} size="large" />
         <h2 className="mt-4 text-2xl font-bold text-gray-700">{username}</h2>
@@ -60,7 +60,24 @@ const UserProfile = () => {
           >
             Delete Account
           </button>
-          <DeleteAccountModal
+      </div>
+      <div className="mt-5">
+        <div className="bg-white shadow-md rounded-lg my-6 overflow-x-auto">
+        <table className="text-left w-full border-collapse border-b">
+          <thead>
+            <tr className="bg-lightpurple-login">
+              <th className="py-4 px-9">Name</th>
+              <th className="py-4 px-9">Project Name </th>
+              <th className="py-4 px-9">Event  </th>
+              <th className="py-4 px-9 text-end">Timestamp</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr></tr>
+          </tbody>
+          </table>
+          </div>
+              <DeleteAccountModal
             isOpen={isDeleteModalOpen}
             onClose={() => setDeleteModalOpen(false)}
           />
@@ -71,12 +88,14 @@ const UserProfile = () => {
 };
 
 const UserInfo = ({ onEdit }) => (
-  <button
-    onClick={onEdit}
-    className="inline-flex justify-center rounded-md border border-transparent px-4 py-2 text-sm font-medium text-purple-700 bg-purple-100 hover:bg-purple-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2"
-  >
-    Edit
-  </button>
+  <div className="flex items-center justify-between mb-4">
+    <button
+      onClick={onEdit}
+      className="inline-flex justify-center rounded-md border border-transparent px-4 py-2 text-sm font-medium text-purple-700 bg-purple-100 hover:bg-purple-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2"
+    >
+      Edit
+    </button>
+  </div>
 );
 
 export default UserProfile;

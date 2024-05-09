@@ -1,12 +1,11 @@
-import React, { useEffect, useRef, useState, useContext, createContext } from "react";
+import { useEffect, useRef, useState, useContext, createContext } from "react";
 import { getJwt, verifyData } from "../Auth/jwt";
 import { useNavigate } from "react-router-dom";
 import { userContext } from "./Layout";
 import TimeTrackerDay from "../components/TimeTrackerDay";
-import TimeEntry from "../components/TimeEntry"
-import DatePicker from "react-datepicker";
 import ManualEntryModal from "../modals/ManualEntryModal";
 import "react-datepicker/dist/react-datepicker.css";
+import { FaPlay, FaPlus, FaStop } from "react-icons/fa";
 
 export const projectsContext = createContext(null);
 
@@ -19,6 +18,7 @@ const TimeTrackerPage = () => {
   const [selectedProject, setSelectedProject] = useState();
   const [isModalOpen, setModalOpen] = useState(false);
 
+  const apiUrl = import.meta.env.VITE_API_URL;
   const navigate = useNavigate();
   const { workspace } = useContext(userContext);
   let id = useRef();
@@ -34,6 +34,7 @@ const TimeTrackerPage = () => {
 
   const handleTime = () => {
     id.startDate = new Date();
+    if (id.current) clearInterval(id.current);
     id.current = setInterval(() => {
       setTime((prev) => {
         if (prev.sec == 60) {
@@ -51,7 +52,7 @@ const TimeTrackerPage = () => {
     //if they dont have a desc or project Id, early return and force them to enter one
     if (!entryDesc) {
       window.alert("Enter a description");
-      return
+      return;
     } else if (selectedProject == -1) {
       window.alert("Please Select a project");
       return;
@@ -119,17 +120,17 @@ const TimeTrackerPage = () => {
         console.log(data.err);
       }
     } catch (err) {
-      console.log(err)
+      console.log(err);
     }
-  }
+  };
 
   //is a helper function when sorting entries, formats based on local time
   const formatDay = (dateObj) => {
     const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     let formattedDate = new Date(dateObj);
-    formattedDate.toLocaleString('en-US', { timeZone: userTimeZone });
+    formattedDate.toLocaleString("en-US", { timeZone: userTimeZone });
     return formattedDate.toString().slice(0, 10);
-  }
+  };
 
   //sorts entries into a two dimensional array based on the entries end time
   const formatEntries = (entries) => {
@@ -138,15 +139,15 @@ const TimeTrackerPage = () => {
     let day = formatDay(entries[0].end_time);
 
     for (let i = 0; i < entries.length; i++) {
-      const endTime = formatDay(entries[i].end_time)
+      const endTime = formatDay(entries[i].end_time);
 
       if (endTime.startsWith(day)) {
         storageArray[groupIndex].push(entries[i]);
       } else {
         //update the 'day'
-        day = formatDay(entries[i].end_time)
+        day = formatDay(entries[i].end_time);
         // increment the group index
-        groupIndex +=1;
+        groupIndex += 1;
         //push a new empty array onto the storageArray, then push the entry into that array
         storageArray.push([]);
         storageArray[groupIndex].push(entries[i]);
@@ -154,7 +155,7 @@ const TimeTrackerPage = () => {
     }
 
     setEntries(storageArray);
-  }
+  };
 
   const createEntry = async () => {
     try {
@@ -178,7 +179,8 @@ const TimeTrackerPage = () => {
       if (success) {
         getEntries();
       } else {
-        window.alert("Error creating entry, please try again")
+        console.error(TypeError);
+        window.alert("Error creating entry, please try again");
       }
     } catch (err) {
       console.log(err);
@@ -195,9 +197,11 @@ const TimeTrackerPage = () => {
   });
 
   //maps through to get an array for each time entry group (day)
-  const entryElems = entries.map(entryGroup => {
-    return <TimeTrackerDay entryGroup = {entryGroup} key={entryGroup[0].entry_id}/>
-  })
+  const entryElems = entries.map((entryGroup) => {
+    return (
+      <TimeTrackerDay entryGroup={entryGroup} key={entryGroup[0].entry_id} />
+    );
+  });
 
   return (
     <>
@@ -205,18 +209,19 @@ const TimeTrackerPage = () => {
       <div className="flex min-h-[100%]">
         <div className="shadow-lg border border-gray-300 min-w-320 rounded p-4 w-full ">
           {/* tracking */}
-          <div className="shadow-lg border bg-white border-gray-300 min-w-[320px] rounded p-4 md:mb-4 grid grid-cols-2 md:grid-cols-1">
-            <div className="flex flex-wrap md:mb-4 grid-cols-4 col-span-2">
+          <div className="shadow-lg bg-white min-w-[320px] rounded p-4 md:mb-4 grid grid-cols-2 md:grid-cols-1">
+            <div className="flex flex-wrap grid-cols-4 col-span-2">
               {/* entry desc */}
               <input
                 type="text"
                 placeholder="Description"
-                className="border bg-lightpurple w-full placeholder-gray-950 border-gray300 p-4 py-2 rounded-md mr-2 my-2 md:w-4/4 lg:w-1/3"
+                className="bg-lightpurple w-full placeholder-gray-950 p-4 py-2 rounded-md mr-2 my-2 md:w-4/4 lg:w-1/3"
                 value={entryDesc}
                 onChange={handleEntryDesc}
+                autoFocus
               />
               <select
-                className="border border-gray-300 px-4 py-2 rounded-md w-3/4 mr-2 my-2 md:w-2/5 lg:w-1/4"
+                className="px-4 py-2 rounded-md w-3/4 mr-2 my-2 md:w-2/5 lg:w-1/4 cursor-pointer"
                 value={selectedProject}
                 onChange={handleSelectedProject}
               >
@@ -224,21 +229,15 @@ const TimeTrackerPage = () => {
                 {projectElems}
               </select>
               {/* add button */}
-              <button className="bg-white text-black p-1 py-2 rounded-md flex items-center md:order-last " onClick={() => setModalOpen(true)}>
-                <svg
-                  width="24px"
-                  height="24px"
-                  viewBox="0 0 15 15"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="mr-2"
-                >
-                  <path d="M7.5 1V14M1 7.5H14" stroke="#000000" />
-                </svg>
+              <button
+                className="flex items-center md:order-last"
+                onClick={() => setModalOpen(true)}
+              >
+                <FaPlus size={"20"} />
               </button>
               <ManualEntryModal
-              isOpen={isModalOpen}
-              onClose={() => setModalOpen(false)}
+                isOpen={isModalOpen}
+                onClose={() => setModalOpen(false)}
               />
               {/* Timer */}
               <div className="border border-gray p-4 py-2 w-3/4 min-w-[201px] rounded-md mr-2 my-2 md:w-1/4 lg:w-1/5 lg:mr-auto">
@@ -266,36 +265,25 @@ const TimeTrackerPage = () => {
                     togglePlayButton();
                   }}
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    width="24"
-                    height="24"
-                    className="fill-current"
-                  >
-                    <path d="M8 5v14l11-7z" />
-                  </svg>
+                  <FaPlay size={"20"} />
                 </button>
               ) : (
                 <button
                   className="bg-gray text-black p-2 py-2 rounded-md mr-2 md:order-3"
                   onClick={handleStop}
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="1em"
-                    height="1em"
-                    viewBox="0 0 24 24"
-                  >
-                    <path fill="black" d="M3 21V3h18v18z"></path>
-                  </svg>
+                  <FaStop size={"20"} />
                 </button>
               )}
             </div>
           </div>
           {/* Entries go here */}
           <div>
-            <projectsContext.Provider value={projects ? {projects: projects, getEntries: getEntries }: null}>
+            <projectsContext.Provider
+              value={
+                projects ? { projects: projects, getEntries: getEntries } : null
+              }
+            >
               {entryElems}
             </projectsContext.Provider>
           </div>

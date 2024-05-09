@@ -11,7 +11,7 @@ const Layout = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [currentWorkspace, setCurrentWorkspace] = useState({});
   const [workspaces, setWorkspaces] = useState([]);
-  const [loading, setLoading ] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [user, setUser] = useState("");
   const [isModalOpen, setModalOpen] = useState(false);
 
@@ -78,8 +78,7 @@ const Layout = () => {
       }
 
       setLoading(false);
-
-    } catch(err) {
+    } catch (err) {
       console.error(err);
     }
   };
@@ -158,7 +157,7 @@ const Layout = () => {
             </svg>
           </button>
           <Link to="/quanta/timetracker">
-          <p className="ml-2 text-3xl text-darkpurple">Quanta</p>
+            <p className="ml-2 text-3xl text-darkpurple">Quanta</p>
           </Link>
           {/* dropdown button desktop view */}
           <button
@@ -310,12 +309,14 @@ const Layout = () => {
             </>
             : null}
           
-          
+          {/* WorkSpaces on the Mobile View  */}
           <p className="text-3xl border-b-2 border-slate-100 py-2 mt-5 mr-[10px] pl-[10px]">Workspaces</p>
-          <button  
-          onClick={() => setModalOpen(true)}
-          className =" flex  items-center text-3xl mt-[20px]  px-[10px] ">
-            <svg
+        
+            <button
+              onClick={() => setModalOpen(true)}
+              className=" flex  items-center text-3xl mt-[20px]  px-[10px] "
+            >
+              <svg
                 className="svg2"
                 xmlns="http://www.w3.org/2000/svg"
                 width="1em"
@@ -327,15 +328,14 @@ const Layout = () => {
                   d="M600 0C268.629 0 0 268.629 0 600s268.629 600 600 600s600-268.629 600-600S931.371 0 600 0m-95.801 261.841h191.602v242.358h242.358v191.602H695.801v242.358H504.199V695.801H261.841V504.199h242.358z"
                 />
               </svg>
-              <p className="pl-[10px]">Create</p> 
-              </button>
-              <CreateModal
-            isOpen={isModalOpen}
-            onClose={() => setModalOpen(false)}
-          />
-           <button  
-          className =" flex flex-wrap items-center text-3xl mt-[10px] py-2 px-[10px]">
-            <svg
+              <p className="pl-[10px]">Create</p>
+            </button>
+            <CreateModal
+              isOpen={isModalOpen}
+              onClose={() => setModalOpen(false)}
+            />
+            <button className=" flex flex-wrap items-center text-3xl mt-[10px] py-2 px-[10px]">
+              <svg
                 className="svg2"
                 xmlns="http://www.w3.org/2000/svg"
                 width="1.1em"
@@ -346,10 +346,10 @@ const Layout = () => {
                   fill="currentColor"
                   d="M32 2C15.432 2 2 15.432 2 32c0 16.568 13.432 30 30 30s30-13.432 30-30C62 15.432 48.568 2 32 2m1.693 46V37.428H15V27.143h18.693V16L49 32z"
                 />
-              </svg> 
+              </svg>
               <p className=" pl-[10px] ">Join</p>
-              </button>
-              </div>
+            </button>
+          </div>
           <button
             onClick={handleSignout}
             className="flex items-center text-3xl mt-[20px] pl-[10px] p-2 "
@@ -367,7 +367,6 @@ const Layout = () => {
             </svg>
             <p className="pl-[10px]">Logout</p>
           </button>
-          
         </div>
         <div className="flex min-h-[100%]">
           {/* sidebar - desktop view*/}
@@ -475,27 +474,26 @@ const Layout = () => {
               <p className="pl-[10px]">Create</p> 
               </button>
               <CreateModal
-            isOpen={isModalOpen}
-            onClose={() => setModalOpen(false)}
-          />
-           <button  
-          className =" flex flex-wrap items-center text-2xl py-2 px-[10px] hover:bg-lightpurple-selected w-[100%]">
-            <svg
-                className="svg2"
-                xmlns="http://www.w3.org/2000/svg"
-                width="1.1em"
-                height="1.2em"
-                viewBox="0 0 64 64"
-              >
-                <path
-                  fill="currentColor"
-                  d="M32 2C15.432 2 2 15.432 2 32c0 16.568 13.432 30 30 30s30-13.432 30-30C62 15.432 48.568 2 32 2m1.693 46V37.428H15V27.143h18.693V16L49 32z"
-                />
-              </svg> 
-              <p className=" pl-[10px] ">Join</p>
+                isOpen={isModalOpen}
+                onClose={() => setModalOpen(false)}
+              />
+              <button className=" flex flex-wrap items-center text-2xl py-2 px-[10px] hover:bg-lightpurple-selected w-[100%]">
+                <svg
+                  className="svg2"
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="1.1em"
+                  height="1.2em"
+                  viewBox="0 0 64 64"
+                >
+                  <path
+                    fill="currentColor"
+                    d="M32 2C15.432 2 2 15.432 2 32c0 16.568 13.432 30 30 30s30-13.432 30-30C62 15.432 48.568 2 32 2m1.693 46V37.428H15V27.143h18.693V16L49 32z"
+                  />
+                </svg>
+                <p className=" pl-[10px] ">Join</p>
               </button>
             </div>
-            
+
             <button
               onClick={handleSignout}
               className="flex items-center text-3xl pl-[10px] hover:text-red-600 hover:fill-red-600"
@@ -506,24 +504,23 @@ const Layout = () => {
                 height="1em"
                 viewBox="0 0 24 24"
               >
-                <path
-                  d="M5 21q-.825 0-1.412-.587T3 19V5q0-.825.588-1.412T5 3h7v2H5v14h7v2zm11-4l-1.375-1.45l2.55-2.55H9v-2h8.175l-2.55-2.55L16 7l5 5z"
-                ></path>
+                <path d="M5 21q-.825 0-1.412-.587T3 19V5q0-.825.588-1.412T5 3h7v2H5v14h7v2zm11-4l-1.375-1.45l2.55-2.55H9v-2h8.175l-2.55-2.55L16 7l5 5z"></path>
               </svg>
               <p className="pl-[10px]">Logout</p>
             </button>
           </div>
           <div className="bg-lightpurple-body w-[100%]">
-          {/* Changed the value so the key is undefined instead of the whole context */}
-          { !loading ? 
-            <userContext.Provider value={{
-              workspace: currentWorkspace ? currentWorkspace : undefined,
-              user: user
-            }}>
-              <Outlet />
-            </userContext.Provider>
-            : null
-            }
+            {/* Changed the value so the key is undefined instead of the whole context */}
+            {!loading ? (
+              <userContext.Provider
+                value={{
+                  workspace: currentWorkspace ? currentWorkspace : undefined,
+                  user: user,
+                }}
+              >
+                <Outlet />
+              </userContext.Provider>
+            ) : null}
           </div>
         </div>
       </div>
