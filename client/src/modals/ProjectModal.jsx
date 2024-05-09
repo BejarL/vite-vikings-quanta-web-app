@@ -24,7 +24,7 @@ const ProjectModal = ({ isOpen, onClose, workspace_id, getProjects }) => {
       const { success, err } = await verifyData(response);
 
       if (success) {
-        onClose();
+        handleClose();
         getProjects();
       } else {
         window.alert(err);
@@ -34,7 +34,14 @@ const ProjectModal = ({ isOpen, onClose, workspace_id, getProjects }) => {
     }
   };
 
-  const handleSubmit = () => {
+  //is used to clear state and call onClose to close the modal
+  const handleClose = () => {
+    setNewProjectName("");
+    onClose();
+  }
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
     createNewProject();
   };
 
@@ -63,7 +70,7 @@ const ProjectModal = ({ isOpen, onClose, workspace_id, getProjects }) => {
               <button
                 type="button"
                 className="inline-flex justify-center rounded-md border border-transparent px-4 py-2 text-sm font-medium text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
-                onClick={onClose}
+                onClick={handleClose}
               >
                 Cancel
               </button>

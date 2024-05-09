@@ -29,7 +29,6 @@ const DeleteProjectModal = ({
       }
 
       if (data.success) {
-        console.log(`Delete successful for project ID: ${projectId}`);
         onClose();
         onProjectDelete(projectId);
       }
