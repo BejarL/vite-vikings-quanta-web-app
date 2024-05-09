@@ -132,6 +132,7 @@ const updateEntry = async (req, res) => {
 
 const deleteEntry = async (req, res) => {
   try {
+    const { user_id } = req.user;
     const { entry_id, workspace_id, project_id } = req.body;
 
     //begin transaction, so both queries happen or both dont

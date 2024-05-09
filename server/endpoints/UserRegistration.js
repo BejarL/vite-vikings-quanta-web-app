@@ -60,7 +60,7 @@ const signUp = async (req, res) => {
       const { insertId: workspace_id } = workspace
       // add users access to their personal workspace
       await req.db.query(`INSERT INTO Workspace_Users (user_id, workspace_id, workspace_role)
-                          VALUES (:user_id, :workspace_id, "personal")`, {
+                          VALUES (:user_id, :workspace_id, "Personal")`, {
         user_id, workspace_id
       });
 

@@ -2,14 +2,11 @@ import { useState } from "react";
 import { getJwt, verifyData } from "../Auth/jwt";
 
 
-
 const InviteToWorkspace = ({ isOpen, toggleModal, workspace_id }) => {
   const [userEmail, setUserEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [role, setRole] = useState("member")
+  const [role, setRole] = useState("Member")
   const [error, setError] = useState("");
-
-  
   
   const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -57,7 +54,7 @@ const InviteToWorkspace = ({ isOpen, toggleModal, workspace_id }) => {
   const handleClose = () => {
     setUserEmail("");
     setIsLoading(false);
-    setRole("member");
+    setRole("Member");
     toggleModal();
   }
 
@@ -94,8 +91,8 @@ const InviteToWorkspace = ({ isOpen, toggleModal, workspace_id }) => {
                         value={role}
                         onChange={handleRole}
                     >
-                        <option value={"member"}>Member</option>
-                        <option value={"admin"}>Admin</option>
+                        <option value={"Member"}>Member</option>
+                        <option value={"Admin"}>Admin</option>
                     </select>
                 </div>
               </div>

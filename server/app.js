@@ -3,14 +3,30 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 
 //endpoints
-const { signUp, signIn, getUserInfo, changePassword, sendResetPassword, changeUsername, changeEmail, profileChangePassword, deleteAccount } = require('./endpoints/UserRegistration');
-const { getRecentProjects,
-  getAllProjects,
-  getProjectInfo,
-  addNewProject,
-  deleteProject } = require('./endpoints/Projects');
-const { getWorkspaceUsers, changeLastWorkspace, deleteWorkspace, createWorkspace, leaveWorkspace, inviteUser } = require('./endpoints/Workspace');
-const { getAllEntries, deleteEntry, updateEntry, createEntry } = require('./endpoints/TimeTracker');
+const { signUp, 
+        signIn, 
+        getUserInfo, 
+        changePassword, 
+        sendResetPassword, 
+        changeUsername, 
+        changeEmail, 
+        profileChangePassword, 
+        deleteAccount } = require('./endpoints/UserRegistration');
+const { getRecentProjects, 
+        getAllProjects, 
+        getProjectInfo, 
+        addNewProject, 
+        deleteProject } = require('./endpoints/Projects');
+const { getWorkspaceUsers, 
+        changeLastWorkspace, 
+        deleteWorkspace, 
+        createWorkspace, 
+        leaveWorkspace, inviteUser, 
+        updateRole } = require('./endpoints/Workspace');
+const { getAllEntries, 
+        deleteEntry, 
+        updateEntry, 
+        createEntry } = require('./endpoints/TimeTracker');
 
 //middle ware
 const { dbConnect, verifyJwt } = require('./endpoints/Middleware')
@@ -79,6 +95,8 @@ app.delete('/workspace/delete/:workspace_id', (req, res) => deleteWorkspace(req,
 
 app.put('/workspace/update-last', (req, res) => changeLastWorkspace(req, res));
 
+app.put('/workspace/update-role', (req, res) => updateRole(req, res));
+
 
 /* 
 *
@@ -107,7 +125,7 @@ app.post('/entries/new', (req, res) => createEntry(req, res));
 app.put(`/entries/update`, (req, res) => updateEntry(req, res));
 
 // uses put instead of delete since we're using req.body
-app.put('/entries/delete', (req, res) => deleteEntry(req, res));
+app.put('/entries/delete/', (req, res) => deleteEntry(req, res));
 
 app.listen(port, () => {
   console.log(`server started at http://localhost:${port}`);

@@ -2,6 +2,7 @@ import { useState, useContext, useEffect} from "react"
 import InviteToWorkspace from "../modals/InviteToWorkspace"
 import { userContext } from "./Layout";
 import { getJwt } from "../Auth/jwt";
+import WorkspaceUser from "../components/WorkspaceUser";
 
 const UsersPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -24,7 +25,7 @@ const UsersPage = () => {
 
   //ensures the user should have access to the page. if they are a member, navigate to the time tracker page.
   const verifyAccess = () => {
-    if (workspace.workspace_role === "member") {
+    if (workspace.workspace_role === "Member") {
       Navigate("/");
     }
   }
@@ -59,6 +60,10 @@ const UsersPage = () => {
     setFilter(filter);
   };
 
+  const userElems = users.map(user => {
+    return <WorkspaceUser user={user} key={user.user_id}/>
+  })
+
   return (
     <div className="Container mx-auto p-4">
       <InviteToWorkspace 
@@ -75,50 +80,39 @@ const UsersPage = () => {
       </button>
       </div>
       
-      <div className="flex mb-4">
-        <div className="flex mb-2">
-        <input type="text" 
-        placeholder="Search by email" 
-        className="border border-gray-300 py-2 px-4 rounded-lg mr-2 flex-grow md:flex-grow-0" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
-        <button className={`py-2 px-4 md:px-6  border border-black  ${filter === "all" ? "bg-blue-500 text-white" : "bg-white"}`} onClick={() => handleFilterChange("all")}>
-          All
-        </button>
-        <button className={`py-2 px-4 md:px-6  border border-black  ${filter === "active" ? "bg-blue-500 text-white" : "bg-white"}`} onClick={() => handleFilterChange("active")}>
-          Active
-        </button>
-        <button className={`py-2 px-4 md:px-6  border border-black   ${filter === "pending" ? "bg-blue-500 text-white" : "bg-white"}`} onClick={() => handleFilterChange("pending")}>
-          Pending
-        </button>
-        </div>
-        </div>
-        
       
-        
-        <div className="overflow-x-auto mt-4">
-          <table className="w-full table-auto border-collapse border border-gray-300">
+        <div className="flex mb-2 flex-wrap justify-center items-center md:justify-start">
+          <input type="text" 
+                placeholder="Search by email" 
+                className="border border-gray-300 py-2 px-4 rounded-lg mr-2 mt-2 flex-grow md:flex-grow-0" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+        <div className="min-w-[200px] flex no-wrap mt-2">
+            <button className={`py-2 px-4 md:px-6  border border-black  ${filter === "all" ? "bg-blue-500 text-white" : "bg-white"}`} onClick={() => handleFilterChange("all")}>
+              All
+            </button>
+            <button className={`py-2 px-4 md:px-6  border border-black  ${filter === "active" ? "bg-blue-500 text-white" : "bg-white"}`} onClick={() => handleFilterChange("active")}>
+              Active
+            </button>
+            <button className={`py-2 px-4 md:px-6  border border-black   ${filter === "pending" ? "bg-blue-500 text-white" : "bg-white"}`} onClick={() => handleFilterChange("pending")}>
+              Pending
+            </button>
+          </div>
+        </div>
+        <div className="mt-2">
+          <table className="w-full table-auto border-collapse border border-gray-300 ">
             <thead>
-              <tr className="bg-gray-200">
-                <th className="border border-gray-300 p-2 text-left">Email</th>
-                <th className="border border-gray-300 p-2 text-left">Username</th>
+              <tr className="bg-gray-200 w-[100%]">
+                <th className="border border-gray-300 p-2 text-left min-w-[50px] overflow-hidden">Email</th>
+                <th className="border border-gray-300 p-2 text-left max-w-[100px]">Username</th>
                 <th className="border border-gray-300 p-2 text-left">Role</th>
-                <th className="border border-gray-300 p-2 text-left">Status</th>
-                 </tr>
+                <th className="border border-gray-300 p-2 text-left w-[10px] min-w-[50px]"></th>
+              </tr>
             </thead>
-            <tbody>
-              {filteredUsers.map((user) => (
-                <tr key={user.user_id}>
-                <td className="border-t border-gray-300 border-dashed p-2">{user.email}</td>
-                <td className="border-t border-gray-300 border-dashed p-2">{user.username}</td>
-                <td className="border-t border-gray-300 border-dashed p-2">{user.workspace_role}</td>
-                <td className="border-t border-gray-300 border-dashed p-2">{user.status}</td>
-                </tr>
-              ))}
+            <tbody className="w-full">
+              {userElems}
             </tbody>
           </table>
         </div>
         </div>
-        
-    
   );
 };
 

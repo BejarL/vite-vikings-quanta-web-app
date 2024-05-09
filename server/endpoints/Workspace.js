@@ -183,7 +183,7 @@ const leaveWorkspace = async (req, res) => {
 //is used to invite users to a workspace
 const inviteUser = async (req, res) => {
   try {
-    const { username } = req.user;
+    const { username: admin_username } = req.user;
     const { user_email, workspace_id, role } = req.body;
 
     const subject = `Invitation To Workspace`;
@@ -228,7 +228,7 @@ const inviteUser = async (req, res) => {
         user_id, workspace_id, role
       });
 
-      const log_desc = `Added user ${username}`;
+      const log_desc = `${admin_username} Added user ${username}`;
 
       await req.db.query(`INSERT INTO Change_Log (edit_desc, edit_timestamp, user_id, workspace_id)
                           VALUES (:log_desc, NOW(), :user_id, :workspace_id)`, {
@@ -271,6 +271,37 @@ const changeLastWorkspace = async (req, res) => {
   }
 }
 
+const updateRole = async (req, res) => {
+  try {
+    const { username: admin_username, user_id: admin_user_id } = req.user
+    const { user_id, username, workspace_id, role } = req.body;
+
+    await req.db.beginTransaction();
+
+    await req.db.query(`UPDATE Workspace_Users
+                        SET workspace_role = :role
+                        WHERE user_id = :user_id AND workspace_id = :workspace_id`, {
+      user_id, workspace_id, role
+    });
+
+    const log_desc = `${admin_username + " Changed " + username + "'s role"}`
+
+    await req.db.query(`INSERT INTO Change_Log (edit_desc, edit_timestamp, user_id, workspace_id)
+                        VALUES (:log_desc, NOW(), :admin_user_id, :workspace_id)`, {
+      log_desc, admin_user_id, workspace_id
+    });
+
+    await req.db.commit();
+
+    res.json({success: true, message: "Role Successfully Updated"});
+
+  } catch (err) {
+    console.log(err);
+    res.json({success: false, err: "Internal Server Error"});
+  }
+} 
+ 
+exports.updateRole = updateRole;
 exports.leaveWorkspace = leaveWorkspace;
 exports.changeLastWorkspace = changeLastWorkspace;
 exports.deleteWorkspace = deleteWorkspace;
