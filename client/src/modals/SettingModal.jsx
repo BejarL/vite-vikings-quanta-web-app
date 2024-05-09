@@ -60,7 +60,7 @@ const SettingModal = ({ isOpen, onClose, workspace }) => {
              Workspace Setting
           </h3>
           <form onSubmit={handleSubmit} className="mt-8 space-y-6"> 
-              {workspace.workspace_role == "Creator" || "Admin" ? ( 
+              {workspace.workspace_role == "Creator" || workspace.workspace_role == "Admin" ? ( 
                 <>
             <input
               type="text"
