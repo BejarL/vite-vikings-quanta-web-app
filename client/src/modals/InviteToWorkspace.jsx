@@ -2,7 +2,7 @@ import { useState } from "react";
 import { getJwt, verifyData } from "../Auth/jwt";
 
 
-const InviteToWorkspace = ({ isOpen, toggleModal, workspace_id }) => {
+const InviteToWorkspace = ({ isOpen, toggleModal, workspace_id, getUsers }) => {
   const [userEmail, setUserEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [role, setRole] = useState("Member")
@@ -29,6 +29,7 @@ const InviteToWorkspace = ({ isOpen, toggleModal, workspace_id }) => {
           //get the data from the response
           setIsLoading(false);
           setUserEmail("");
+          getUsers();
           toggleModal();
           // Added a check to see if data has elements to avoid errors
         } else {

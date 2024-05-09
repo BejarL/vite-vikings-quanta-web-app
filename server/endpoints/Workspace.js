@@ -10,7 +10,7 @@ const getWorkspaceUsers = async (req, res) => {
     const [rows] = await req.db.query(`SELECT Users.user_id, username, email, Workspace_Users.workspace_role
                                        FROM Workspace_Users
                                        INNER JOIN Users ON Workspace_Users.user_id = Users.user_id
-                                       WHERE workspace_id = :workspace_id
+                                       WHERE workspace_id = :workspace_id AND Workspace_Users.deleted_flag=0
                                        ORDER BY username`, {
       workspace_id
     });
@@ -184,13 +184,13 @@ const leaveWorkspace = async (req, res) => {
 const inviteUser = async (req, res) => {
   try {
     const { username: admin_username } = req.user;
-    const { user_email, workspace_id, role } = req.body;
+    const { user_email, user_name, workspace_id, role } = req.body;
 
     const subject = `Invitation To Workspace`;
 
     const html = `
         <div>
-            <h4>You have been added to a workspace by ${username}</h4>
+            <h4>You have been added to a workspace by ${admin_username}</h4>
             <h6>Check it out <a href="http://localhost:5173/Quanta">here</a></h6>
         </div>`
 
@@ -227,14 +227,14 @@ const inviteUser = async (req, res) => {
                           VALUES (:user_id, :workspace_id, :role)`, {
         user_id, workspace_id, role
       });
-
+ 
       const log_desc = `${admin_username} Added user ${username}`;
 
       await req.db.query(`INSERT INTO Change_Log (edit_desc, edit_timestamp, user_id, workspace_id)
                           VALUES (:log_desc, NOW(), :user_id, :workspace_id)`, {
         log_desc, user_id, workspace_id
       });
-
+ 
       //start transaction
       await req.db.commit();
 

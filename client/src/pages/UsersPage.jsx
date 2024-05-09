@@ -3,19 +3,20 @@ import InviteToWorkspace from "../modals/InviteToWorkspace"
 import { userContext } from "./Layout";
 import { getJwt } from "../Auth/jwt";
 import WorkspaceUser from "../components/WorkspaceUser";
+import { useNavigate } from "react-router-dom";
 
 const UsersPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filter, setFilter] = useState("all");
   const [users, setUsers] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
 
   const apiUrl = import.meta.env.VITE_API_URL;
 
   const { workspace } = useContext(userContext);
   
   useEffect(() => {
-    verifyAccess();
     getUsers();
   }, [])
 
@@ -26,11 +27,12 @@ const UsersPage = () => {
   //ensures the user should have access to the page. if they are a member, navigate to the time tracker page.
   const verifyAccess = () => {
     if (workspace.workspace_role === "Member") {
-      Navigate("/");
+      navigate("/Quanta");
     }
   }
 
   const getUsers = async () => {
+    verifyAccess();
     try {
       const jwt = getJwt();
 
@@ -61,7 +63,7 @@ const UsersPage = () => {
   };
 
   const userElems = users.map(user => {
-    return <WorkspaceUser user={user} key={user.user_id}/>
+    return <WorkspaceUser user={user} key={user.user_id} getUsers={getUsers}/>
   })
 
   return (
@@ -70,6 +72,7 @@ const UsersPage = () => {
         isOpen={isOpen}
         toggleModal={toggleModal}
         workspace_id={workspace.workspace_id}
+        getUsers={getUsers}
       />
       <div className="flex justify-between items-center mb-4">
       <h1 className="text-2xl font-bold mb-4">WorkSpace Users</h1>

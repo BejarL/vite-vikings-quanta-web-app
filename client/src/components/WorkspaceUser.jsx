@@ -5,7 +5,7 @@ import RemoveUser from "../modals/RemoveUser";
 
 import { userContext } from "../pages/Layout";
  
-const WorkspaceUser = ({ user }) => {
+const WorkspaceUser = ({ user, getUsers }) => {
   const [role, setRole] = useState(user.workspace_role);
   const [isOpen, setIsOpen] = useState(false);
   const { workspace } = useContext(userContext); 
@@ -73,13 +73,29 @@ const WorkspaceUser = ({ user }) => {
         </td>
         <td className="border-t border-gray-300 border-dashed p-2">
           {/* Delete button */}
-          <RemoveUser isOpen={isOpen} toggleModal={toggleModal} user={user}/>
-          <button 
+          <RemoveUser isOpen={isOpen} 
+                      toggleModal={toggleModal} 
+                      user={user} 
+                      workspace={workspace} 
+                      getUsers={getUsers}
+          />
+          {/* need to render differently based on the signed in users role */}
+          { workspace.workspace_role ==="Creator" || 
+           workspace.workspace_role === "Admin" ? 
+            <>
+            <button 
               className="bg-gray text-black p-2 py-2 rounded-md mr-1 md:order-3"
               onClick={toggleModal}
-              >
+            >
               Remove
-          </button>
+            </button>
+          </>
+          : 
+          <p className="text-gray-500" >
+            remove
+          </p>
+        
+        }
         </td>
       </tr>
     </>

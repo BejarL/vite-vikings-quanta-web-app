@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { getJwt } from "../Auth/jwt";
 
-const RemoveUser = ({ isOpen, toggleModal, user }) => {
+const RemoveUser = ({ isOpen, toggleModal, user, workspace, getUsers }) => {
   const [error, setError] = useState("");
   const apiUrl = import.meta.env.VITE_API_URL;
 
   const removeUser = async () => {
+    console.log("here");
     try {
         const jwt = getJwt();
           const response = await fetch(`${apiUrl}/workspace/leave`, {
@@ -22,13 +23,19 @@ const RemoveUser = ({ isOpen, toggleModal, user }) => {
           
           const {success, err } = await response.json();
           if (!success) {
-            window.alert(err);
+            setError(err)
+          } else {
+            getUsers();
           }
       } catch (error) {
           console.log(error);
       }
   }
  
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    removeUser();
+  };
 
 
   if (!isOpen) {
@@ -43,7 +50,7 @@ const RemoveUser = ({ isOpen, toggleModal, user }) => {
             Are you sure you want to remove {user.username}?
           </h3>
           <form className="mt-8 space-y-2"
-
+            onSubmit={handleSubmit}
           >
             {error && <div className="text-red-500 text-sm">{error}</div>}{" "}
             <div className="flex justify-center space-x-4 pt-3">
