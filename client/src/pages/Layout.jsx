@@ -3,6 +3,7 @@ import { Outlet, Link, useNavigate } from "react-router-dom";
 import { clearJwt, getJwt, verifyData } from "../Auth/jwt";
 import LetteredAvatar from "../components/LetteredAvatar";
 import CreateModal from "../modals/CreateModal";
+import SettingModal from "../modals/SettingModal";
 
 export const userContext = createContext(null);
 
@@ -14,6 +15,7 @@ const Layout = () => {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState("");
   const [isModalOpen, setModalOpen] = useState(false);
+  const [isSettingModalOpen, setSettingModalOpen] = useState(false);
 
   const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -332,21 +334,18 @@ const Layout = () => {
               isOpen={isModalOpen}
               onClose={() => setModalOpen(false)}
             />
-            <button className=" flex flex-wrap items-center text-3xl mt-[10px] py-2 px-[10px]">
-              <svg
-                className="svg2"
-                xmlns="http://www.w3.org/2000/svg"
-                width="1.1em"
-                height="1.2em"
-                viewBox="0 0 64 64"
-              >
-                <path
-                  fill="currentColor"
-                  d="M32 2C15.432 2 2 15.432 2 32c0 16.568 13.432 30 30 30s30-13.432 30-30C62 15.432 48.568 2 32 2m1.693 46V37.428H15V27.143h18.693V16L49 32z"
-                />
-              </svg>
-              <p className=" pl-[10px] ">Join</p>
+            <button className=" flex flex-wrap items-center text-3xl mt-[10px] py-2 px-[10px]"
+                    onClick={() => setSettingModalOpen(true)}
+            >
+             <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 1024 1024">
+                <path fill="currentColor" d="M600.704 64a32 32 0 0 1 30.464 22.208l35.2 109.376c14.784 7.232 28.928 15.36 42.432 24.512l112.384-24.192a32 32 0 0 1 34.432 15.36L944.32 364.8a32 32 0 0 1-4.032 37.504l-77.12 85.12a357 357 0 0 1 0 49.024l77.12 85.248a32 32 0 0 1 4.032 37.504l-88.704 153.6a32 32 0 0 1-34.432 15.296L708.8 803.904c-13.44 9.088-27.648 17.28-42.368 24.512l-35.264 109.376A32 32 0 0 1 600.704 960H423.296a32 32 0 0 1-30.464-22.208L357.696 828.48a352 352 0 0 1-42.56-24.64l-112.32 24.256a32 32 0 0 1-34.432-15.36L79.68 659.2a32 32 0 0 1 4.032-37.504l77.12-85.248a357 357 0 0 1 0-48.896l-77.12-85.248A32 32 0 0 1 79.68 364.8l88.704-153.6a32 32 0 0 1 34.432-15.296l112.32 24.256c13.568-9.152 27.776-17.408 42.56-24.64l35.2-109.312A32 32 0 0 1 423.232 64H600.64zm-23.424 64H446.72l-36.352 113.088l-24.512 11.968a294 294 0 0 0-34.816 20.096l-22.656 15.36l-116.224-25.088l-65.28 113.152l79.68 88.192l-1.92 27.136a293 293 0 0 0 0 40.192l1.92 27.136l-79.808 88.192l65.344 113.152l116.224-25.024l22.656 15.296a294 294 0 0 0 34.816 20.096l24.512 11.968L446.72 896h130.688l36.48-113.152l24.448-11.904a288 288 0 0 0 34.752-20.096l22.592-15.296l116.288 25.024l65.28-113.152l-79.744-88.192l1.92-27.136a293 293 0 0 0 0-40.256l-1.92-27.136l79.808-88.128l-65.344-113.152l-116.288 24.96l-22.592-15.232a288 288 0 0 0-34.752-20.096l-24.448-11.904L577.344 128zM512 320a192 192 0 1 1 0 384a192 192 0 0 1 0-384m0 64a128 128 0 1 0 0 256a128 128 0 0 0 0-256"/></svg>
+              <p className=" pl-[10px] ">Setting</p>
             </button>
+            <SettingModal
+                isOpen={isSettingModalOpen}
+                onClose={() => setSettingModalOpen(false)}
+                workspace={currentWorkspace}
+              />
           </div>
           <button
             onClick={handleSignout}
@@ -489,24 +488,21 @@ const Layout = () => {
               </svg>
               <p className="pl-[10px]">Create</p> 
               </button>
-              <CreateModal
+              <CreateModal 
                 isOpen={isModalOpen}
                 onClose={() => setModalOpen(false)}
+                workspace={currentWorkspace}/>
+              <SettingModal
+                isOpen={isSettingModalOpen}
+                onClose={() => setSettingModalOpen(false)}
+                workspace={currentWorkspace}
               />
-              <button className=" flex flex-wrap items-center text-2xl py-2 px-[10px] hover:bg-lightpurple-selected w-[100%]">
-                <svg
-                  className="svg2"
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="1.1em"
-                  height="1.2em"
-                  viewBox="0 0 64 64"
-                >
-                  <path
-                    fill="currentColor"
-                    d="M32 2C15.432 2 2 15.432 2 32c0 16.568 13.432 30 30 30s30-13.432 30-30C62 15.432 48.568 2 32 2m1.693 46V37.428H15V27.143h18.693V16L49 32z"
-                  />
-                </svg>
-                <p className=" pl-[10px] ">Join</p>
+              <button 
+              onClick={() => setSettingModalOpen(true)}
+              className=" flex flex-wrap items-center text-2xl py-2 px-[10px] hover:bg-lightpurple-selected w-[100%]">
+              <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 1024 1024">
+                <path fill="currentColor" d="M600.704 64a32 32 0 0 1 30.464 22.208l35.2 109.376c14.784 7.232 28.928 15.36 42.432 24.512l112.384-24.192a32 32 0 0 1 34.432 15.36L944.32 364.8a32 32 0 0 1-4.032 37.504l-77.12 85.12a357 357 0 0 1 0 49.024l77.12 85.248a32 32 0 0 1 4.032 37.504l-88.704 153.6a32 32 0 0 1-34.432 15.296L708.8 803.904c-13.44 9.088-27.648 17.28-42.368 24.512l-35.264 109.376A32 32 0 0 1 600.704 960H423.296a32 32 0 0 1-30.464-22.208L357.696 828.48a352 352 0 0 1-42.56-24.64l-112.32 24.256a32 32 0 0 1-34.432-15.36L79.68 659.2a32 32 0 0 1 4.032-37.504l77.12-85.248a357 357 0 0 1 0-48.896l-77.12-85.248A32 32 0 0 1 79.68 364.8l88.704-153.6a32 32 0 0 1 34.432-15.296l112.32 24.256c13.568-9.152 27.776-17.408 42.56-24.64l35.2-109.312A32 32 0 0 1 423.232 64H600.64zm-23.424 64H446.72l-36.352 113.088l-24.512 11.968a294 294 0 0 0-34.816 20.096l-22.656 15.36l-116.224-25.088l-65.28 113.152l79.68 88.192l-1.92 27.136a293 293 0 0 0 0 40.192l1.92 27.136l-79.808 88.192l65.344 113.152l116.224-25.024l22.656 15.296a294 294 0 0 0 34.816 20.096l24.512 11.968L446.72 896h130.688l36.48-113.152l24.448-11.904a288 288 0 0 0 34.752-20.096l22.592-15.296l116.288 25.024l65.28-113.152l-79.744-88.192l1.92-27.136a293 293 0 0 0 0-40.256l-1.92-27.136l79.808-88.128l-65.344-113.152l-116.288 24.96l-22.592-15.232a288 288 0 0 0-34.752-20.096l-24.448-11.904L577.344 128zM512 320a192 192 0 1 1 0 384a192 192 0 0 1 0-384m0 64a128 128 0 1 0 0 256a128 128 0 0 0 0-256"/></svg>
+                <p className=" pl-[10px] ">Setting</p>
               </button>
             </div>
 
