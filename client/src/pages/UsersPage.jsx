@@ -76,7 +76,7 @@ const UsersPage = () => {
       />
       <div className="flex justify-between items-center mb-4">
       <h1 className="text-2xl font-bold mb-4">WorkSpace Users</h1>
-      <button className="bg-purple-300 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4"
+      <button className="bg-purple-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4"
               onClick={toggleModal}
       >
         INVITE

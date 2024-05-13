@@ -102,7 +102,7 @@ const TimeTrackerPage = () => {
   const getEntries = async () => {
     try {
       const jwt = getJwt();
-      const response = await fetch(`${apiUrl}/entries/all/${workspace.workspace_id}`, {
+      const response = await fetch(`${apiUrl}/entries/all`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -177,7 +177,6 @@ const TimeTrackerPage = () => {
       if (success) {
         getEntries();
       } else {
-        console.error(TypeError);
         window.alert("Error creating entry, please try again");
       }
     } catch (err) {
@@ -236,6 +235,10 @@ const TimeTrackerPage = () => {
               <ManualEntryModal
                 isOpen={isModalOpen}
                 onClose={() => setModalOpen(false)}
+                projects={projects}
+                createEntry={createEntry}
+                getEntries={getEntries}
+                workspace_id={workspace.workspace_id}
               />
               {/* Timer */}
               <div className="border border-gray p-4 py-2 w-3/4 min-w-[201px] rounded-md mr-2 my-2 md:w-1/4 lg:w-1/5 lg:mr-auto">
