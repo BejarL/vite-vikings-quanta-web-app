@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 
-//endpoints
+//endpoint functions
 const { signUp, 
         signIn, 
         getUserInfo, 
@@ -12,8 +12,7 @@ const { signUp,
         changeEmail, 
         profileChangePassword, 
         deleteAccount } = require('./endpoints/UserRegistration');
-const { getRecentProjects, 
-        getAllProjects, 
+const { getAllProjects, 
         getProjectInfo, 
         addNewProject, 
         deleteProject } = require('./endpoints/Projects');
@@ -27,9 +26,11 @@ const { getAllEntries,
         deleteEntry, 
         updateEntry, 
         createEntry } = require('./endpoints/TimeTracker');
+const { getAuditEntries } = require('./endpoints/Audit.js');
 
 //middle ware
-const { dbConnect, verifyJwt } = require('./endpoints/Middleware')
+const { dbConnect, verifyJwt } = require('./endpoints/Middleware');
+
 
 const app = express();
 const port = 3000;
@@ -118,7 +119,7 @@ app.delete('/projects/delete/:project_id', (req, res) => deleteProject(req, res)
 * Endpoints for Timetracker 
 *
 */
-app.get('/entries/all/:workspace_id', (req, res) => getAllEntries(req, res));
+app.get('/entries/all', (req, res) => getAllEntries(req, res));
 
 app.post('/entries/new', (req, res) => createEntry(req, res));
 
@@ -126,6 +127,15 @@ app.put(`/entries/update`, (req, res) => updateEntry(req, res));
 
 // uses put instead of delete since we're using req.body
 app.put('/entries/delete/', (req, res) => deleteEntry(req, res));
+
+/*
+*
+*
+*Endpoint for Audit Page
+*
+*/
+
+app.get('/audit-entries/:workspace_id', (req, res) => getAuditEntries(req, res));
 
 app.listen(port, () => {
   console.log(`server started at http://localhost:${port}`);

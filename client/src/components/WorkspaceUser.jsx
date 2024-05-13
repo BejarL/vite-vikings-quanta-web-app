@@ -62,6 +62,7 @@ const WorkspaceUser = ({ user, getUsers }) => {
         <td className="border-t border-gray-300 border-dashed p-2">
           {
             role === "Creator" ? <p>Creator</p> :
+            role === "Admin" && workspace.workspace_role === "Admin" ? <p>Admin</p> :
             <select 
               value={role}
               onChange={(e)=> setRole(e.target.value)}
@@ -80,8 +81,8 @@ const WorkspaceUser = ({ user, getUsers }) => {
                       getUsers={getUsers}
           />
           {/* need to render differently based on the signed in users role */}
-          { workspace.workspace_role ==="Creator" || 
-           workspace.workspace_role === "Admin" ? 
+          { role === "Creator" ? <p className="text-gray-500 p-2">Remove</p> : 
+            role === "Admin" && workspace.workspace_role === "Admin" ? <p className="text-gray-500 p-2">Remove</p> :
             <>
             <button 
               className="bg-gray text-black p-2 py-2 rounded-md mr-1 md:order-3"
@@ -90,11 +91,6 @@ const WorkspaceUser = ({ user, getUsers }) => {
               Remove
             </button>
           </>
-          : 
-          <p className="text-gray-500" >
-            remove
-          </p>
-        
         }
         </td>
       </tr>

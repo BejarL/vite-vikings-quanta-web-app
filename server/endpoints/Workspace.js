@@ -106,43 +106,6 @@ const createWorkspace = async (req, res) => {
   }
 }
 
-//join a user to a workspace
-// const joinWorkspace = async (req, res) => {
-//   try {
-
-//     const { user_id } = req.user;
-//     const { workspace_id } = req.body;
-
-//     await req.body.beginTransaction();
-
-//     await req.db.query(`INSERT INTO Workspace_Users (user_id, workspace_role, workspace_id)
-//                         VALUES (:user_id, "member", :workspace_id)`, {
-//       user_id, workspace_id
-//     });
-
-//     const [[query]] = await req.db.query(`SELECT username 
-//                                           FROM Users
-//                                           WHERE user_id = :user_id`, {
-//       user_id
-//     });
-
-//     const updateString = `${query.username} joined.`
-
-//     await req.db.query(`INSERT INTO Change_Log (edit_desc, edit_timestamp, user_id, workspace_id)
-//                         VALUES (:updateString, NOW(), :user_id, :workspace_id)`, {
-//       updateString, user_id, workspace_id
-//     });
-
-//     await req.db.commit();
-
-//     res.json({ success: true, message: "Successfully Added to workspace" });
-
-//   } catch (err) {
-//     console.log(err);
-//     res.json({ success: false, err: "Internal server error" })
-//   }
-// }
-
 const leaveWorkspace = async (req, res) => {
   try {
     const { user_id, workspace_id } = req.body;
@@ -164,8 +127,8 @@ const leaveWorkspace = async (req, res) => {
 
     const updateString = `${query.username} left`;
 
-    await req.db.query(`INSERT INTO Change_Log (edit_desc, user_id, workspace_id)
-                        VALUES (:updateString, :user_id, :workspace_id)`, {
+    await req.db.query(`INSERT INTO Change_Log (edit_desc, user_id, workspace_id, edit_timestamp)
+                        VALUES (:updateString, :user_id, :workspace_id, NOW())`, {
       updateString, user_id, workspace_id
     });
 
@@ -282,8 +245,8 @@ const updateRole = async (req, res) => {
                         SET workspace_role = :role
                         WHERE user_id = :user_id AND workspace_id = :workspace_id`, {
       user_id, workspace_id, role
-    });
-
+    }); 
+  
     const log_desc = `${admin_username + " Changed " + username + "'s role"}`
 
     await req.db.query(`INSERT INTO Change_Log (edit_desc, edit_timestamp, user_id, workspace_id)
@@ -294,7 +257,7 @@ const updateRole = async (req, res) => {
     await req.db.commit();
 
     res.json({success: true, message: "Role Successfully Updated"});
-
+ 
   } catch (err) {
     console.log(err);
     res.json({success: false, err: "Internal Server Error"});

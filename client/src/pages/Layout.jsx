@@ -505,7 +505,7 @@ const Layout = () => {
               <p className="pl-[10px]">Logout</p>
             </button>
           </div>
-          <div className="bg-lightpurple-body w-[100%]">
+          <div className="bg-lightpurple-body w-[100%] max-h-[calc(100vh-60px)] overflow-auto">
             {/* Changed the value so the key is undefined instead of the whole context */}
             {!loading ? (
               <userContext.Provider
