@@ -24,11 +24,10 @@ const CreateModal = ({ isOpen , onClose }) => {
         body: JSON.stringify({ workspace_name: workspaceName }),
       });
 
-      const { success, err } = await verifyData(response);
+      const { success, err } = await response.json();
 
       if (success) {
         onClose();
-        verifyData();
         alert("Workspace created successfully");
       } else {
         window.alert(err);

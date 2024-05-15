@@ -23,7 +23,8 @@ const { getWorkspaceUsers,
         removeUserFromWorkspace, 
         leaveWorkspace,
         inviteUser, 
-        updateRole } = require('./endpoints/Workspace');
+        updateRole,
+        updateWorkspaceName } = require('./endpoints/Workspace');
 const { getAllEntries, 
         deleteEntry, 
         updateEntry, 

@@ -202,7 +202,7 @@ const Layout = () => {
         <div
           className={`${
             showOffCanvas ? "left-0" : "left-[-250px]"
-          } transition-all absolute w-[250px]  bg-lightpurple-login h-[100%] flex flex-col justify-between md:hidden pl-[10px] py-[10px] z-50`}
+          } transition-all absolute w-[250px]  bg-lightpurple h-[100%] flex flex-col justify-between md:hidden pl-[10px] py-[10px] z-50`}
         >
           <div>
             {/* drop down for workspace selection mobile view*/}
@@ -347,6 +347,7 @@ const Layout = () => {
                 isOpen={isSettingModalOpen}
                 onClose={() => setSettingModalOpen(false)}
                 workspace={currentWorkspace}
+                getUserData={getUserData}
               />
           </div>
           <button
@@ -475,11 +476,13 @@ const Layout = () => {
               <CreateModal 
                 isOpen={isModalOpen}
                 onClose={() => setModalOpen(false)}
-                workspace={currentWorkspace}/>
+                workspace={currentWorkspace}
+              />
               <SettingModal
                 isOpen={isSettingModalOpen}
                 onClose={() => setSettingModalOpen(false)}
                 workspace={currentWorkspace}
+                getUserData={getUserData}
               />
               <button 
               onClick={() => setSettingModalOpen(true)}
