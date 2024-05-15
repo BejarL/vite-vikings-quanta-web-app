@@ -186,7 +186,7 @@ const Layout = () => {
           <div
             className={`${
               !showDropdown ? "" : "md:flex"
-            } hidden w-auto max-h-[200px] px-[20px]  border absolute left-[185px] top-[45px] bg-white flex-col overflow-y-scroll lilac-scrollbar`}
+            } hidden w-auto max-h-[200px] px-[20px]  border absolute left-[185px] top-[45px] bg-white flex-col overflow-y-scroll overflow-x-clip whitespace-nowrap max-w-[260px] lilac-scrollbar`}
           >
             {workspaceElems}
           </div>
