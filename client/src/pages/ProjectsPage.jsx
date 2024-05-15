@@ -25,13 +25,16 @@ const ProjectsPage = () => {
     const jwt = getJwt();
 
     try {
-      const response = await fetch(`${apiUrl}/projects/all/${workspace.workspace_id}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          authorization: jwt,
+      const response = await fetch(
+        `${apiUrl}/projects/all/${workspace.workspace_id}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            authorization: jwt,
+          },
         }
-      });
+      );
 
       const { success, data } = await verifyData(response, navigate);
       if (success) {
@@ -52,34 +55,6 @@ const ProjectsPage = () => {
     project.project_name.toLowerCase().includes(searchProject.toLowerCase())
   );
 
-  const deleteProject = async (projectId) => {
-    const jwt = getJwt();
-
-    try {
-      const response = await fetch(
-        `${apiUrl}/projects/delete/${projectId}`,
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            authorization: jwt,
-          },
-        }
-      );
-
-      // verify the data, make sure the error isnt jwt related then return the json res object
-      const { success, err } = await verifyData(response);
-
-      if (success) {
-        getProjects();
-      } else {
-        window.alert(err);
-      }
-    } catch (err) {
-      window.alert(err);
-    }
-  };
-
   const handleModalClose = () => {
     setIsModalOpen(false);
     getProjects();
@@ -87,7 +62,7 @@ const ProjectsPage = () => {
 
   const handleProjectDelete = (projectId) => {
     const updatedProjects = projects.filter(
-      (project) => project.project_id !== projectId
+      (Projects) => Projects.project_id !== projectId
     );
     setProjects(updatedProjects);
   };
@@ -99,9 +74,25 @@ const ProjectsPage = () => {
   };
 
   return (
-    <div className="container mx-auto p-4 ">
+    <div className="container mx-auto px-4 mt-4">
       {/* Search and Add Section */}
-      <div className="w-[100%] pb-4 flex justify-between items-center">
+      <h1 className="text-2xl font-bold mb-5">WorkSpace Projects</h1>
+      <div>
+        <button
+          className="bg-purple-600 mb-5  hover:bg-purple-700 text-white font-bold py-2 px-4 rounded"
+          onClick={() => setIsModalOpen(true)}
+          aria-label="Open modal to add new project"
+        >
+          New Project +
+        </button>
+        <ProjectModal
+          isOpen={isModalOpen}
+          onClose={handleModalClose}
+          workspace_id={workspace.workspace_id}
+          getProjects={getProjects}
+        />
+      </div>
+      <div className="w-[50%] flex justify-between items-center">
         <input
           className="shadow appearance-none border rounded w-full py-2 pl-4 pr-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
           id="search"
@@ -115,24 +106,9 @@ const ProjectsPage = () => {
           <path d="M 21 3 C 11.601563 3 4 10.601563 4 20 C 4 29.398438 11.601563 37 21 37 C 24.355469 37 27.460938 36.015625 30.09375 34.34375 L 42.375 46.625 L 46.625 42.375 L 34.5 30.28125 C 36.679688 27.421875 38 23.878906 38 20 C 38 10.601563 30.398438 3 21 3 Z M 21 7 C 28.199219 7 34 12.800781 34 20 C 34 27.199219 28.199219 33 21 33 C 13.800781 33 8 27.199219 8 20 C 8 12.800781 13.800781 7 21 7 Z"></path>
         </svg>
       </div>
-      <div>
-        <button
-          className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded"
-          onClick={() => setIsModalOpen(true)}
-          aria-label="Open modal to add new project"
-        >
-          New Project +
-        </button>
-        <ProjectModal
-          isOpen={isModalOpen}
-          onClose={handleModalClose}
-          workspace_id={workspace.workspace_id}
-          getProjects={getProjects}
-        />
-      </div>
 
       {/* Project List Section */}
-      <div className="bg-white shadow-md rounded-lg my-6 overflow-x-auto">
+      <div className="bg-white shadow rounded-md my-6 overflow-x-auto">
         <table className="text-left w-full border-collapse border-b">
           <thead>
             <tr className="bg-lightpurple-login">
@@ -142,20 +118,20 @@ const ProjectsPage = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredProjects.map((project) => (
-              <tr key={project.project_id} className="hover:bg-gray-100">
+            {filteredProjects.map((Projects) => (
+              <tr key={Projects.project_id} className="hover:bg-gray-100">
                 <td className="py-4 px-6 border-b border-gray-200">
-                  <Link to={`/quanta/projects/${project.project_id}`}>
-                    {project.project_name}
+                  <Link to={`/quanta/projects/${Projects.project_id}`}>
+                    {Projects.project_name}
                   </Link>
                 </td>
                 <td className="py-4 px-6 border-b border-gray-200">
-                  {formatTime(project.total_project_time)}
+                  {formatTime(Projects.total_project_time)}
                 </td>
                 <td className="py-4 px-6 border-b border-gray-200 text-end">
                   <button
                     onClick={() => {
-                      setCurrentProjectId(project.project_id);
+                      setCurrentProjectId(Projects.project_id);
                       setIsDeleteModalOpen(true);
                     }}
                     className="text-white p-1 rounded-full inline-flex items-center justify-center"
