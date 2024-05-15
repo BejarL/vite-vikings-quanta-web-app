@@ -145,7 +145,7 @@ const TimeEntry = ({ entry }) => {
           <DatePicker
             selected={timeDay}
             onChange={(date) => setTimeDay(date)}
-            className="p-2 my-2 rounded w-5/6 lg:w-full "
+            className="p-2 my-2 rounded w-5/6 min-w-[100px] text-center lg:w-full"
           />
         </div>
         {/* Hours Tracked */}

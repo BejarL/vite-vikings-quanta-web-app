@@ -56,7 +56,7 @@ const WorkspaceUser = ({ user, getUsers }) => {
 
   return (
     <>
-      <tr className="w-[100%]">
+      <tr className="w-[100%] bg-white">
         <td className="border-t border-gray-300 border-dashed p-2 max-w-[100px] overflow-x-auto">{user.email} </td>
         <td className="border-t border-gray-300 border-dashed p-2">{user.username}</td>
         <td className="border-t border-gray-300 border-dashed p-2">

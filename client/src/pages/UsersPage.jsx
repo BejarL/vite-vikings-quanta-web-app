@@ -103,7 +103,7 @@ const UsersPage = () => {
         <div className="mt-2">
           <table className="w-full table-auto border-collapse border border-gray-300 ">
             <thead>
-              <tr className="bg-gray-200 w-[100%]">
+              <tr className="bg-lightpurple-login w-[100%]">
                 <th className="border border-gray-300 p-2 text-left min-w-[50px] overflow-hidden">Email</th>
                 <th className="border border-gray-300 p-2 text-left max-w-[100px]">Username</th>
                 <th className="border border-gray-300 p-2 text-left">Role</th>

@@ -20,7 +20,9 @@ const { getWorkspaceUsers,
         changeLastWorkspace, 
         deleteWorkspace, 
         createWorkspace, 
-        leaveWorkspace, inviteUser, 
+        removeUserFromWorkspace, 
+        leaveWorkspace,
+        inviteUser, 
         updateRole } = require('./endpoints/Workspace');
 const { getAllEntries, 
         deleteEntry, 
@@ -86,7 +88,7 @@ app.get('/workspace/users/:workspace_id', (req, res) => getWorkspaceUsers(req, r
 
 app.post('/workspace/new', (req, res) => createWorkspace(req, res));
 
-// app.post(`/workspace/join`, (req, res) => joinWorkspace(req, res));
+app.put('/workspace/remove-user', (req, res) => removeUserFromWorkspace(req, res));
 
 app.put('/workspace/leave', (req, res) => leaveWorkspace(req, res));
 
@@ -97,6 +99,8 @@ app.delete('/workspace/delete/:workspace_id', (req, res) => deleteWorkspace(req,
 app.put('/workspace/update-last', (req, res) => changeLastWorkspace(req, res));
 
 app.put('/workspace/update-role', (req, res) => updateRole(req, res));
+
+app.put('/workspace/update-name', (req, res) => updateWorkspaceName(req, res));
 
 
 /* 
@@ -119,7 +123,7 @@ app.delete('/projects/delete/:project_id', (req, res) => deleteProject(req, res)
 * Endpoints for Timetracker 
 *
 */
-app.get('/entries/all', (req, res) => getAllEntries(req, res));
+app.get('/entries/all/:workspace_id', (req, res) => getAllEntries(req, res));
 
 app.post('/entries/new', (req, res) => createEntry(req, res));
 
@@ -134,7 +138,6 @@ app.put('/entries/delete/', (req, res) => deleteEntry(req, res));
 *Endpoint for Audit Page
 *
 */
-
 app.get('/audit-entries/:workspace_id', (req, res) => getAuditEntries(req, res));
 
 app.listen(port, () => {

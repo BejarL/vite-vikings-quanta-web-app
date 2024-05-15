@@ -107,7 +107,7 @@ const LoginPage = () => {
       //if successfull and a jwt token, save the token and navigate to the dashboard
       if (data.success && data.jwt) {
         setJwt(data.jwt);
-        navigate("/Quanta");
+        navigate("/quanta/");
       } else {
         window.alert(`error signing in: ${data.err}`);
       }
