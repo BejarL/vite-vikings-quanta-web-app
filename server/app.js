@@ -1,79 +1,146 @@
 const express = require('express');
 const cors = require('cors');
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
 const bodyParser = require('body-parser');
-const dbConnect = require('./database');
+
+//endpoint functions
+const { signUp, 
+        signIn, 
+        getUserInfo, 
+        changePassword, 
+        sendResetPassword, 
+        changeUsername, 
+        changeEmail, 
+        profileChangePassword, 
+        deleteAccount } = require('./endpoints/UserRegistration');
+const { getAllProjects, 
+        getProjectInfo, 
+        addNewProject, 
+        deleteProject } = require('./endpoints/Projects');
+const { getWorkspaceUsers, 
+        changeLastWorkspace, 
+        deleteWorkspace, 
+        createWorkspace, 
+        removeUserFromWorkspace, 
+        leaveWorkspace,
+        inviteUser, 
+        updateRole,
+        updateWorkspaceName } = require('./endpoints/Workspace');
+const { getAllEntries, 
+        deleteEntry, 
+        updateEntry, 
+        createEntry } = require('./endpoints/TimeTracker');
+const { getAuditEntries } = require('./endpoints/Audit.js');
+
+//middle ware
+const { dbConnect, verifyJwt } = require('./endpoints/Middleware');
+
 
 const app = express();
 const port = 3000;
 
 const corsOptions = {
-   origin: '*', 
-   credentials: true,  
-   'access-control-allow-credentials': true,
-   optionSuccessStatus: 200,
-}
+  origin: "*",
+  credentials: true,
+  "access-control-allow-credentials": true,
+  optionSuccessStatus: 200,
+};
 
 app.use(cors(corsOptions));
 
 // Makes Express parse the JSON body of any requests and adds the body to the req object
 app.use(bodyParser.json());
 
-//adds database connection to req.db 
-app.use((req, res, next) => dbConnect(req, res, next));
- 
-app.put('/signup', async (req, res) => {
-    try {
-        //get the data from the request to create a new user
-        const {
-            username,
-            email,
-            password
-        } = req.body;
+//adds database connection to req.db
+app.use((req, res, next) => dbConnect(req, res, next));  
 
-        //check if the email or username is being used
-        const [[validateEmail]] = await req.db.query(`SELECT email FROM Users WHERE email = :email`, { email });
-        const [[validateUser]] = await req.db.query(`SELECT username FROM Users WHERE username = :username`, { username });
+/*
+*
+* User Registration - /endpoints/UserRegistration.js
+*
+*/
+app.post('/signup', (req, res) => signUp(req, res));
 
-        if (validateEmail) {
-            res.json({success: false, err: "Email already in use"});
-        } else if (validateUser) {
-            res.json({success: false, err: "Username already taken"});
-        } else {
+app.post('/signin', (req, res) => signIn(req, res));
 
-            //hash their password
-            const hashedPassword = await bcrypt.hash(password, 10);
+app.post('/resetpassword/send', (req, res) => sendResetPassword(req, res));
 
-            console.log(hashedPassword);
-            
-            //attempt to insert the data into the database
-            await req.db.query(`INSERT INTO Users (username, email, password) 
-                                                          VALUES (:username, :email, :hashedPassword);`, 
-            { username, email, hashedPassword });
+app.use((req, res, next) => verifyJwt(req, res, next)); // middleware after signing in
 
-            //need to query into the db to get the newly created users id, username, and profilepic
-            const [[userData]] = await req.db.query(`SELECT user_id, username, email FROM Users WHERE username = :username`, {
-                username
-            });
+app.delete('/delete-account', (req, res) => deleteAccount(req, res));
 
-            const payload = {
-                user_id: userData.user_id,
-                username: userData.username,
-                email: userData.email
-            }
+app.post('/resetpassword/confirm', (req, res) => changePassword(req, res));
 
-            const jwtEncodedUser = jwt.sign(payload, process.env.JWT_KEY);
-                
-            res.json({ jwt: jwtEncodedUser, success: true, data: payload });
-        }
-    } catch(error) {
-        res.json({success: false, err: error});
-        console.log(`error creating user ${error}`);
-    }
-}) // end user post
+app.put('/user/change-username', (req, res) => changeUsername(req, res));
 
+app.put('/user/change-email', (req, res) => changeEmail(req, res));
+
+app.put('/user/change-password', (req, res) => profileChangePassword(req, res));
+
+app.get('/user', (req, res) => getUserInfo(req, res));
+
+
+
+/* 
+*
+*   Workspace endpoints - see /endpoints/Workspace.js
+*
+*/
+app.get('/workspace/users/:workspace_id', (req, res) => getWorkspaceUsers(req, res));
+
+app.post('/workspace/new', (req, res) => createWorkspace(req, res));
+
+app.put('/workspace/remove-user', (req, res) => removeUserFromWorkspace(req, res));
+
+app.put('/workspace/leave', (req, res) => leaveWorkspace(req, res));
+
+app.post('/workspace/invite', (req, res) => inviteUser(req, res));
+
+app.delete('/workspace/delete/:workspace_id', (req, res) => deleteWorkspace(req, res));
+
+app.put('/workspace/update-last', (req, res) => changeLastWorkspace(req, res));
+
+app.put('/workspace/update-role', (req, res) => updateRole(req, res));
+
+app.put('/workspace/update-name', (req, res) => updateWorkspaceName(req, res));
+
+
+/* 
+*
+* Endpoints for Projects - see /endpoints/Projects.js
+*
+*/
+//app.get('/projects/recent/:workspace_id', (req, res) => getRecentProjects(req, res));
+
+app.get('/projects/all/:workspace_id', (req, res) => getAllProjects(req, res));
+
+app.get('/project/:project_id', (req, res) => getProjectInfo(req, res));
+
+app.post('/projects/new', (req, res) => addNewProject(req, res));
+
+app.delete('/projects/delete/:project_id', (req, res) => deleteProject(req, res));
+
+/* 
+*
+* Endpoints for Timetracker 
+*
+*/
+app.get('/entries/all/:workspace_id', (req, res) => getAllEntries(req, res));
+
+app.post('/entries/new', (req, res) => createEntry(req, res));
+
+app.put(`/entries/update`, (req, res) => updateEntry(req, res));
+
+// uses put instead of delete since we're using req.body
+app.put('/entries/delete/', (req, res) => deleteEntry(req, res));
+
+/*
+*
+*
+*Endpoint for Audit Page
+*
+*/
+app.get('/audit-entries/:workspace_id', (req, res) => getAuditEntries(req, res));
 
 app.listen(port, () => {
-    console.log(`server started at http://localhost:${port}`);
-  });
+  console.log(`server started at http://localhost:${port}`);
+});
