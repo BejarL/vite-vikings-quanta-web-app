@@ -347,6 +347,7 @@ const Layout = () => {
                 isOpen={isSettingModalOpen}
                 onClose={() => setSettingModalOpen(false)}
                 workspace={currentWorkspace}
+                getUserData={getUserData}
               />
           </div>
           <button
@@ -475,11 +476,13 @@ const Layout = () => {
               <CreateModal 
                 isOpen={isModalOpen}
                 onClose={() => setModalOpen(false)}
-                workspace={currentWorkspace}/>
+                workspace={currentWorkspace}
+              />
               <SettingModal
                 isOpen={isSettingModalOpen}
                 onClose={() => setSettingModalOpen(false)}
                 workspace={currentWorkspace}
+                getUserData={getUserData}
               />
               <button 
               onClick={() => setSettingModalOpen(true)}

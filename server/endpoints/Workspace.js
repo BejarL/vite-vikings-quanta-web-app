@@ -267,18 +267,18 @@ const updateRole = async (req, res) => {
 
 const updateWorkspaceName = async (req, res) => {
   try {
-    const { user_id, username } = req.user
-    const { newName, workspace_id } = req.body;
+    const {user_id, username } = req.user
+    const { workspace_name, workspace_id } = req.body;
 
     await req.db.beginTransaction();
 
     await req.db.query(`UPDATE Workspace
-                        SET workspace_name = :newName
-                        WHERE user_id = :user_id AND workspace_id = :workspace_id`, {
-      user_id, workspace_id, newName
+                        SET workspace_name = :workspace_name
+                        WHERE workspace_id = :workspace_id`, {
+      user_id, workspace_id, workspace_name
     }); 
   
-    const log_desc = `${username + " renamed workspace to " + newName}`;
+    const log_desc = `${username + " renamed workspace to " + workspace_name}`;
 
     await req.db.query(`INSERT INTO Change_Log (edit_desc, edit_timestamp, user_id, workspace_id)
                         VALUES (:log_desc, NOW(), :user_id, :workspace_id)`, {
