@@ -158,7 +158,7 @@ const Layout = () => {
               ></path>
             </svg>
           </button>
-          <Link to="/quanta/timetracker">
+          <Link to="/quanta">
             <p className="ml-2 text-3xl text-darkpurple">Quanta</p>
           </Link>
           {/* dropdown button desktop view */}
@@ -202,7 +202,7 @@ const Layout = () => {
         <div
           className={`${
             showOffCanvas ? "left-0" : "left-[-250px]"
-          } transition-all absolute w-[250px]  bg-lightpurple-login h-[100%] flex flex-col justify-between md:hidden pl-[10px] py-[10px] z-50`}
+          } transition-all absolute w-[250px]  bg-white h-[100%] flex flex-col justify-between md:hidden pl-[10px] py-[10px] z-50`}
         >
           <div>
             {/* drop down for workspace selection mobile view*/}

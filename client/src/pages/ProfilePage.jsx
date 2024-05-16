@@ -16,8 +16,8 @@ const UserProfile = () => {
   const [isEmailModalOpen, setEmailModalOpen] = useState(false);
 
   return (
-    <div className="flex flex-col justify-center items-center mt-5">
-      <div className="flex flex-col items-center p-6 w-full max-w-lg rounded-lg shadow-lg bg-lightpurple">
+    <div className="flex flex-col justify-center items-center mt-10">
+      <div className="flex flex-col items-center p-6 w-full max-w-lg rounded-lg shadow-lg bg-white">
         <LetteredAvatar name={username} size="large" />
         <h2 className="mt-4 text-2xl font-bold text-gray-700">{username}</h2>
 
@@ -60,24 +60,9 @@ const UserProfile = () => {
           >
             Delete Account
           </button>
-      </div>
-      <div className="mt-5">
-        <div className="bg-white shadow-md rounded-lg my-6 overflow-x-auto">
-        <table className="text-left w-full border-collapse border-b">
-          <thead>
-            <tr className="bg-lightpurple-login">
-              <th className="py-4 px-9">Name</th>
-              <th className="py-4 px-9">Project Name </th>
-              <th className="py-4 px-9">Event  </th>
-              <th className="py-4 px-9 text-end">Timestamp</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr></tr>
-          </tbody>
-          </table>
-          </div>
-              <DeleteAccountModal
+        </div>
+        <div className="mt-5">
+          <DeleteAccountModal
             isOpen={isDeleteModalOpen}
             onClose={() => setDeleteModalOpen(false)}
           />

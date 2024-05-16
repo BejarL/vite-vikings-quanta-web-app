@@ -15,7 +15,7 @@ export default {
         ...colors,
         'lightpurple': {
           DEFAULT: '#f8f0fe',
-          login: '#DCB6FA',
+          login: '#F6E0FF',
           body: '#f3eff6',
           selected: '#f3e6fd',
         },
@@ -45,43 +45,40 @@ export default {
         },
       },
     },
-    plugins: [
-      function ({ addUtilities }) {
-        const newUtilities = {
-          ".no-scrollbar::-webkit-scrollbar": {
-            display: "none",
-          },
-          ".no-scrollbar": {
-            "-ms-overflow-style": "none",
-            "scrollbar-width": "none"
-          },
-          /* width */
-          ".lilac-scrollbar::-webkit-scrollbar": {
-            "width": "10px",
-          },
-
-          /* Track */
-          ".lilac-scrollbar::-webkit-scrollbar-track": {
-            "background": "rgb(209 213 219)",
-          },
-
-          /* Handle */
-          ".lilac-scrollbar::-webkit-scrollbar-thumb": {
-            "background": "#DCB6FA",
-            "border-radius": "5px",
-          },
-
-          /* Handle on hover */
-          ".lilac-scrollbar::-webkit-scrollbar-thumb:hover": {
-            "background": "#B08DCC",
-          },
-        }
-
-        addUtilities(newUtilities)
-      }
-      // Plugins can be added here to extend Tailwind's core functionality.
-      // For example, to add forms support:
-      // require('@tailwindcss/forms'),
-    ],
   },
+  plugins: [
+    function ({ addUtilities }) {
+      const newUtilities = {
+        ".no-scrollbar::-webkit-scrollbar": {
+          display: "none",
+        },
+        ".no-scrollbar": {
+          "-ms-overflow-style": "none",
+          "scrollbar-width": "none"
+        },
+        /* width */
+        ".lilac-scrollbar::-webkit-scrollbar": {
+          "width": "10px",
+        },
+        /* Track */
+        ".lilac-scrollbar::-webkit-scrollbar-track": {
+          "background": "rgb(209 213 219)",
+        },
+        /* Handle */
+        ".lilac-scrollbar::-webkit-scrollbar-thumb": {
+          "background": "#DCB6FA",
+          "border-radius": "5px",
+        },
+        /* Handle on hover */
+        ".lilac-scrollbar::-webkit-scrollbar-thumb:hover": {
+          "background": "#B08DCC",
+        },
+      }
+
+      addUtilities(newUtilities)
+    }
+    // Plugins can be added here to extend Tailwind's core functionality.
+    // For example, to add forms support:
+    // require('@tailwindcss/forms'),
+  ],
 };
