@@ -1,9 +1,5 @@
 node_modules
 
-server/.env
-
-client/.env
-
 # amplify
 .amplify
 amplify_outputs*
