@@ -1,0 +1,23 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-quanta-dev-25cb7-authRole",
+      "UnauthRoleArn": "arn:aws:iam::637423558630:role/amplify-quanta-dev-25cb7-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::637423558630:role/amplify-quanta-dev-25cb7-authRole",
+      "Region": "us-east-2",
+      "DeploymentBucketName": "amplify-quanta-dev-25cb7-deployment",
+      "UnauthRoleName": "amplify-quanta-dev-25cb7-unauthRole",
+      "StackName": "amplify-quanta-dev-25cb7",
+      "StackId": "arn:aws:cloudformation:us-east-2:637423558630:stack/amplify-quanta-dev-25cb7/4143c690-13d4-11ef-92f8-0638b17cf575",
+      "AmplifyAppId": "ds9jx9oyachbv"
+    },
+    "categories": {
+      "hosting": {
+        "amplifyhosting": {
+          "appId": "ds9jx9oyachbv",
+          "type": "cicd"
+        }
+      }
+    }
+  }
+}

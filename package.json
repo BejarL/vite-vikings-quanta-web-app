@@ -14,10 +14,19 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@aws-amplify/backend": "^1.0.2",
+    "@aws-amplify/backend-cli": "^1.0.3",
+    "aws-cdk": "^2.142.0",
+    "aws-cdk-lib": "^2.142.0",
     "concurrently": "^8.2.2",
-    "serve": "^14.0.1"
+    "constructs": "^10.3.0",
+    "esbuild": "^0.21.3",
+    "serve": "^14.0.1",
+    "tsx": "^4.10.3",
+    "typescript": "^5.4.5"
   },
   "dependencies": {
+    "aws-amplify": "^6.3.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.22.3"
