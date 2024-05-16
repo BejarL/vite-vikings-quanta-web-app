@@ -13,6 +13,12 @@ const SettingModal = ({ isOpen, onClose, workspace, getUserData }) => {
   const apiUrl = import.meta.env.VITE_API_URL;
 
   const renameWorkspace = async () => {
+
+    if (workspaceName === "") {
+      setError("Please enter a workspace name");
+      return;
+    }
+
     const jwt = getJwt();
 
     try {
