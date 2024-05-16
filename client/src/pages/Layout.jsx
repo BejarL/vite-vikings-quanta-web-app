@@ -233,7 +233,7 @@ const Layout = () => {
             <div
               className={`${
                 showDropdown ? "h-auto" : "h-0"
-              } mr-[10px] border-b-2 border-slate-100 transition-all flex flex-col items-start overflow-hidden px-[14px]`}
+              } mr-[10px] border-b-2 border-slate-100 transition-all flex flex-col items-start px-[14px] max-h-[80px] overflow-y-scroll lilac-scrollbar`}
             >
               {workspaceElems}
             </div>

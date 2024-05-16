@@ -3,8 +3,8 @@ const colors = require('tailwindcss/colors')
 
 export default {
   content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
+    "./index.html", 
+    "./src/**/*.{js,ts,jsx,tsx}", 
   ],
   theme: {
     // The `theme` section is where you define your custom styling.
@@ -34,54 +34,44 @@ export default {
         'desktop': '1280px',
         // Add more breakpoints as needed
       },
-      container: {
-        center: true,
-        padding: '2rem',
-        screens: {
-          sm: '100%',
-          md: '100%',
-          lg: '100%',
-          xl: '100%',
-        },
-      },
     },
+  },
     plugins: [
-      function ({ addUtilities }) {
+      function ({addUtilities}) {
         const newUtilities = {
           ".no-scrollbar::-webkit-scrollbar": {
             display: "none",
           },
-          ".no-scrollbar": {
-            "-ms-overflow-style": "none",
-            "scrollbar-width": "none"
+          ".no-scrollbar":{
+            "-ms-overflow-style":"none",
+            "scrollbar-width":"none"
           },
-          /* width */
+                  /* width */
           ".lilac-scrollbar::-webkit-scrollbar": {
-            "width": "10px",
+            "width":"10px",
           },
-
+  
           /* Track */
           ".lilac-scrollbar::-webkit-scrollbar-track": {
-            "background": "rgb(209 213 219)",
+            "background":"rgb(209 213 219)",
           },
-
+  
           /* Handle */
           ".lilac-scrollbar::-webkit-scrollbar-thumb": {
             "background": "#DCB6FA",
             "border-radius": "5px",
           },
-
+  
           /* Handle on hover */
           ".lilac-scrollbar::-webkit-scrollbar-thumb:hover": {
             "background": "#B08DCC",
           },
-        }
-
-        addUtilities(newUtilities)
-      }
-      // Plugins can be added here to extend Tailwind's core functionality.
-      // For example, to add forms support:
-      // require('@tailwindcss/forms'),
-    ],
-  },
-};
+                }
+  
+                addUtilities(newUtilities)
+              }
+              // Plugins can be added here to extend Tailwind's core functionality.
+              // For example, to add forms support:
+              // require('@tailwindcss/forms'),
+            ],
+  };
