@@ -1,14 +1,20 @@
 //gets all recent entries for a user
 const getAllEntries = async (req, res) => {
   try {
-    const { user_id } = req.user
+    const { user_id } = req.user;
+    const { workspace_id } = req.params;
 
-    const [entries] = await req.db.query(`SELECT entry_id, start_time, end_time, entry_desc, tag, project_id,
-                                          TIMEDIFF(end_time, start_time) AS total_time
+    const [entries] = await req.db.query(`SELECT entry_id, start_time, end_time, entry_desc, tag, project_id, 
+                                            CASE 
+                                              WHEN TIMEDIFF(end_time, start_time) < 0 THEN
+                                                TIMEDIFF(DATE_ADD(end_time, INTERVAL 24 HOUR), start_time)
+                                              ELSE
+                                                TIMEDIFF(end_time, start_time)
+                                            END AS total_time
                                           FROM Entries 
-                                          WHERE user_id = :user_id AND deleted_flag = 0
+                                          WHERE user_id = :user_id AND deleted_flag = 0 AND workspace_id=:workspace_id
                                           ORDER BY end_time DESC`, {
-        user_id
+        user_id, workspace_id
     });
 
     res.json({ success: true, entries: entries });
@@ -45,9 +51,9 @@ const createEntry = async (req, res) => {
     await req.db.beginTransaction();
 
     //insert the entry
-    await req.db.query(`INSERT INTO Entries (start_time, end_time, entry_desc, tag, project_id, user_id)
-                        VALUES (:insertStartDate, :insertEndDate, :entry_desc, :tag, :project_id,:user_id)`, {
-        insertStartDate, insertEndDate, entry_desc, tag, project_id, user_id,
+    await req.db.query(`INSERT INTO Entries (start_time, end_time, entry_desc, tag, project_id, user_id, workspace_id)
+                        VALUES (:insertStartDate, :insertEndDate, :entry_desc, :tag, :project_id, :user_id, :workspace_id)`, {
+        insertStartDate, insertEndDate, entry_desc, tag, project_id, user_id, workspace_id
     });
 
     //add to the change log

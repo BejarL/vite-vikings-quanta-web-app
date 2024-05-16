@@ -19,7 +19,6 @@ const TimeTrackerPage = () => {
   const [isModalOpen, setModalOpen] = useState(false);
 
   const apiUrl = import.meta.env.VITE_API_URL;
-  const navigate = useNavigate();
   const { workspace } = useContext(userContext);
   let id = useRef();
 
@@ -28,7 +27,7 @@ const TimeTrackerPage = () => {
     getProjects();
     getEntries();
     return () => clearInterval(id.current);
-  }, []);
+  }, [workspace]);
 
   const handleTime = () => {
     id.startDate = new Date();
@@ -84,12 +83,11 @@ const TimeTrackerPage = () => {
           authorization: jwt,
         }
       });
-      //check if the request was successful, if not do an early return
-      if (response.ok) {
-        //get the data from the response
-        const { data } = await verifyData(response, navigate);
+       
+      const { success, data } = await response.json();
+
+      if (success) {
         setProjects(data);
-        // Added a check to see if data has elements to avoid errors
       } else {
         console.error("Failed to fetch projects");
       }
@@ -102,7 +100,7 @@ const TimeTrackerPage = () => {
   const getEntries = async () => {
     try {
       const jwt = getJwt();
-      const response = await fetch(`${apiUrl}/entries/all`, {
+      const response = await fetch(`${apiUrl}/entries/all/${workspace.workspace_id}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -110,12 +108,15 @@ const TimeTrackerPage = () => {
         }
       });
 
-      const data = await response.json()
-      if (data.success) {
-        formatEntries(data.entries);
+      const {success, entries: newEntries} = await response.json()
+      if (success) {
+        if (newEntries.length) {
+          formatEntries(newEntries);
+        } else {
+          setEntries([]);
+        }
       } else {
         window.alert("Error getting entries");
-        console.log(data.err);
       }
     } catch (err) {
       console.log(err);
@@ -194,11 +195,7 @@ const TimeTrackerPage = () => {
   });
 
   //maps through to get an array for each time entry group (day)
-  const entryElems = entries.map((entryGroup) => {
-    return (
-      <TimeTrackerDay entryGroup={entryGroup} key={entryGroup[0].entry_id} />
-    );
-  });
+  const entryElems = entries.map((entryGroup) => <TimeTrackerDay entryGroup={entryGroup} key={entryGroup[0].entry_id} />);
 
   return (
     <>

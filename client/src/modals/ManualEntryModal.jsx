@@ -22,7 +22,7 @@ const ManualEntryModal = ({ isOpen, onClose, projects, getEntries, workspace_id 
       setError("Please select a project");
       return
     }
-    createEntry()
+    createEntry();
   }; 
 
   const getNewTime = (initialDate, time) => {
@@ -150,7 +150,6 @@ const ManualEntryModal = ({ isOpen, onClose, projects, getEntries, workspace_id 
               <button
                 type="submit"
                 className="inline-flex justify-center rounded-md border border-transparent px-4 py-2 text-sm font-medium text-purple-700 bg-purple-100 hover:bg-purple-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2"
-                onClick={createEntry}
                 disabled={isLoading}
               >
                 {isLoading ? "Creating..." : "Create"}

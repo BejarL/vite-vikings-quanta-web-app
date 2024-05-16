@@ -6,7 +6,16 @@ const getAllProjects = async (req, res) => {
     // TIME_TO_SEC converts time to seconds since TIMEDIFF format is HH:MM:SS
     // SUM calculates total seconds
     // SEC_TO_TIME converts total seconds back to HH:MM:SS format
-    const [projects] = await req.db.query(` SELECT Projects.project_id, project_name, SEC_TO_TIME(SUM(TIME_TO_SEC(TIMEDIFF(Entries.end_time, Entries.start_time)))) AS total_project_time
+
+    const [projects] = await req.db.query(` SELECT Projects.project_id, project_name, 
+                                              SEC_TO_TIME(SUM(TIME_TO_SEC(
+                                                CASE 
+                                                  WHEN TIMEDIFF(end_time, start_time) < 0 THEN
+                                                    TIMEDIFF(DATE_ADD(end_time, INTERVAL 24 HOUR), start_time)
+                                                  ELSE
+                                                    TIMEDIFF(end_time, start_time)
+                                                END
+                                            ))) AS total_project_time
                                             FROM Projects
                                             LEFT JOIN Entries ON Projects.project_id = Entries.project_id AND Entries.deleted_flag = 0
                                             WHERE Projects.workspace_id = :workspace_id AND Projects.deleted_flag = 0

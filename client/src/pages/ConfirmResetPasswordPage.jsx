@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import "../index.css";
 
 const ConfirmResetPasswordPage = () => {
   const [newPassword, setNewPassword] = useState("");
@@ -45,7 +46,7 @@ const ConfirmResetPasswordPage = () => {
       if (success) {
         navigate("/");
       } else {
-        window.alert("Error reseting password");
+        window.alert("Error resetting password");
       }
     } catch (err) {
       console.log(err);
@@ -53,61 +54,63 @@ const ConfirmResetPasswordPage = () => {
   };
 
   return (
-    <div className="bg-lightpurple-login w-[100vw] h-[100vh] md:p-[50px]">
-      <div className="z-[1] h-[100%] flex items-center justify-center md:w-[100%]">
-        <div className="relative bg-white p-9 rounded-lg shadow-md w-[400px] min-w-md min-w-[350px] pt-1 md:flex md:flex-col md:items-center h-[90%] md:w-[70%]">
-          <div className="self-center  text-gray-700 font-bold text-4xl mt-10 flex justify-evenly md:flex md:w-[80%] ">
-            <p>Reset password</p>
-          </div>
-          <div className="self-center mt-4 flex mb-4 justify-evenly md:flex md:w-[80%] md:mb-[100px]">
-            <p>
-              Please enter the email address you would like your password reset
-              link sent to
+    <div className="flex flex-col justify-center items-center bg-lightpurple-login w-screen h-screen p-4 md:p-10">
+      <div className="flex items-center justify-center w-full md:w-1/2 p-4">
+        <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-md form-container">
+          <div className="text-center mb-6">
+            <p className="text-4xl font-bold text-darkpurple mt-10">
+              Reset password
+            </p>
+            <p className="text-gray-700 mt-4 mb-6">
+              Please enter your new password below.
             </p>
           </div>
-          <form action="" className="w-full md:w-[90%]">
-            <div className="mb-4 md:w-[100%] ">
+
+          <form className="w-full space-y-4">
+            <div>
               <label
                 htmlFor="new-password"
-                className="block text-gray-700 text-sm font-bold mb-2 "
+                className="block text-gray-700 font-bold"
               >
                 New Password
               </label>
               <input
-                type="text"
-                placeholder="Enter new password"
-                className="appearance-none w-full bg-transparent border-0 border-b border-gray-700 focus:outline-none py-1 md:mb-[20px]"
+                type="password"
                 id="new-password"
+                placeholder="Enter new password"
+                className="w-full border-b border-gray-400 focus:outline-none py-2"
                 value={newPassword}
                 onChange={handlePasswordUpdate}
               />
             </div>
-            <div className="mb-4 md:w-[100%] ">
+            <div>
               <label
                 htmlFor="confirm-password"
-                className="block text-gray-700 text-sm font-bold mb-2 "
+                className="block text-gray-700 font-bold"
               >
                 Confirm Password
               </label>
               <input
-                type="text"
-                placeholder="Enter password"
-                className="appearance-none w-full bg-transparent border-0 border-b border-gray-700 focus:outline-none py-1 md:mb-[20px]"
+                type="password"
                 id="confirm-password"
+                placeholder="Confirm password"
+                className="w-full border-b border-gray-400 focus:outline-none py-2"
                 value={confirm}
                 onChange={handleConfirmUpdate}
               />
+              {newPassword !== confirm && confirm && (
+                <p className="text-red-600 text-center">
+                  Passwords do not match!
+                </p>
+              )}
             </div>
-
-            <div>
-              <button
-                className="text-gray-700 w-full hover:bg-lightpurple bg-lightpurple-login rounded-3xl font-bold py-2 px-4 focus:outline-none focus:shadow-outline"
-                type="button"
-                onClick={resetPassword}
-              >
-                Reset password
-              </button>
-            </div>
+            <button
+              className="w-full py-2 bg-darkpurple text-white rounded-lg font-bold hover:bg-purple-400"
+              type="button"
+              onClick={resetPassword}
+            >
+              Reset password
+            </button>
           </form>
         </div>
       </div>

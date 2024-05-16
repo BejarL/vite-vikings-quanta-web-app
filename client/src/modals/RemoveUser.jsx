@@ -9,7 +9,7 @@ const RemoveUser = ({ isOpen, toggleModal, user, workspace, getUsers }) => {
     console.log("here");
     try {
         const jwt = getJwt();
-          const response = await fetch(`${apiUrl}/workspace/leave`, {
+          const response = await fetch(`${apiUrl}/workspace/remove-user`, {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",

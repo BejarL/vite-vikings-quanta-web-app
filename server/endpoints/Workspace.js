@@ -106,8 +106,9 @@ const createWorkspace = async (req, res) => {
   }
 }
 
-const leaveWorkspace = async (req, res) => {
+const removeUserFromWorkspace = async (req, res) => {
   try {
+    const { username: admin_username } = req.user;
     const { user_id, workspace_id } = req.body;
 
     //declares transaction
@@ -125,7 +126,7 @@ const leaveWorkspace = async (req, res) => {
       user_id
     });
 
-    const updateString = `${query.username} left`;
+    const updateString = `${admin_username} removed ${query.username}`;
 
     await req.db.query(`INSERT INTO Change_Log (edit_desc, user_id, workspace_id, edit_timestamp)
                         VALUES (:updateString, :user_id, :workspace_id, NOW())`, {
@@ -263,12 +264,75 @@ const updateRole = async (req, res) => {
     res.json({success: false, err: "Internal Server Error"});
   }
 } 
+
+const updateWorkspaceName = async (req, res) => {
+  try {
+    const {user_id, username } = req.user
+    const { workspace_name, workspace_id } = req.body;
+
+    await req.db.beginTransaction();
+
+    await req.db.query(`UPDATE Workspace
+                        SET workspace_name = :workspace_name
+                        WHERE workspace_id = :workspace_id`, {
+      user_id, workspace_id, workspace_name
+    }); 
+  
+    const log_desc = `${username + " renamed workspace to " + workspace_name}`;
+
+    await req.db.query(`INSERT INTO Change_Log (edit_desc, edit_timestamp, user_id, workspace_id)
+                        VALUES (:log_desc, NOW(), :user_id, :workspace_id)`, {
+      log_desc, user_id, workspace_id
+    });
+
+    await req.db.commit();
+
+    res.json({success: true, message: "Role Successfully Updated"});
+ 
+  } catch (err) {
+    console.log(err);
+    res.json({success: false, err: "Internal Server Error"});
+  }
+}
+
+const leaveWorkspace = async (req, res) => {
+  try {
+    const { username, user_id } = req.user
+    const { workspace_id } = req.body;
+
+    //declares transaction
+    await req.db.beginTransaction();
+
+    await req.db.query(`UPDATE Workspace_Users
+                        SET deleted_flag = 1
+                        WHERE user_id = :user_id AND workspace_id = :workspace_id`, {
+      user_id, workspace_id
+    });
+
+    const updateString = `${username} left`;
+
+    await req.db.query(`INSERT INTO Change_Log (edit_desc, user_id, workspace_id, edit_timestamp)
+                        VALUES (:updateString, :user_id, :workspace_id, NOW())`, {
+      updateString, user_id, workspace_id
+    });
+
+    //starts transaction
+    await req.db.commit();
+
+    res.json({ success: true, message: "Successfully removed from workspace" });
+
+  } catch (err) {
+    console.log(err);
+    res.json({ success: false, err: "Internal Server Error" });
+  }
+}
  
 exports.updateRole = updateRole;
+exports.removeUserFromWorkspace = removeUserFromWorkspace;
 exports.leaveWorkspace = leaveWorkspace;
 exports.changeLastWorkspace = changeLastWorkspace;
 exports.deleteWorkspace = deleteWorkspace;
 exports.inviteUser = inviteUser;
 exports.getWorkspaceUsers = getWorkspaceUsers;
 exports.createWorkspace = createWorkspace;
-// exports.joinWorkspace = joinWorkspace;
+exports.updateWorkspaceName = updateWorkspaceName;
