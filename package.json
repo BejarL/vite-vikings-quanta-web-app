@@ -6,16 +6,18 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "concurrently \"cd server && nodemon app.js\" \"cd client && npm run dev\"",
-    "install-all": "cd server && npm install && cd ../client && npm install"
+    "install-all": "cd server && npm install && cd ../client && npm install",
+    "build": "cd client && npm run build",
+    "start:prod": "concurrently \"cd server && npm start\" \"cd client && npx serve -s dist\""
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "serve": "^14.0.1"
   },
   "dependencies": {
-    "nodemon": "^3.1.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.22.3"

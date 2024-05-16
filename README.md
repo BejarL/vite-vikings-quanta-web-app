@@ -14,7 +14,7 @@ Create a user-friendly platform for employees to record their work hours and emp
 
 ### Links
 
-- Live Site URL: [Live site URL]()
+- Live Site URL: [Quanta](https://main.d3uaf307ruf885.amplifyapp.com/)
 
 ## Process
 
@@ -29,9 +29,9 @@ Create a user-friendly platform for employees to record their work hours and emp
 
 ## Authors
 
-- Website - [Add name](AddLink)
-- Website - [Add name](AddLink)
-- Website - [Add name](AddLink)
-- Website - [Add name](AddLink)
-- Website - [Add name](AddLink)
-- Website - [Lisset Bejar](https://www.lbejar.dev)
+- Website - [Justin Valencia](https://github.com/JustinValencia)
+- Website - [RJ DeGuzman](https://github.com/jaydgm)
+- Website - [Ben Maring](https://github.com/BenjaminMaring)
+- Website - [CJ Jimmy](https://github.com/CiegeX)
+- Website - [Shezah Jhendar](https://github.com/sjendar)
+- Website - [Lisset Bejar](https://github.com/BejarL)
