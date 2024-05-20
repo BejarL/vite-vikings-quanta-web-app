@@ -92,6 +92,7 @@ const ManualEntryModal = ({ isOpen, onClose, projects, getEntries, workspace_id 
              value={entryDesc}
              onChange={(e) => setEntryDesc(e.target.value)}
             />
+            {error && <p className="text-red-500">{error}</p>}
             <select
               type="text"
               name="description"
@@ -122,7 +123,6 @@ const ManualEntryModal = ({ isOpen, onClose, projects, getEntries, workspace_id 
               className="relative appearance-none rounded-none pl-[40px] m-5 w-[120px] py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
               placeholder="0:00"
             />
-            -
             <input
               type="time"
               name="end"
@@ -131,7 +131,6 @@ const ManualEntryModal = ({ isOpen, onClose, projects, getEntries, workspace_id 
               className="relative appearance-none rounded-none pl-[40px] m-5 w-[120px] py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
               placeholder="0:00"
             />
-            {error && <p className="text-red-500">{error}</p>}
               <DatePicker
                   popperPlacement="right-start"
                   selected={startDate}
