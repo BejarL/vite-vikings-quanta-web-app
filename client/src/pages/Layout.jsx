@@ -335,6 +335,7 @@ const Layout = () => {
             <CreateModal
               isOpen={isModalOpen}
               onClose={() => setModalOpen(false)}
+              getUserData={getUserData}
             />
             <button className=" flex flex-wrap items-center text-3xl mt-[10px] py-2 px-[10px]"
                     onClick={() => setSettingModalOpen(true)}
@@ -477,6 +478,7 @@ const Layout = () => {
                 isOpen={isModalOpen}
                 onClose={() => setModalOpen(false)}
                 workspace={currentWorkspace}
+                getUserData={getUserData}
               />
               <SettingModal
                 isOpen={isSettingModalOpen}
