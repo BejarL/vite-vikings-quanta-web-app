@@ -14,7 +14,7 @@ Create a user-friendly platform for employees to record their work hours and emp
 
 ### Links
 
-- Live Site URL: [Quanta](https://main.d3uaf307ruf885.amplifyapp.com/)
+- Live Site URL: [Quanta](https://vite-vikings-quanta-web-app.vercel.app/)
 
 ## Process
 
