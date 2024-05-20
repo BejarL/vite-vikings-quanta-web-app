@@ -26,7 +26,7 @@ const AuditPage = () => {
       }, 800);
       return () => clearTimeout(id);
     }
-  }, [page])
+  }, [page]);
 
   useEffect(() => {
     verifyAccess();
