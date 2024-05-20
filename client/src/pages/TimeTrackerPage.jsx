@@ -177,6 +177,8 @@ const TimeTrackerPage = () => {
       const { success, err } = await response.json();
       if (success) {
         getEntries();
+        setEntryDesc("");
+        setSelectedProject(-1);
       } else {
         window.alert("Error creating entry, please try again");
       }

@@ -55,7 +55,7 @@ const DeleteEntryModal = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-center">
+    <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-center z-[5]">
       <div className="bg-white rounded-lg overflow-hidden shadow-xl transform transition-all sm:max-w-lg sm:w-full p-4">
         <div className="text-center p-5">
           <h3 className="text-2xl leading-6 font-medium text-gray-900">

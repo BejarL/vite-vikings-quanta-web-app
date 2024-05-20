@@ -101,7 +101,7 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="flex flex-col justify-center items-center bg-lightpurple-login w-screen h-screen p-4 md:p-10">
+    <div className="flex flex-col justify-center items-center bg-lightpurple-login w-screen h-[100%] p-4 md:p-10">
       <div className="flex flex-col md:flex-row items-center w-full h-full md:justify-between space-y-4 md:space-y-0 md:space-x-4">
         <div className="flex flex-col items-center w-full md:w-1/2 p-4">
           <p className="text-5xl font-bold text-darkpurple mt-10 md:mt-20 drop-shadow-lg">

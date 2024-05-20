@@ -118,7 +118,9 @@ const SettingModal = ({ isOpen, onClose, workspace, getUserData }) => {
     const confirmCheck = /confirm/i
     if (e.key === "Enter") {
       if (confirmCheck.test(confirmDelete)) {
-        deleteWorkspace();
+        deleteWorkspace()
+        setUserConfirm(true);
+        setShowConfirm(true);
       } else {
         setError("Double check you've typed 'Confirm'");
       }
@@ -175,6 +177,7 @@ const SettingModal = ({ isOpen, onClose, workspace, getUserData }) => {
                   onClick={renameWorkspace}
                 >Rename</button>
               </div>
+              <p className="text-red-500 py-3">{error}</p>
               <div className="flex justify-center  pt-3">
                 {workspace.workspace_role == "Personal" ? null : showConfirm ?
                 // for toggling delete button
@@ -225,7 +228,7 @@ const SettingModal = ({ isOpen, onClose, workspace, getUserData }) => {
             /> 
           </div>
             }
-            <p>{error}</p>
+            
         </div>
       </div>
     </div>
