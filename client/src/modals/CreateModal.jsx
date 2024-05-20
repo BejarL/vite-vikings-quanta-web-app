@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { getJwt, verifyData } from "../Auth/jwt";
 
-const CreateModal = ({ isOpen , onClose }) => {
+const CreateModal = ({ isOpen , onClose, getUserData  }) => {
   const [workspaceName, setWorkspaceName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -27,6 +27,7 @@ const CreateModal = ({ isOpen , onClose }) => {
       const { success, err } = await response.json();
 
       if (success) {
+        getUserData();
         onClose();
         alert("Workspace created successfully");
       } else {
