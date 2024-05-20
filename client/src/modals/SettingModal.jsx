@@ -161,6 +161,7 @@ const SettingModal = ({ isOpen, onClose, workspace, getUserData }) => {
           <h3 className="text-lg leading-6 font-medium text-gray-900 mb-5">
              Workspace Setting
           </h3>
+          {/* if role is creator or personal */}
           {workspace.workspace_role == "Creator" || workspace.workspace_role == "Personal" ?  
             <>
               <div className="flex ">
@@ -204,8 +205,8 @@ const SettingModal = ({ isOpen, onClose, workspace, getUserData }) => {
                 }
               </div>
             </>
-            // if not a creator
-            : workspace.workspace_role !== "personal" ? null : userConfirm ? 
+            // if role is member
+            : workspace.workspace_role == "Member" || workspace.workspace_role == "Admin" ?  userConfirm ? 
             // for toggling leave button  
               <button
                     type="submit"
@@ -227,8 +228,8 @@ const SettingModal = ({ isOpen, onClose, workspace, getUserData }) => {
               onChange={(e) => setConfirmDelete(e.target.value)}
             /> 
           </div>
-            }
-            
+            : null}
+            <p>{error}</p>
         </div>
       </div>
     </div>
