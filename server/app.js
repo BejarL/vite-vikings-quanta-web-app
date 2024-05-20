@@ -39,19 +39,18 @@ const app = express();
 const port = 3000;
 
 const corsOptions = {
-  origin: "*",
-  credentials: true,
-  "access-control-allow-credentials": true,
-  optionSuccessStatus: 200,
+        origin: "https://vite-vikings-quanta-web-app.vercel.app/",
+        credentials: true,
+        optionSuccessStatus: 200,
 };
 
 app.use(cors(corsOptions));
 
-// Makes Express parse the JSON body of any requests and adds the body to the req object
+// Parses JSON body
 app.use(bodyParser.json());
 
-//adds database connection to req.db
-app.use((req, res, next) => dbConnect(req, res, next));  
+// Adds database connection to req.db
+app.use((req, res, next) => dbConnect(req, res, next)); 
 
 /*
 *
