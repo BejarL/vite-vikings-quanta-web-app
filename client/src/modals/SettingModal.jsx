@@ -229,7 +229,6 @@ const SettingModal = ({ isOpen, onClose, workspace, getUserData }) => {
             /> 
           </div>
             : null}
-            <p>{error}</p>
         </div>
       </div>
     </div>
