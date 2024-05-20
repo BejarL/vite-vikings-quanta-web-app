@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { getJwt } from "../Auth/jwt";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -9,9 +9,28 @@ const ManualEntryModal = ({ isOpen, onClose, projects, getEntries, workspace_id 
   const [selectedProject, setSelectedProject] = useState("");
   const [error, setError] = useState("");
   const [startDate, setStartDate] = useState(new Date());
+  const [popperPlacement, setPopperPlacement] = useState("top-start");
   const [startTime, setStartTime] = useState(formatTime(new Date()));
   const [endTime, setEndTime] = useState(formatTime(new Date()));
   const [entryDesc, setEntryDesc] = useState("");
+
+
+  // Update the popperPlacement based on the window width
+  const updatePopperPlacement = () => {
+    if (window.innerWidth >= 768) {
+      setPopperPlacement('right-start');
+    } else {
+      setPopperPlacement('top-start');
+    }
+  };
+
+  useEffect(() => {
+    updatePopperPlacement();
+    window.addEventListener('resize', updatePopperPlacement);
+    return () => {
+      window.removeEventListener('resize', updatePopperPlacement);
+    };
+  }, []);
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -92,6 +111,7 @@ const ManualEntryModal = ({ isOpen, onClose, projects, getEntries, workspace_id 
              value={entryDesc}
              onChange={(e) => setEntryDesc(e.target.value)}
             />
+            {error && <p className="text-red-500">{error}</p>}
             <select
               type="text"
               name="description"
@@ -122,7 +142,6 @@ const ManualEntryModal = ({ isOpen, onClose, projects, getEntries, workspace_id 
               className="relative appearance-none rounded-none pl-[40px] m-5 w-[120px] py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
               placeholder="0:00"
             />
-            -
             <input
               type="time"
               name="end"
@@ -131,9 +150,8 @@ const ManualEntryModal = ({ isOpen, onClose, projects, getEntries, workspace_id 
               className="relative appearance-none rounded-none pl-[40px] m-5 w-[120px] py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
               placeholder="0:00"
             />
-            {error && <p className="text-red-500">{error}</p>}
               <DatePicker
-                  popperPlacement="right-start"
+                  popperPlacement={popperPlacement}
                   selected={startDate}
                   onChange={(date) => setStartDate(date)}
                   className="border border-gray p-2 my-2 rounded w-5/6 lg:w-full"
