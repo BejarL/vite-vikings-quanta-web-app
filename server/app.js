@@ -29,12 +29,15 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 const corsOptions = {
-        origin: "https://vite-vikings-quanta-web-app.vercel.app",
-        credentials: true,
-        optionSuccessStatus: 200,
+  origin: "https://quanta-app.vercel.app",
+  credentials: true,
+  optionsSuccessStatus: 200,
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
+  allowedHeaders: "Content-Type,Authorization"
 };
 
 app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 
 // Parses JSON body
 app.use(bodyParser.json());
