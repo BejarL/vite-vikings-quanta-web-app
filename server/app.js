@@ -23,7 +23,7 @@ const {
 const { getAuditEntries } = require('./endpoints/Audit.js');
 
 // Middleware
-const { verifyJwt } = require('./endpoints/Middleware'); 
+const { verifyJwt } = require('./endpoints/Middleware');
 
 const app = express();
 const port = process.env.PORT || 3000;
