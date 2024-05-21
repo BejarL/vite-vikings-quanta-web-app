@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { getJwt, verifyData } from "../Auth/jwt";
+import { getJwt } from "../Auth/jwt";
 
 const InviteToWorkspace = ({ isOpen, toggleModal, workspace_id, getUsers }) => {
   const [userEmail, setUserEmail] = useState("");

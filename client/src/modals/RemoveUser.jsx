@@ -6,7 +6,6 @@ const RemoveUser = ({ isOpen, toggleModal, user, workspace, getUsers }) => {
   const apiUrl = import.meta.env.VITE_API_URL;
 
   const removeUser = async () => {
-    console.log("here");
     try {
         const jwt = getJwt();
           const response = await fetch(`${apiUrl}/workspace/remove-user`, {

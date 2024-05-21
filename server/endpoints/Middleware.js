@@ -53,8 +53,9 @@ const verifyJwt = async (req, res, next) => {
     res.json({ sucess: false, err: "Invalid authorization, invalid authorization scheme" });
     return;
   }
-
+ 
   try {
+    
     //decode the jwt, then tack on the payload of user info to the req obj to be used in later requests
     const decodedJwtObject = jwt.verify(jwtToken, process.env.JWT_KEY);
     req.user = decodedJwtObject;
