@@ -1,35 +1,20 @@
 {
-  "name": "vite-vikings-quanta-web-app",
+  "name": "my-app",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "concurrently \"cd server && nodemon app.js\" \"cd client && npm run dev\"",
-    "install-all": "cd server && npm install && cd ../client && npm install",
-    "build": "cd client && npm run build",
-    "start:prod": "concurrently \"cd server && npm start\" \"cd client && npx serve -s dist\""
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "devDependencies": {
-    "@aws-amplify/backend": "^1.0.2",
-    "@aws-amplify/backend-cli": "^1.0.3",
-    "aws-cdk": "^2.142.0",
-    "aws-cdk-lib": "^2.142.0",
-    "concurrently": "^8.2.2",
-    "constructs": "^10.3.0",
-    "esbuild": "^0.21.3",
-    "serve": "^14.0.1",
-    "tsx": "^4.10.3",
-    "typescript": "^5.4.5"
+    "start": "npm run build --prefix client && npm run start:server",
+    "start:server": "node server/app.js",
+    "build": "npm run build --prefix client",
+    "heroku-postbuild": "npm run build"
   },
   "dependencies": {
-    "aws-amplify": "^6.3.2",
-    "mysql": "^2.18.1",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-router-dom": "^6.22.3"
+    "express": "^4.17.1",
+    "cors": "^2.8.5",
+    "body-parser": "^1.19.0",
+    "mysql2": "^2.2.5",
+    "dotenv": "^8.2.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.7"
   }
 }

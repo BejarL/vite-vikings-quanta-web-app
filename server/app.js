@@ -2,6 +2,7 @@ require('dotenv').config();
 
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 const bodyParser = require('body-parser');
 const mysql = require('mysql2/promise');
 
@@ -28,13 +29,12 @@ const { verifyJwt } = require('./endpoints/Middleware');
 const app = express();
 const port = process.env.PORT || 3000;
 
-const corsOptions = {
-  origin: "https://quanta-app.vercel.app",
-  credentials: true,
-  optionsSuccessStatus: 200,
-  methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
-  allowedHeaders: "Content-Type,Authorization"
-};
+// Serve static files from the React app
+app.use(express.static(path.join(__dirname, '../client/build')));
+// The "catchall" handler: for any request that doesn't match one above, send back React's index.html file.
+app.get('*', (req, res) => {
+        res.sendFile(path.join(__dirname, '../client/build/index.html'));
+});
 
 app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
@@ -54,6 +54,7 @@ app.use(async (req, res, next) => {
                 req.db = connection;
                 next();
         } catch (error) {
+                console.error('Database connection failed:', error); // Add this line
                 next(error);
         }
 });
