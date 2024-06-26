@@ -1,4 +1,4 @@
-# Vite Vikings Timesheet Web App
+# Quanta - Timesheet Web App
 
 ## Table of contents
 
